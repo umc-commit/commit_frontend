@@ -28,11 +28,21 @@
 ## 🧑‍💻 Git 브랜치 전략
 - 기능 단위 브랜치로 분리
 - 브랜치 네이밍 규칙: `type/#이슈번호-기능`
+- feature	: 기능 개발
+- fix	: 일반 버그 수정
+- hotfix : 긴급 버그 수정
+- release	: 릴리즈 준비
+- develop	: 통합 개발 브랜치
+- main	: 최종 배포 브랜치
 
 ## 🧾 Issue & PR 규칙
-- [UI] 로그인 화면 / 레이아웃 구현
-- [Feature/#11] 로그인 API 연동
+- [Refactor / Feature/ Bug / Fix/ Style] 이슈 제목
+- [타입/#이슈번호] 작업 요약
 
 ## 📂 프로젝트 구조
 - 기능별 디렉토리 구조 (ui, model, data ...)
+
+## targetSDK와 minSDK 버전
+- targetSDK : 35 / Android 15.0
+- minSDK : 23
 
