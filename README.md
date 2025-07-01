@@ -2,6 +2,8 @@
 
 ## 🛠 기술 스택
 - Kotlin, Retrofit2, Glide, SharedPreferences 등
+- 알림: FCM
+- 결제: WebView
 
 ## 🧑‍💻 Git 브랜치 전략
 - 기능 단위 브랜치로 분리
