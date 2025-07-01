@@ -28,12 +28,12 @@
 ## 🧑‍💻 Git 브랜치 전략
 - 기능 단위 브랜치로 분리
 - 브랜치 네이밍 규칙: `type/#이슈번호-기능`
-- feature	: 기능 개발
-- fix	: 일반 버그 수정
-- hotfix : 긴급 버그 수정
-- release	: 릴리즈 준비
-- develop	: 통합 개발 브랜치
-- main	: 최종 배포 브랜치
+  - feature	: 기능 개발
+  - fix	: 일반 버그 수정
+  - hotfix : 긴급 버그 수정
+  - release	: 릴리즈 준비
+  - develop	: 통합 개발 브랜치
+  - main	: 최종 배포 브랜치
 
 ## 🧾 Issue & PR 규칙
 - [Refactor / Feature/ Bug / Fix/ Style] 이슈 제목
