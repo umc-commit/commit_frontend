@@ -2,7 +2,7 @@
 
 ## 🛠 기술 스택
 - 언어: Kotlin
-- 서버 연결: Retrofit, http
+- 서버 연결: Retrofit
 - 알림: FCM(Firebase Cloud Messaging)
 - 결제: WebView
 - 채팅: Socket.IO client
