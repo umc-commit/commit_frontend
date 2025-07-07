@@ -1,9 +1,14 @@
 # commit_frontend
 
 ## 🛠 기술 스택
-- Kotlin, Retrofit2, Glide, SharedPreferences 등
-- 알림: FCM
+- 언어: Kotlin
+- 서버 연결: Retrofit, http
+- 알림: FCM(Firebase Cloud Messaging)
 - 결제: WebView
+- 채팅: Socket.IO client
+- UI 레이아웃: ConstraintLayout + ViewBinding
+- 홈화면: ViewPager2+TabLayout, SearchView, RecyclerView
+- 마이페이지: SharedPreferences, Glide
 
 ## 🧑‍💻 Git 브랜치 전략
 - 기능 단위 브랜치로 분리
