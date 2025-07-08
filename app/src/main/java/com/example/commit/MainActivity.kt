@@ -7,6 +7,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.commit.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.example.commit.ui.request.FragmentRequest
+import android.util.Log
+
+
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
@@ -35,7 +39,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_home -> {
                     supportFragmentManager
                         .beginTransaction()
-                        .replace(binding.NavFrame.id, FragmentHome()) // Replace with your fragment
+                        .replace(binding.NavFrame.id, FragmentHome())
                         .commitAllowingStateLoss()
                     return@setOnItemSelectedListener true
                 }
@@ -47,6 +51,7 @@ class MainActivity : AppCompatActivity() {
                     return@setOnItemSelectedListener true
                 }
                 R.id.nav_request -> {
+                    Log.d("MainActivity", "신청함 눌림")
                     supportFragmentManager
                         .beginTransaction()
                         .replace(binding.NavFrame.id, FragmentRequest())
@@ -56,7 +61,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_chat -> {
                     supportFragmentManager
                         .beginTransaction()
-                        .replace(binding.NavFrame.id, FragmentChat())
+                        .replace(binding.NavFrame.id, FragmentMypage())
                         .commitAllowingStateLoss()
                     return@setOnItemSelectedListener true
                 }
