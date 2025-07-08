@@ -4,10 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -19,7 +22,6 @@ import com.example.commit.R
 import com.example.commit.data.model.Artist
 import com.example.commit.data.model.RequestItem
 import com.example.commit.ui.request.notoSansKR
-import androidx.compose.ui.graphics.Color
 
 @Composable
 fun RequestCard(item: RequestItem) {
@@ -35,13 +37,27 @@ fun RequestCard(item: RequestItem) {
             .padding(vertical = 8.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = if (isInProgress) "진행 중" else "작업 완료",
-                fontSize = 14.sp,
-                fontFamily = notoSansKR,
-                color = Color.Black,
-                fontWeight = FontWeight.SemiBold
-            )
+
+            // 🔹 진행 상태 + 오른쪽 아이콘
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = if (isInProgress) "진행 중" else "작업 완료",
+                    fontSize = 14.sp,
+                    fontFamily = notoSansKR,
+                    color = Color.Black,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Icon(
+                    painter = painterResource(id = R.drawable.vector),
+                    contentDescription = "화살표",
+                    tint = Color(0xFF4D4D4D),
+                    modifier = Modifier.size(12.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -53,7 +69,7 @@ fun RequestCard(item: RequestItem) {
                     modifier = Modifier
                         .size(80.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFE8E8E8)), // gray1
+                        .background(Color(0xFFE8E8E8)),
                     error = painterResource(id = R.drawable.ic_default_image),
                     fallback = painterResource(id = R.drawable.ic_default_image)
                 )
@@ -81,14 +97,26 @@ fun RequestCard(item: RequestItem) {
                         fontFamily = notoSansKR,
                         fontWeight = FontWeight.Normal
                     )
+
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "작가에게 문의하기 >",
-                        fontSize = 12.sp,
-                        color = Color(0xFF222222),
-                        fontFamily = notoSansKR,
-                        fontWeight = FontWeight.Normal
-                    )
+
+                    // 🔹 문의하기 + 아이콘 한 줄 정렬
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "작가에게 문의하기",
+                            fontSize = 12.sp,
+                            fontFamily = notoSansKR,
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF4D4D4D)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Icon(
+                            painter = painterResource(id = R.drawable.artist_vector),
+                            contentDescription = "화살표",
+                            tint = Color(0xFF4D4D4D),
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
                 }
             }
 
@@ -146,7 +174,7 @@ fun RequestCard(item: RequestItem) {
 fun RequestCardPreview() {
     val sampleItem = RequestItem(
         requestId = 1,
-        status = "DONE",
+        status = "IN_PROGRESS",
         title = "낙서 타입 커미션",
         price = 16000,
         thumbnailImage = "https://via.placeholder.com/150",

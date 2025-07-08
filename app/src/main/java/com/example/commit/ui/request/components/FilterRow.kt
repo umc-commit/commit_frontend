@@ -40,14 +40,14 @@ fun FilterRow(selected: String, onSelect: (String) -> Unit) {
                         .height(30.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(
-                            color = if (isSelected) Color(0x1A17D5C6) else Color.White // mint1 10% 투명도
+                            color = if (isSelected) Color(0xFF00E2BC) else Color.White
                         )
                         .border(
                             width = 1.dp,
                             color = if (isSelected)
-                                Color(0xFF17D5C6) // mint1
+                                Color(0xFF00E2BC)
                             else
-                                Color(0xFFB0B0B0), // gray2
+                                Color(0xFF00E2BC),
                             shape = RoundedCornerShape(16.dp)
                         )
                         .clickable { onSelect(label) },
@@ -59,7 +59,7 @@ fun FilterRow(selected: String, onSelect: (String) -> Unit) {
                         fontFamily = notoSansKR,
                         fontWeight = FontWeight.Medium,
                         color = if (isSelected)
-                            Color(0xFF17D5C6) // mint1
+                            Color.White
                         else
                             Color(0xFF909090)
                     )
