@@ -2,11 +2,11 @@
 
 ## 🛠 기술 스택
 - 언어: Kotlin
+- UI: Jetpack Compose
 - 서버 연결: Retrofit
 - 알림: FCM(Firebase Cloud Messaging)
 - 결제: WebView
 - 채팅: Socket.IO client
-- UI 레이아웃: ConstraintLayout + ViewBinding
 - 홈화면: ViewPager2+TabLayout, SearchView, RecyclerView
 - 마이페이지: SharedPreferences, Glide
 
