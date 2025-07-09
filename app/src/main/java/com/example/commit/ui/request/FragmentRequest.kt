@@ -1,10 +1,10 @@
 package com.example.commit.ui.request
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,13 +18,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.example.commit.R
-import com.example.commit.data.model.Artist
-import com.example.commit.data.model.RequestItem
+import com.example.commit.data.model.*
 import com.example.commit.ui.request.components.FilterRow
 import com.example.commit.ui.request.components.RequestCard
 
@@ -41,12 +39,8 @@ class FragmentRequest : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Log.d("FragmentRequest", "onCreateView 진입")
-
         return ComposeView(requireContext()).apply {
             setContent {
-                Log.d("FragmentRequest", "setContent 실행")
-
                 val sampleRequests = listOf(
                     RequestItem(
                         requestId = 1,
@@ -82,31 +76,96 @@ class FragmentRequest : Fragment() {
                     )
                 )
 
-                Log.d("FragmentRequest", "RequestScreen 진입 전")
-                RequestScreen(requests = sampleRequests)
+                RequestScreen(
+                    requests = sampleRequests,
+                    onCardClick = { item ->
+                        val detailFragment = FragmentRequestDetail().apply {
+                            arguments = Bundle().apply {
+                                putParcelable("requestItem", item)
+
+                                // mock 데이터 전달
+                                putParcelableArrayList("timeline", arrayListOf(
+                                    TimelineItem(
+                                        status = "IN_PROGRESS",
+                                        label = "작가가 작업을 시작했어요.",
+                                        changedAt = "2025-06-30 20:12"
+                                    ),
+                                    TimelineItem(
+                                        status = "SUBMITTED",
+                                        label = "작가가 작업을 완료했어요.",
+                                        changedAt = "2025-06-30 20:40"
+                                    )
+                                ))
+
+                                putParcelable("paymentInfo", PaymentInfo(
+                                    paidAt = "2025-06-30 20:05",
+                                    basePrice = 40000,
+                                    additionalPrice = 0,
+                                    totalPrice = 40000,
+                                    paymentMethod = "kakaopay"
+                                ))
+
+                                putParcelableArrayList("formSchema", arrayListOf(
+                                    FormItem(
+                                        type = "radio",
+                                        label = "당일마감 옵션",
+                                        options = listOf(OptionItem("O (+10000P)"))
+                                    ),
+                                    FormItem(
+                                        type = "radio",
+                                        label = "신청 부위",
+                                        options = listOf(OptionItem("전신"))
+                                    ),
+                                    FormItem(
+                                        type = "checkbox",
+                                        label = "프로필 공지사항 확인해주세요 !",
+                                        options = listOf(OptionItem("확인했습니다."))
+                                    ),
+                                    FormItem(
+                                        type = "textarea",
+                                        label = "신청 내용"
+                                    )
+                                ))
+
+                                putSerializable("formAnswer", hashMapOf<String, Any>(
+                                    "당일마감 옵션" to "yes",
+                                    "신청 부위" to "전신",
+                                    "프로필 공지사항 확인해주세요 !" to listOf("확인했습니다."),
+                                    "신청 내용" to "귀엽게 그려주세요~"
+                                ))
+                            }
+                        }
+
+                        val transaction = (requireActivity() as AppCompatActivity)
+                            .supportFragmentManager.beginTransaction()
+                        transaction.replace(R.id.Nav_Frame, detailFragment)
+                        transaction.addToBackStack(null)
+                        transaction.commit()
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun RequestScreen(requests: List<RequestItem>) {
-    Log.d("RequestScreen", "컴포저블 시작됨")
-
+fun RequestScreen(
+    requests: List<RequestItem>,
+    onCardClick: (RequestItem) -> Unit
+) {
     var selectedStatus by remember { mutableStateOf("전체") }
 
     val filteredRequests = when (selectedStatus) {
         "진행 중" -> requests.filter { it.status == "IN_PROGRESS" || it.status == "ACCEPTED" }
-        "작업 완료" -> requests.filter { it.status != "IN_PROGRESS" }
+        "작업 완료" -> requests.filter { it.status == "DONE" }
         else -> requests
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFE8E8E8)) // gray1
+            .background(Color(0xFFE8E8E8))
     ) {
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -136,35 +195,10 @@ fun RequestScreen(requests: List<RequestItem>) {
         ) {
             items(filteredRequests) { item ->
                 Column {
-                    RequestCard(item)
+                    RequestCard(item = item, onClick = { onCardClick(item) })
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
-
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RequestScreenPreview() {
-    val sample = listOf(
-        RequestItem(
-            requestId = 1,
-            status = "IN_PROGRESS",
-            title = "낙서 타입 커미션",
-            price = 40000,
-            thumbnailImage = "",
-            artist = Artist(10, "키르")
-        ),
-        RequestItem(
-            requestId = 2,
-            status = "DONE",
-            title = "완료된 작업",
-            price = 50000,
-            thumbnailImage = "",
-            artist = Artist(11, "리아")
-        )
-    )
-    RequestScreen(requests = sample)
 }

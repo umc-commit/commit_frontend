@@ -22,9 +22,11 @@ import com.example.commit.R
 import com.example.commit.data.model.Artist
 import com.example.commit.data.model.RequestItem
 import com.example.commit.ui.request.notoSansKR
+import androidx.compose.foundation.clickable
+
 
 @Composable
-fun RequestCard(item: RequestItem) {
+fun RequestCard(item: RequestItem, onClick: () -> Unit) {
     val isDone = item.status == "DONE"
     val isInProgress = !isDone
 
@@ -35,10 +37,9 @@ fun RequestCard(item: RequestItem) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-
-            // 🔹 진행 상태 + 오른쪽 아이콘
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -94,25 +95,22 @@ fun RequestCard(item: RequestItem) {
                         text = "${item.price}P",
                         fontSize = 14.sp,
                         color = Color(0xFF4D4D4D),
-                        fontFamily = notoSansKR,
-                        fontWeight = FontWeight.Normal
+                        fontFamily = notoSansKR
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // 🔹 문의하기 + 아이콘 한 줄 정렬
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "작가에게 문의하기",
                             fontSize = 12.sp,
                             fontFamily = notoSansKR,
-                            fontWeight = FontWeight.Normal,
                             color = Color(0xFF4D4D4D)
                         )
                         Spacer(modifier = Modifier.width(2.dp))
                         Icon(
                             painter = painterResource(id = R.drawable.artist_vector),
-                            contentDescription = "화살표",
+                            contentDescription = "문의 화살표",
                             tint = Color(0xFF4D4D4D),
                             modifier = Modifier.size(12.dp)
                         )
@@ -180,5 +178,5 @@ fun RequestCardPreview() {
         thumbnailImage = "https://via.placeholder.com/150",
         artist = Artist(1, "사과")
     )
-    RequestCard(item = sampleItem)
+    RequestCard(item = sampleItem, onClick = {})
 }
