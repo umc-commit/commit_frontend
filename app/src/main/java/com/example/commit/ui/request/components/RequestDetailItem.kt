@@ -89,7 +89,7 @@ fun RequestDetailItem(item: RequestItem) {
                 .height(40.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(if (isInProgress) Color(0xFFE8E8E8) else Color.Black)
-                .then(if (!isInProgress) Modifier.clickable { /* TODO: 클릭 동작 */ } else Modifier),
+                .then(if (!isInProgress) Modifier.clickable { /* TODO */ } else Modifier),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -103,20 +103,28 @@ fun RequestDetailItem(item: RequestItem) {
 
         // 하단 버튼 3개
         Row(modifier = Modifier.fillMaxWidth()) {
-            listOf("거래완료", "후기작성", "문의하기").forEach { label ->
+            listOf("거래완료", "후기작성", "문의하기").forEachIndexed { index, label ->
+                val isFirst = index == 0
+                val disableFirst = isFirst && !isInProgress
+
+                val buttonBackground = if (disableFirst) Color(0xFFEDEDED) else Color(0xFFF0F0F0)
+                val textColor = if (disableFirst) Color(0xFFB0B0B0) else Color.Black
+
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(36.dp)
                         .padding(horizontal = 4.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFF0F0F0)),
+                        .background(buttonBackground)
+                        .then(if (!disableFirst) Modifier.clickable { /* TODO: 클릭 동작 */ } else Modifier),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(label, fontSize = 13.sp)
+                    Text(label, fontSize = 13.sp, color = textColor)
                 }
             }
         }
+
     }
 }
 
@@ -125,7 +133,7 @@ fun RequestDetailItem(item: RequestItem) {
 fun PreviewRequestDetailItem() {
     val dummyItem = RequestItem(
         requestId = 1,
-        status = "ACCEPTED",
+        status = "DONE",
         title = "2인 캐릭터 세트",
         price = 16000,
         thumbnailImage = "",
@@ -133,4 +141,3 @@ fun PreviewRequestDetailItem() {
     )
     RequestDetailItem(item = dummyItem)
 }
-

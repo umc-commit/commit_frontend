@@ -51,28 +51,94 @@ fun RequestDetailSectionList(
             expanded = isPaymentExpanded,
             onToggle = { isPaymentExpanded = !isPaymentExpanded }
         ) {
-            Text("결제일: ${paymentInfo.paidAt}")
-            Text("결제수단: ${paymentInfo.paymentMethod}")
-            Text("기본 금액: ${paymentInfo.basePrice}P")
-            Text("추가 금액: ${paymentInfo.additionalPrice}P")
-            Text("총 결제 금액: ${paymentInfo.totalPrice}P")
+            Column(modifier = Modifier.fillMaxWidth()) {
+
+                // 결제일시 + 상태
+                Text(
+                    text = "${paymentInfo.paidAt} 결제완료",
+                    fontSize = 12.sp,
+                    fontFamily = notoSansKR,
+                    color = Color.Gray
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 기본 금액
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "기본 금액",
+                        fontSize = 14.sp,
+                        fontFamily = notoSansKR,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "${"%,d".format(paymentInfo.basePrice)}P",
+                        fontSize = 14.sp,
+                        fontFamily = notoSansKR,
+                        color = Color.Black
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 추가 금액
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "추가 금액",
+                        fontSize = 14.sp,
+                        fontFamily = notoSansKR,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "${"%,d".format(paymentInfo.additionalPrice)}P",
+                        fontSize = 14.sp,
+                        fontFamily = notoSansKR,
+                        color = Color.Black
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 총 결제 금액
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "총 결제 금액",
+                        fontSize = 16.sp,
+                        fontFamily = notoSansKR,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = "${"%,d".format(paymentInfo.totalPrice)}P",
+                        fontSize = 16.sp,
+                        fontFamily = notoSansKR,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+            }
         }
+
 
         ExpandableItem(
             title = "신청서 보기",
             expanded = isFormExpanded,
             onToggle = { isFormExpanded = !isFormExpanded }
         ) {
-            formSchema.forEach { item ->
-                val answer = formAnswer[item.label]
-                val answerText = when (answer) {
-                    is List<*> -> answer.joinToString(", ")
-                    is String -> answer
-                    else -> "응답 없음"
-                }
-                Text("${item.label}: $answerText", fontSize = 14.sp, modifier = Modifier.padding(4.dp))
-            }
-        }
+            FormAnswerSection(
+                formSchema = formSchema,
+                formAnswer = formAnswer
+            )
+    }
     }
 }
 

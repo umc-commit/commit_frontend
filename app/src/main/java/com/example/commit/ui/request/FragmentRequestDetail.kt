@@ -23,6 +23,8 @@ import com.example.commit.data.model.*
 import com.example.commit.ui.request.components.RequestDetailItem
 import com.example.commit.ui.request.components.RequestDetailSectionList
 import com.example.commit.ui.request.notoSansKR
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 class FragmentRequestDetail : Fragment() {
     override fun onCreateView(
@@ -68,6 +70,7 @@ fun RequestDetailScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFE8E8E8))
+            .verticalScroll(rememberScrollState())
     ) {
         // 상단 타이틀 바
         Box(
