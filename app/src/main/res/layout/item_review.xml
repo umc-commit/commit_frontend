@@ -176,7 +176,7 @@
                 android:layout_marginStart="32dp" />
 
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnEdit"
                 android:layout_width="48dp"
                 android:layout_height="22dp"
@@ -185,14 +185,14 @@
                 android:textColor="#222222"
                 android:background="@drawable/bg_button_outline_gray"
                 android:fontFamily="@font/notosanskr_regular"
-                android:includeFontPadding="true"
+                android:includeFontPadding="false"
                 android:gravity="center"
                 app:layout_constraintTop_toBottomOf="@id/tvContent"
                 app:layout_constraintEnd_toStartOf="@id/btnDelete"
                 android:layout_marginTop="24dp"
                 android:layout_marginEnd="10dp" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnDelete"
                 android:layout_width="48dp"
                 android:layout_height="22dp"
@@ -201,7 +201,7 @@
                 android:textColor="#222222"
                 android:background="@drawable/bg_button_outline_gray"
                 android:fontFamily="@font/notosanskr_regular"
-                android:includeFontPadding="true"
+                android:includeFontPadding="false"
                 android:gravity="center"
                 app:layout_constraintTop_toBottomOf="@id/tvContent"
                 app:layout_constraintEnd_toEndOf="parent"
