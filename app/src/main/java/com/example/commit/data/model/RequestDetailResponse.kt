@@ -31,3 +31,9 @@ data class OptionItem(
     val label: String
 ) : Parcelable
 
+@Parcelize
+data class TimelineEvent(
+    val iconRes: Int,
+    val description: String,
+    val date: String
+): Parcelable

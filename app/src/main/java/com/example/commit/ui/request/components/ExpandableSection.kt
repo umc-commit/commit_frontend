@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.commit.R
 import com.example.commit.data.model.*
+import com.example.commit.ui.request.notoSansKR
 
 @Composable
 fun RequestDetailSectionList(
@@ -41,9 +42,7 @@ fun RequestDetailSectionList(
             expanded = isTimelineExpanded,
             onToggle = { isTimelineExpanded = !isTimelineExpanded }
         ) {
-            timeline.forEach { item ->
-                Text("${item.changedAt}: ${item.label}", fontSize = 14.sp, modifier = Modifier.padding(4.dp))
-            }
+            TimelineSection(events = timeline.map { it.toEvent() })
         }
 
         ExpandableItem(
@@ -128,7 +127,6 @@ fun RequestDetailSectionList(
             }
         }
 
-
         ExpandableItem(
             title = "신청서 보기",
             expanded = isFormExpanded,
@@ -138,7 +136,7 @@ fun RequestDetailSectionList(
                 formSchema = formSchema,
                 formAnswer = formAnswer
             )
-    }
+        }
     }
 }
 
