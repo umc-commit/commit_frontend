@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,9 +26,11 @@ fun CommissionHeader() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 28.dp, top = 28.dp, end = 20.dp), // Figma 여백 기준
+            .padding(start = 28.dp, top = 20.dp, bottom = 20.dp), // Figma 여백 기준
         verticalAlignment = Alignment.CenterVertically
+
     ) {
+
         // 프로필 이미지 (회색 사각형 대체용)
         Box(
             modifier = Modifier

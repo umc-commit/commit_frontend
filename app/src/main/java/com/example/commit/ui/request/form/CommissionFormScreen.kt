@@ -1,122 +1,94 @@
 package com.example.commit.ui.request.form
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.ui.res.painterResource
-import com.example.commit.R
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.commit.ui.request.notoSansKR
+import com.example.commit.ui.Theme.CommitTheme
+
 
 @Composable
 fun CommissionFormScreen() {
-    var selectedDeadlineOption by remember { mutableStateOf("") }
-    var selectedCharacter by remember { mutableStateOf("") }
-    var isChecked by remember { mutableStateOf(false) }
-    var inputText by remember { mutableStateOf("") }
+    // 상태 정의
+    val images = remember { mutableStateListOf<Bitmap>() }
+    var text by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .padding(horizontal = 20.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        Text("커미션 신청", style = MaterialTheme.typography.headlineSmall)
+        // 0. top
+        CommissionTopBar()
 
-        // 1. 당일마감 옵션
-        Text("1. 당일마감 옵션 *", style = MaterialTheme.typography.bodyMedium)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            RadioButton(
-                selected = selectedDeadlineOption == "yes",
-                onClick = { selectedDeadlineOption = "yes" }
-            )
-            Text("+1000P", style = MaterialTheme.typography.bodyMedium)
-            Spacer(modifier = Modifier.width(16.dp))
-            RadioButton(
-                selected = selectedDeadlineOption == "no",
-                onClick = { selectedDeadlineOption = "no" }
-            )
-            Text("X", style = MaterialTheme.typography.bodyMedium)
-        }
+        // 1. 헤더
+        CommissionHeader()
 
-        // 2. 신청 캐릭터
-        Text("2. 신청 캐릭터 *", style = MaterialTheme.typography.bodyMedium)
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            listOf("고양이", "햄스터", "캐리커쳐", "랜덤").forEach { option ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = selectedCharacter == option,
-                        onClick = { selectedCharacter = option }
-                    )
-                    Text(option, style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
+        Spacer(modifier = Modifier.height(20.dp))
 
-        // 3. 확인 체크박스
-        Text("3. 저희 팀 코믹 예쁘게 봐주세요! *", style = MaterialTheme.typography.bodyMedium)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = isChecked, onCheckedChange = { isChecked = it })
-            Text("확인했습니다.", style = MaterialTheme.typography.bodyMedium)
-        }
-
-        // 4. 신청 내용
-        Text("4. 신청 내용", style = MaterialTheme.typography.bodyMedium)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_camera),
-                contentDescription = "사진 추가",
-                modifier = Modifier
-                    .size(48.dp)
-                    .padding(end = 8.dp)
-            )
-            Text("0/10", style = MaterialTheme.typography.labelSmall)
-        }
-
-        OutlinedTextField(
-            value = inputText,
-            onValueChange = {
-                if (it.length <= 500) inputText = it
-            },
-            label = { Text("신청자 텍스트", style = MaterialTheme.typography.labelSmall) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            maxLines = 10
+        // 2. 질문 섹션 예시 (하나는 샘플, 더 만들 수 있음)
+        CommissionOptionSection(
+            index = 1,
+            title = "커미션을 어떻게 알게 되셨나요?",
+            isChecked = false,
+            onCheckedChange = { /* TODO */ }
         )
 
-        Text("${'$'}{inputText.length}/500", style = MaterialTheme.typography.labelSmall)
+        Spacer(modifier = Modifier.height(12.dp))
 
-        Button(
-            onClick = { /* 신청 로직 */ },
+        // 3. 이미지 및 텍스트 섹션
+        CommissionImageTextSection(
+            text = text,
+            onTextChange = { text = it },
+            images = images,
+            onAddClick = { /* TODO: 이미지 추가 */ },
+            onRemoveClick = { index -> images.removeAt(index) }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 4. 구분선
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
-            enabled = selectedDeadlineOption.isNotEmpty()
-                    && selectedCharacter.isNotEmpty()
-                    && isChecked
-                    && inputText.isNotBlank()
+                .height(8.dp)
+                .background(Color(0xFFD9D9D9))
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // 5. 신청하기 버튼
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .background(Color(0xFFE0E0E0), shape = RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center
         ) {
-            Text("신청하기", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "신청하기",
+                color = Color.Gray,
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
+
+        Spacer(modifier = Modifier.height(30.dp))
     }
 }
-
 @Preview(showBackground = true)
 @Composable
-fun CommissionFormPreview() {
-    MaterialTheme {
+fun CommissionFormScreenPreview() {
+    CommitTheme {
         CommissionFormScreen()
     }
 }
