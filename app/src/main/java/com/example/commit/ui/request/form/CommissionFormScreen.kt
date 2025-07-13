@@ -4,8 +4,8 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,15 +17,23 @@ import com.example.commit.ui.Theme.CommitTheme
 
 @Composable
 fun CommissionFormScreen() {
-    // 상태 정의
+    // 스크롤 상태
+    val scrollState = rememberScrollState()
+
+    // 기본 상태
     val images = remember { mutableStateListOf<Bitmap>() }
     var text by remember { mutableStateOf("") }
 
+    // 질문 상태
+    var answer1 by remember { mutableStateOf("") }
+    var answer2 by remember { mutableStateOf("") }
+    var answer3 by remember { mutableStateOf("") }
+
     Column(
         modifier = Modifier
-            .width(400.dp) // 💡 너비 고정
+            .width(400.dp)
             .padding(horizontal = 20.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
     ) {
         // 0. TopBar
         CommissionTopBar()
@@ -35,28 +43,7 @@ fun CommissionFormScreen() {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // 2. 질문 섹션
-        CommissionOptionSection(
-            index = 1,
-            title = "커미션을 어떻게 알게 되셨나요?",
-            isChecked = false,
-            onCheckedChange = { /* TODO */ }
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // 3. 이미지 + 텍스트 섹션
-        CommissionImageTextSection(
-            text = text,
-            onTextChange = { text = it },
-            images = images,
-            onAddClick = { /* TODO */ },
-            onRemoveClick = { index -> images.removeAt(index) }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 4. 구분선
+        // 2. 구분선
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -66,7 +53,59 @@ fun CommissionFormScreen() {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // 5. 신청하기 버튼
+        // 3. 질문 섹션들
+        CommissionOptionSection(
+            index = 1,
+            title = "당일마감 옵션",
+            options = listOf("O (+10000P)", "X"),
+            selectedOption = answer1,
+            onOptionSelected = { answer1 = it }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        CommissionOptionSection(
+            index = 2,
+            title = "신청 캐릭터",
+            options = listOf("고양이", "햄스터", "캐리커쳐", "랜덤"),
+            selectedOption = answer2,
+            onOptionSelected = { answer2 = it }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        CommissionOptionSection(
+            index = 3,
+            title = "저희 팀 코밋 예쁘게 봐주세요!",
+            options = listOf("확인했습니다."),
+            selectedOption = answer3,
+            onOptionSelected = { answer3 = it }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 4. 이미지 + 텍스트 섹션
+        CommissionImageTextSection(
+            text = text,
+            onTextChange = { text = it },
+            images = images,
+            onAddClick = { /* TODO */ },
+            onRemoveClick = { index -> images.removeAt(index) }
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // 5. 구분선
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .background(Color(0xFFD9D9D9))
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // 6. 신청하기 버튼
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -85,7 +124,7 @@ fun CommissionFormScreen() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 400)
+@Preview(showBackground = true, widthDp = 400, heightDp = 800)
 @Composable
 fun CommissionFormScreenPreview() {
     CommitTheme {
