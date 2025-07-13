@@ -15,7 +15,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.commit.ui.Theme.CommitTheme
 
-
 @Composable
 fun CommissionFormScreen() {
     // 상태 정의
@@ -24,19 +23,19 @@ fun CommissionFormScreen() {
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .width(400.dp) // 💡 너비 고정
             .padding(horizontal = 20.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        // 0. top
+        // 0. TopBar
         CommissionTopBar()
 
-        // 1. 헤더
+        // 1. Header
         CommissionHeader()
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // 2. 질문 섹션 예시 (하나는 샘플, 더 만들 수 있음)
+        // 2. 질문 섹션
         CommissionOptionSection(
             index = 1,
             title = "커미션을 어떻게 알게 되셨나요?",
@@ -46,12 +45,12 @@ fun CommissionFormScreen() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 3. 이미지 및 텍스트 섹션
+        // 3. 이미지 + 텍스트 섹션
         CommissionImageTextSection(
             text = text,
             onTextChange = { text = it },
             images = images,
-            onAddClick = { /* TODO: 이미지 추가 */ },
+            onAddClick = { /* TODO */ },
             onRemoveClick = { index -> images.removeAt(index) }
         )
 
@@ -85,7 +84,8 @@ fun CommissionFormScreen() {
         Spacer(modifier = Modifier.height(30.dp))
     }
 }
-@Preview(showBackground = true)
+
+@Preview(showBackground = true, widthDp = 400)
 @Composable
 fun CommissionFormScreenPreview() {
     CommitTheme {
