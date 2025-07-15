@@ -7,9 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.commit.AuthorCardAdapter
-import com.example.commit.HomeCardAdapter
-import com.example.commit.ReviewCardAdapter
+import com.example.commit.adapter.AuthorCardAdapter
+import com.example.commit.adapter.HomeCardAdapter
+import com.example.commit.adapter.ReviewCardAdapter
 import com.example.commit.activity.AlarmActivity
 import com.example.commit.databinding.FragmentHomeBinding
 

@@ -8,13 +8,10 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.commit.AlarmAdapter
-import com.example.commit.AlarmItem
-import com.example.commit.HomeCardAdapter
+import com.example.commit.adapter.AlarmAdapter
+import com.example.commit.data.model.entities.AlarmItem
 import com.example.commit.R
 
 class AlarmActivity : AppCompatActivity() {

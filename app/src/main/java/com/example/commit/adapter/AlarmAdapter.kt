@@ -1,10 +1,12 @@
-package com.example.commit
+package com.example.commit.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.commit.data.model.entities.AlarmItem
+import com.example.commit.R
 import com.example.commit.databinding.ItemAlarmBinding
 
 class AlarmAdapter(
