@@ -1,15 +1,488 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="#FFFFFF">
 
     <TextView
+        android:id="@+id/user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="5"
-        android:textSize = "100dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:text="로지"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:textSize="18sp"
+        android:textColor="@color/black2"
+        android:includeFontPadding="false"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="62dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/applicant_tag"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:text="신청자"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:textSize="10sp"
+        android:textColor="@color/mint2"
+        android:includeFontPadding="false"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/bg_mint3"
+        android:gravity="center"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        app:layout_constraintBottom_toBottomOf="@+id/user_name"
+        app:layout_constraintStart_toEndOf="@+id/user_name"
+        app:layout_constraintTop_toTopOf="@+id/user_name" />
+
+    <ImageView
+        android:id="@+id/dropdown_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_arrow_down"
+        android:layout_marginStart="7.25dp"
+        app:layout_constraintBottom_toBottomOf="@+id/user_name"
+        app:layout_constraintStart_toEndOf="@+id/applicant_tag"
+        app:layout_constraintTop_toTopOf="@+id/user_name" />
+
+    <!-- User Profile Section -->
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/user_profile"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginStart="31dp"
+        android:src="@drawable/ic_profile_rose"
+        app:civ_border_color="@android:color/transparent"
+        app:civ_border_width="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_name" />
+
+    <TextView
+        android:id="@+id/user_name2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="로지"
+        android:fontFamily="@font/notosanskr_bold"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:includeFontPadding="false"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toEndOf="@+id/user_profile"
+        app:layout_constraintTop_toTopOf="@+id/user_profile" />
+
+    <TextView
+        android:id="@+id/user_points_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="5,000P"
+        android:fontFamily="@font/notosanskr_bold"
+        android:textSize="14sp"
+        android:textColor="@color/black1"
+        android:includeFontPadding="false"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="@+id/user_name2"
+        app:layout_constraintTop_toBottomOf="@+id/user_name2" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/profile_button"
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:text="프로필"
+        android:fontFamily="@font/notosanskr_medium"
+        android:textSize="10sp"
+        android:textColor="@color/black2"
+        android:includeFontPadding="false"
+        android:layout_marginEnd="27.5dp"
+        android:background="@drawable/btn_outline_gray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/user_profile"
+        app:layout_constraintTop_toTopOf="@+id/user_profile" />
+
+    <View
+        android:id="@+id/divider_profile_activity"
+        android:layout_width="0dp"
+        android:layout_height="4dp"
+        android:background="#F1F1F1"
+        android:layout_marginTop="25dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_profile" />
+
+    <TextView
+        android:id="@+id/activity_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="활동"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:textSize="10sp"
+        android:textColor="@color/gray2"
+        android:includeFontPadding="false"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider_profile_activity" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/completed_commissions_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="15dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_header">
+
+        <TextView
+            android:id="@+id/completed_commissions_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="완료된 커미션"
+            android:fontFamily="@font/notosanskr_semibold"
+            android:textSize="14sp"
+            android:textColor="@color/black1"
+            android:includeFontPadding="false"
+            android:layout_marginStart="28dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_right_gray"
+            android:layout_marginEnd="28dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Written Reviews Item -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/written_reviews_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingVertical="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/completed_commissions_layout">
+
+        <TextView
+            android:id="@+id/written_reviews_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="작성된 후기"
+            android:fontFamily="@font/notosanskr_semibold"
+            android:textSize="14sp"
+            android:textColor="@color/black1"
+            android:includeFontPadding="false"
+            android:layout_marginStart="28dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_right_gray"
+            android:layout_marginEnd="28dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Commission Report Item -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/commission_report_item_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingVertical="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/written_reviews_layout">
+
+        <TextView
+            android:id="@+id/commission_report_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="커미션 리포트"
+            android:fontFamily="@font/notosanskr_semibold"
+            android:textSize="14sp"
+            android:textColor="@color/black1"
+            android:includeFontPadding="false"
+            android:layout_marginStart="28dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_right_gray"
+            android:layout_marginEnd="28dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/divider_activity_points"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="#F1F1F1"
+        android:layout_marginStart="28dp"
+        android:layout_marginEnd="28dp"
+        android:layout_marginTop="7dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/commission_report_item_layout" />
+
+    <!-- Points Section Header -->
+    <TextView
+        android:id="@+id/points_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="포인트"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:textSize="10sp"
+        android:textColor="@color/gray2"
+        android:includeFontPadding="false"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider_activity_points" />
+
+    <!-- Charge Points Item -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/charge_points_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="15dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/points_header">
+
+        <TextView
+            android:id="@+id/charge_points_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="포인트 충전"
+            android:fontFamily="@font/notosanskr_semibold"
+            android:textSize="14sp"
+            android:textColor="@color/black1"
+            android:includeFontPadding="false"
+            android:layout_marginStart="28dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_right_gray"
+            android:layout_marginEnd="28dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Charge History Item -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/charge_history_item_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingVertical="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/charge_points_layout">
+
+        <TextView
+            android:id="@+id/charge_history_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="충전 내역"
+            android:fontFamily="@font/notosanskr_semibold"
+            android:textSize="14sp"
+            android:textColor="@color/black1"
+            android:includeFontPadding="false"
+            android:layout_marginStart="28dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_right_gray"
+            android:layout_marginEnd="28dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/divider_points_settings"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="#F1F1F1"
+        android:layout_marginStart="28dp"
+        android:layout_marginEnd="28dp"
+        android:layout_marginTop="7dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/charge_history_item_layout" />
+
+    <!-- Settings Section Header -->
+    <TextView
+        android:id="@+id/settings_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="설정"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:textSize="10sp"
+        android:textColor="@color/gray2"
+        android:includeFontPadding="false"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider_points_settings" />
+
+    <!-- Settings Item -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/settings_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingVertical="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_header">
+
+        <TextView
+            android:id="@+id/settings_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="설정"
+            android:fontFamily="@font/notosanskr_semibold"
+            android:textSize="14sp"
+            android:textColor="@color/black1"
+            android:includeFontPadding="false"
+            android:layout_marginStart="28dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_right_gray"
+            android:layout_marginEnd="28dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/divider_settings_support"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="#F1F1F1"
+        android:layout_marginStart="28dp"
+        android:layout_marginEnd="28dp"
+        android:layout_marginTop="2dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_layout" />
+
+    <!-- Support Section Header -->
+    <TextView
+        android:id="@+id/support_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="지원"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:textSize="10sp"
+        android:textColor="@color/gray2"
+        android:includeFontPadding="false"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider_settings_support" />
+
+    <!-- Customer Service Item -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/customer_service_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingVertical="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/support_header">
+
+        <TextView
+            android:id="@+id/customer_service_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="고객 센터"
+            android:fontFamily="@font/notosanskr_semibold"
+            android:textSize="14sp"
+            android:textColor="@color/black1"
+            android:includeFontPadding="false"
+            android:layout_marginStart="28dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_right_gray"
+            android:layout_marginEnd="28dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/divider_logout"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="#F1F1F1"
+        android:layout_marginStart="28dp"
+        android:layout_marginEnd="28dp"
+        android:layout_marginTop="2dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/customer_service_layout" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/logout_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:paddingBottom="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider_logout">
+
+        <TextView
+            android:id="@+id/logout_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="로그아웃"
+            android:fontFamily="@font/notosanskr_semibold"
+            android:textSize="14sp"
+            android:textColor="@color/red1"
+            android:includeFontPadding="false"
+            android:layout_marginStart="28dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

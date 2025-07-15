@@ -72,11 +72,6 @@ class AlarmActivity : AppCompatActivity() {
         alarmDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         alarmDialog.window?.setDimAmount(0.6f)
 
-
-        alarmDialog = Dialog(this)
-        alarmDialog.setContentView(R.layout.dialog_alarm)
-        alarmDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
         alarmDialog.findViewById<TextView>(R.id.tv_delete_all).setOnClickListener {
             alarmDialog.dismiss()
             showDeleteAllDialog()
