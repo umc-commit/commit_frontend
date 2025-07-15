@@ -1,4 +1,4 @@
-package com.example.commit
+package com.example.commit.data.model.entities
 
 data class AlarmItem(
     val id: Long,

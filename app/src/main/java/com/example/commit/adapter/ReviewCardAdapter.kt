@@ -1,4 +1,4 @@
-package com.example.commit
+package com.example.commit.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
