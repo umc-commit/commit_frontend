@@ -70,6 +70,8 @@ fun PostHeaderSection(
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.Center
+
+
         ) {
             repeat(imageCount) { index ->
                 Box(
