@@ -1,15 +1,14 @@
 package com.example.commit
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.commit.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.example.commit.ui.request.FragmentRequest
 import android.util.Log
-
+import com.example.commit.fragment.FragmentBookmark
+import com.example.commit.fragment.FragmentHome
+import com.example.commit.fragment.FragmentMypage
 
 
 class MainActivity : AppCompatActivity() {

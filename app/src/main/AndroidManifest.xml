@@ -12,8 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Commit"
         tools:targetApi="31">
-        <activity
-            android:name=".FragmentHome"
+        <activity android:name=".activity.AlarmActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

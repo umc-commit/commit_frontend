@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="280dp"
+    android:layout_height="120dp"
+    android:layout_marginEnd="12dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="@android:color/transparent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/review_card_bg">
+
+        <!-- 별 아이콘 -->
+        <ImageView
+            android:id="@+id/iv_star"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:src="@drawable/ic_star"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="18dp"/>
+
+        <!-- 평점 -->
+        <TextView
+            android:id="@+id/tv_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5.0"
+            android:fontFamily="@font/notosanskr_medium"
+            android:textSize="12sp"
+            android:textColor="@color/black1"
+            android:includeFontPadding="false"
+            app:layout_constraintTop_toTopOf="@id/iv_star"
+            app:layout_constraintStart_toEndOf="@id/iv_star"
+            android:layout_marginStart="4dp"/>
+
+        <!-- 커미션명 -->
+        <TextView
+            android:id="@+id/tv_commission_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="낙서 타입 커미션"
+            android:fontFamily="@font/notosanskr_medium"
+            android:textSize="12sp"
+            android:textColor="@color/black1"
+            android:includeFontPadding="false"
+            app:layout_constraintTop_toTopOf="@id/iv_star"
+            app:layout_constraintStart_toEndOf="@id/tv_rating"
+            android:layout_marginStart="11dp"/>
+
+        <!-- 리뷰 이미지 -->
+        <ImageView
+            android:id="@+id/iv_review"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:background="@drawable/image_placeholder"
+            app:layout_constraintTop_toBottomOf="@id/iv_star"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="9dp"
+            android:layout_marginStart="18dp"/>
+
+        <!-- 리뷰 내용 -->
+        <TextView
+            android:id="@+id/tv_review_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="친절하게 응대해주셨습니다. 감사해요!"
+            android:fontFamily="@font/notosanskr_regular"
+            android:textSize="10sp"
+            android:textColor="@color/black1"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintTop_toTopOf="@id/iv_review"
+            app:layout_constraintStart_toEndOf="@id/iv_review"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:includeFontPadding="false"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="12dp"/>
+
+        <!-- 작성자 -->
+        <TextView
+            android:id="@+id/tv_reviewer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="익명의 신청자"
+            android:fontFamily="@font/notosanskr_regular"
+            android:textSize="8sp"
+            android:textColor="@color/gray2"
+            android:includeFontPadding="false"
+            app:layout_constraintTop_toBottomOf="@id/tv_review_content"
+            app:layout_constraintStart_toStartOf="@id/tv_review_content"
+            android:layout_marginTop="4dp"/>
+
+        <!-- 작업기간 -->
+        <TextView
+            android:id="@+id/tv_work_period"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="작업기간 : 12시간"
+            android:fontFamily="@font/notosanskr_medium"
+            android:textSize="8sp"
+            android:textColor="@color/gray2"
+            android:includeFontPadding="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="18dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>
