@@ -1,0 +1,78 @@
+package com.example.commit.ui.request.form
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TabRowDefaults.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.commit.R
+import com.example.commit.ui.Theme.CommitTheme
+
+@Composable
+fun CommissionHeader() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 28.dp, top = 20.dp, bottom = 20.dp), // Figma 여백 기준
+        verticalAlignment = Alignment.CenterVertically
+
+    ) {
+
+        // 프로필 이미지 (회색 사각형 대체용)
+        Box(
+            modifier = Modifier
+                .size(width = 80.dp, height = 60.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(color = Color(0xFFD9D9D9))       // Figma: 4dp radius
+        )
+
+        Spacer(modifier = Modifier.width(14.dp)) // Figma 기준 간격
+
+        Column {
+            Text(
+                text = "키르님의",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(11.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "낙서 타임 커미션",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+
+                Spacer(modifier = Modifier.width(6.dp)) // 가로 간격
+
+                Text(
+                    text = "신청 폼",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CommissionHeaderPreview() {
+    CommitTheme {
+        CommissionHeader()
+    }
+}

@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.compose.material3)
     implementation("androidx.compose.material:material:1.6.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation ("androidx.navigation:navigation-compose:2.7.5")
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.activity.compose)
 
@@ -73,4 +74,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 }
