@@ -4,13 +4,320 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".FragmentHome">
+    android:background="#FFFFFF">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="1"
-        android:textSize = "100dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+    <!-- 상단 헤더 -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="125dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/iv_logo"
+            android:layout_width="93dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_commit_logo"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="63dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/iv_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_search"
+            android:layout_marginEnd="13dp"
+            android:layout_marginTop="63dp"
+            app:layout_constraintEnd_toStartOf="@id/iv_alarm"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/iv_alarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_alarm"
+            android:layout_marginEnd="13dp"
+            android:layout_marginTop="63dp"
+            app:layout_constraintEnd_toStartOf="@id/iv_profile"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <ImageView
+            android:id="@+id/iv_alarm_dot"
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:src="@drawable/ic_red_dot"
+            android:layout_marginTop="57dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintEnd_toStartOf="@id/iv_profile"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="visible"/>
+
+        <ImageView
+            android:id="@+id/iv_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_profile"
+            android:layout_marginEnd="28dp"
+            android:layout_marginTop="63dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 탭 레이아웃 -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="31dp"
+        app:layout_constraintTop_toBottomOf="@id/header_layout">
+
+        <View
+            android:id="@+id/indicator_recommend2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E8E8E8"
+            app:layout_constraintStart_toStartOf="@id/tv_recommend"
+            app:layout_constraintEnd_toEndOf="@id/tv_recommend"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_recommend"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="추천"
+            android:fontFamily="@font/notosanskr_semibold"
+            android:textSize="16sp"
+            android:textColor="@color/black1"
+            android:includeFontPadding="false"
+            android:gravity="center"
+            android:layout_marginBottom="3dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tv_following"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <View
+            android:id="@+id/indicator_recommend"
+            android:layout_width="109dp"
+            android:layout_height="2dp"
+            android:background="#17D5C6"
+            app:layout_constraintStart_toStartOf="@id/tv_recommend"
+            app:layout_constraintEnd_toEndOf="@id/tv_recommend"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_following"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="팔로우 중"
+            android:fontFamily="@font/notosanskr_semibold"
+            android:textSize="16sp"
+            android:textColor="@color/gray2"
+            android:includeFontPadding="false"
+            android:gravity="center"
+            android:layout_marginBottom="3dp"
+            app:layout_constraintStart_toEndOf="@id/tv_recommend"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 스크롤 가능한 콘텐츠 -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/tab_layout"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/main_content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- 프로모션 배너 -->
+            <include layout="@layout/item_home_banner"
+                android:id="@+id/promo_banner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_marginStart="28dp"
+                android:layout_marginEnd="28dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- 오늘의 추천커머션 섹션 -->
+            <TextView
+                android:id="@+id/tv_today_recommendations_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="오늘의 추천커머션"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textSize="16sp"
+                android:textColor="@color/black1"
+                android:includeFontPadding="false"
+                android:layout_marginTop="25dp"
+                android:layout_marginStart="28dp"
+                app:layout_constraintTop_toBottomOf="@id/promo_banner"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_today_recommendations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="32dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_today_recommendations_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:listitem="@layout/item_home_card" />
+
+            <!-- 새로 등록 섹션 -->
+            <TextView
+                android:id="@+id/tv_new_registrations_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="따끈따끈 새로 등록됐어요"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textSize="16sp"
+                android:textColor="@color/black1"
+                android:includeFontPadding="false"
+                android:layout_marginTop="25dp"
+                android:layout_marginStart="28dp"
+                app:layout_constraintTop_toBottomOf="@id/rv_today_recommendations"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_new_registrations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="32dp"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_new_registrations_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:listitem="@layout/item_home_card" />
+
+            <TextView
+                    android:id="@+id/tv_hot_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="신청 폭주! 지금 확인해보세요"
+                    android:fontFamily="@font/notosanskr_semibold"
+                    android:textSize="16sp"
+                    android:textColor="@color/black1"
+                    android:includeFontPadding="false"
+                    android:layout_marginTop="25dp"
+                    android:layout_marginStart="28dp"
+                    app:layout_constraintTop_toBottomOf="@id/rv_new_registrations"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_hot_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="32dp"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_hot_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:listitem="@layout/item_home_card" />
+
+            <!-- 마감 임박 섹션 -->
+            <TextView
+                android:id="@+id/tv_deadline_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="마감 임박 커미션, 마지막 찬스"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textSize="16sp"
+                android:textColor="@color/black1"
+                android:includeFontPadding="false"
+                android:layout_marginTop="25dp"
+                android:layout_marginStart="28dp"
+                app:layout_constraintTop_toBottomOf="@id/rv_hot_content"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_deadline_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="32dp"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_deadline_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:listitem="@layout/item_home_card" />
+
+            <!-- 후기 섹션 -->
+            <TextView
+                android:id="@+id/tv_review_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="진심 100% 담긴 후기들"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textSize="16sp"
+                android:textColor="@color/black1"
+                android:includeFontPadding="false"
+                android:layout_marginTop="25dp"
+                android:layout_marginStart="28dp"
+                app:layout_constraintTop_toBottomOf="@id/rv_deadline_content"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_review_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="32dp"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_review_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:listitem="@layout/item_home_review" />
+
+            <!-- 신규 작가 섹션 -->
+            <TextView
+                android:id="@+id/tv_new_author_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="이번 주 신규 작가 PICK !"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textSize="16sp"
+                android:textColor="@color/black1"
+                android:includeFontPadding="false"
+                android:layout_marginTop="25dp"
+                android:layout_marginStart="28dp"
+                app:layout_constraintTop_toBottomOf="@id/rv_review_content"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_new_author_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="32dp"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@+id/tv_new_author_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:listitem="@layout/item_author_profile" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

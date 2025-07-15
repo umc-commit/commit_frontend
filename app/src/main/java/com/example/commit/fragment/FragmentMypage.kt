@@ -1,22 +1,22 @@
-package com.example.commit
+package com.example.commit.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.commit.databinding.FragmentHomeBinding
+import com.example.commit.databinding.FragmentMypageBinding
 
-class FragmentHome : Fragment() {
+class FragmentMypage : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentMypageBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentMypageBinding.inflate(inflater, container, false)
         return binding.root
     }
 

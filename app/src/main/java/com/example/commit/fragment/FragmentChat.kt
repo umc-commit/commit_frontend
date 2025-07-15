@@ -1,4 +1,4 @@
-package com.example.commit
+package com.example.commit.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
