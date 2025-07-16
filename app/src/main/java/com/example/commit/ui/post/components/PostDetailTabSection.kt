@@ -32,44 +32,37 @@ fun PostDetailTabSection(
                 .fillMaxWidth()
                 .height(48.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Bottom
         ) {
-            TabItem(
-                title = "상세글",
-                selected = selectedTab == TabType.DETAIL,
-                onClick = {
-                    selectedTab = TabType.DETAIL
-                    onTabSelected(TabType.DETAIL)
-                }
-            )
-            TabItem(
-                title = "작가정보",
-                selected = selectedTab == TabType.ARTIST,
-                onClick = {
-                    selectedTab = TabType.ARTIST
-                    onTabSelected(TabType.ARTIST)
-                }
-            )
-        }
-
-        // 탭 밑줄 indicator
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(2.dp)
-        ) {
-            repeat(2) { index ->
-                Box(
+            TabType.values().forEach { tab ->
+                Column(
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(
-                            if ((selectedTab == TabType.DETAIL && index == 0) ||
-                                (selectedTab == TabType.ARTIST && index == 1))
-                                Color(0xFF17D5C6)
-                            else Color.Transparent
-                        )
-                )
+                        .clickable {
+                            selectedTab = tab
+                            onTabSelected(tab)
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = when (tab) {
+                            TabType.DETAIL -> "상세글"
+                            TabType.ARTIST -> "작가정보"
+                        },
+                        fontSize = 14.sp,
+                        fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal,
+                        color = if (selectedTab == tab) Color.Black else Color(0xFFB0B0B0)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(70.dp)
+                            .height(2.dp)
+                            .background(
+                                if (selectedTab == tab) Color(0xFF17D5C6)
+                                else Color.Transparent
+                            )
+                    )
+                }
             }
         }
 
@@ -105,6 +98,7 @@ fun PostDetailTabSection(
         }
     }
 }
+
 
 @Composable
 fun TabItem(title: String, selected: Boolean, onClick: () -> Unit) {

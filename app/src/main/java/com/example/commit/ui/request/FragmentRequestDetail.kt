@@ -8,23 +8,27 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.example.commit.R
+import com.example.commit.activity.MainActivity
 import com.example.commit.data.model.*
 import com.example.commit.ui.request.components.RequestDetailItem
 import com.example.commit.ui.request.components.RequestDetailSectionList
-import com.example.commit.ui.request.notoSansKR
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 
 class FragmentRequestDetail : Fragment() {
     override fun onCreateView(
@@ -66,6 +70,20 @@ fun RequestDetailScreen(
     formAnswer: Map<String, Any>,
     onBackClick: () -> Unit
 ) {
+    val context = LocalContext.current
+
+    //  바텀바 숨기기
+    LaunchedEffect(Unit) {
+        (context as? MainActivity)?.showBottomNav(false)
+    }
+
+    //  화면 나갈 때 바텀바 다시 보이기
+    DisposableEffect(Unit) {
+        onDispose {
+            (context as? MainActivity)?.showBottomNav(true)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -94,7 +112,7 @@ fun RequestDetailScreen(
             Text(
                 text = "상세정보",
                 fontSize = 20.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                fontWeight = FontWeight.SemiBold,
                 fontFamily = notoSansKR,
                 color = Color.Black,
                 modifier = Modifier.align(Alignment.Center)
