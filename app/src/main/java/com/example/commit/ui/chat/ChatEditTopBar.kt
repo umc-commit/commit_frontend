@@ -2,6 +2,7 @@ package com.example.commit.ui.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,46 +15,44 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTheme
+import com.example.commit.ui.request.notoSansKR
 
 @Composable
 fun ChatEditTopBar(
+    modifier: Modifier = Modifier,
     onSettingClick: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color.White)
     ) {
-        // "채팅" 텍스트
         Text(
             text = "채팅",
-            fontSize = 18.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
+            fontFamily = notoSansKR,
             color = Color.Black,
-            modifier = Modifier
-                .padding(start = 183.dp, top = 45.dp, bottom = 25.dp)
+            modifier = Modifier.align(Alignment.Center)
         )
 
-        // 설정 아이콘
+        // 오른쪽 정렬
         IconButton(
-            onClick = onSettingClick,
+            onClick = onSettingClick, // ✅ 전달된 람다 실행
             modifier = Modifier
-                .padding(start = 353.dp, top = 49.dp) // 정확히 위치 지정
-                .size(18.dp)
+                .align(Alignment.CenterEnd)
+                .padding(end = 28.dp)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_setting),
-                contentDescription = "설정",
-                modifier = Modifier.size(18.dp),
-                tint = Color.Unspecified
+                contentDescription = "설정"
             )
         }
     }
 }
 
-
-@Preview(showBackground = true, widthDp = 400, heightDp = 100)
+@Preview(showBackground = true, widthDp = 360, heightDp = 100)
 @Composable
 fun ChatEditTopBarPreview() {
     CommitTheme {

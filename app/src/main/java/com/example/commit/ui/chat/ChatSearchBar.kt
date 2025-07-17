@@ -38,7 +38,7 @@ fun ChatSearchBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_search),
+            painter = painterResource(id = R.drawable.ic_search_gray),
             contentDescription = "검색 아이콘",
             modifier = Modifier.size(10.dp),
             tint = Color.Gray

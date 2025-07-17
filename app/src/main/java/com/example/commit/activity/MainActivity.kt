@@ -8,6 +8,7 @@ import com.example.commit.ui.request.FragmentRequest
 import android.util.Log
 import com.example.commit.R
 import com.example.commit.fragment.FragmentBookmark
+import com.example.commit.fragment.FragmentChat
 import com.example.commit.fragment.FragmentHome
 import com.example.commit.fragment.FragmentMypage
 
@@ -61,7 +62,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_chat -> {
                     supportFragmentManager
                         .beginTransaction()
-                        .replace(binding.NavFrame.id, FragmentMypage())
+                        .replace(binding.NavFrame.id, FragmentChat())
                         .commitAllowingStateLoss()
                     return@setOnItemSelectedListener true
                 }

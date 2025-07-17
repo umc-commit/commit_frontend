@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import com.example.commit.data.model.ChatItem
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ChatListItem(item: ChatItem) {
@@ -37,27 +38,30 @@ fun ChatListItem(item: ChatItem) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = item.name,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
             )
             Text(
                 text = item.message,
-                fontSize = 14.sp,
-                color = Color.DarkGray
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium
             )
         }
 
-        Column(horizontalAlignment = Alignment.End) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text = item.time,
-                fontSize = 12.sp,
+                fontSize = 10.sp,
                 color = Color(0xFFB0B0B0)
             )
+
             if (item.isNew) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
+                        .size(5.dp)
                         .clip(CircleShape)
                         .background(Color.Red)
                 )
@@ -65,3 +69,5 @@ fun ChatListItem(item: ChatItem) {
         }
     }
 }
+
+
