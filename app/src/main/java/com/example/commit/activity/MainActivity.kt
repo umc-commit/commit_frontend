@@ -1,6 +1,7 @@
 package com.example.commit.activity
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.commit.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -10,7 +11,6 @@ import com.example.commit.R
 import com.example.commit.fragment.FragmentBookmark
 import com.example.commit.fragment.FragmentHome
 import com.example.commit.fragment.FragmentMypage
-
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
@@ -25,13 +25,10 @@ class MainActivity : AppCompatActivity() {
 
         val startFragmentId = intent.getIntExtra("start_fragment", R.id.nav_home)
         bottomNavigationView.selectedItemId = startFragmentId
-
     }
 
     private fun initBottomNavigation() {
-
         bottomNavigationView = binding.BottomNavi
-
         bottomNavigationView.selectedItemId = R.id.nav_home
 
         bottomNavigationView.setOnItemSelectedListener { menuItem ->
@@ -75,5 +72,10 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    // 바텀바 숨기기/보이기 메서드
+    fun showBottomNav(isVisible: Boolean) {
+        binding.BottomNavi.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
 }
