@@ -57,7 +57,6 @@ fun ExpandableItem(
     }
 }
 
-
 @Composable
 fun ArtistInfoSection(
     artistName: String,
@@ -137,7 +136,7 @@ fun ArtistInfoSection(
                 color = Color.Black
             )
             Text(
-                text = "11개",
+                text = "0개",
                 fontSize = 13.sp,
                 color = Color(0xFF17D5C6),
                 fontWeight = FontWeight.Medium
@@ -190,7 +189,42 @@ fun ArtistInfoSection(
             expanded = isExpanded,
             onToggle = { isExpanded = !isExpanded }
         ) {
-            // 실제 후기는 추후 구현 예정
+            if (reviewCount == 0) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                        .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
+                        .background(Color.White),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "아직 남겨진 후기가 없어요.",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row {
+                        repeat(5) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_star),
+                                contentDescription = null,
+                                tint = Color(0xFFD3D3D3),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            } else {
+                ReviewItem(
+                    rating = 5.0f,
+                    title = "낚서 타임 커미션",
+                    duration = "12시간",
+                    content = "친절하게 응대해주셨습니다. 감사해요!",
+                    writer = "워시",
+                    date = "2일 전"
+                )
+            }
         }
     }
 }
@@ -204,7 +238,7 @@ fun PreviewArtistInfoSection() {
         workCount = 11,
         rating = 5.0f,
         recommendRate = 100,
-        reviewCount = 3,
+        reviewCount = 0,
         onFollowClick = { }
     )
 }
