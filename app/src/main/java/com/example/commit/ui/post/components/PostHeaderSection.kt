@@ -29,43 +29,47 @@ fun PostHeaderSection(
     imageCount: Int = 3,
     currentIndex: Int = 0
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(85.dp)
-                .background(Color.White)
-        ) {
-            val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-            Image(
-                painter = painterResource(id = R.drawable.ic_left_vector),
-                contentDescription = "뒤로가기",
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 16.dp)
-                    .size(24.dp)
-                    .clickable {
-                        backDispatcher?.onBackPressed()
-                    }
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
 
-            Text(
-                text = title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
-
+        // 스크롤 가능한 전체 콘텐츠
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 16.dp)
+                .padding(bottom = 90.dp) // 하단 버튼과 겹치지 않게
         ) {
+            // 상단 바
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(85.dp)
+                    .background(Color.White)
+            ) {
+                val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+                Image(
+                    painter = painterResource(id = R.drawable.ic_left_vector),
+                    contentDescription = "뒤로가기",
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = 16.dp)
+                        .size(24.dp)
+                        .clickable {
+                            backDispatcher?.onBackPressed()
+                        }
+                )
+
+                Text(
+                    text = title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
             Spacer(modifier = Modifier.height(20.dp))
 
+            // 썸네일 이미지 영역 (임시 박스)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -73,6 +77,7 @@ fun PostHeaderSection(
                     .background(Color(0xFFE0E0E0))
             )
 
+            // 인디케이터
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,6 +97,7 @@ fun PostHeaderSection(
                 }
             }
 
+            // 본문 영역
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -118,6 +124,7 @@ fun PostHeaderSection(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // 태그 영역
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -167,9 +174,20 @@ fun PostHeaderSection(
                     color = Color(0xFF333333)
                 )
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             PostDetailTabSection(onTabSelected = {})
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        // 하단 고정 바
+        PostBottomBar(
+            isRecruiting = true,
+            remainingSlots = 11,
+            onApplyClick = { /* TODO */ },
+            onChatClick = { /* TODO */ },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+        )
     }
 }

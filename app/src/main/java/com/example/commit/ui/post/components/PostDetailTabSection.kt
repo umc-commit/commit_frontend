@@ -86,14 +86,15 @@ fun PostDetailTabSection(
             }
 
             TabType.ARTIST -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = "[작가정보 페이지 입니다]", fontSize = 14.sp)
-                }
+                ArtistInfoSection(
+                    artistName = "키르",
+                    followerCount = 32,
+                    workCount = 11,
+                    rating = 5.0f,
+                    recommendRate = 100,
+                    reviewCount = 3,
+                    onFollowClick = { /* TODO: 팔로우 버튼 눌렀을 때 처리 */ }
+                )
             }
         }
     }

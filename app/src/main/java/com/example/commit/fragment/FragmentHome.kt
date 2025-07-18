@@ -46,11 +46,12 @@ class FragmentHome : Fragment() {
                 setContent {
                     Log.d(TAG, "ComposeView.setContent 실행됨")
                     PostHeaderSection(
-                        title = title,
-                        tags = listOf("태그1", "#예시", "#테스트"),
+                        title = "그림 커미션",
+                        tags = listOf("그림", "#LD", "#당일마감"),
                         minPrice = 10000,
-                        summary = "$title 커미션에 대한 설명입니다."
+                        summary = "작업 설명입니다"
                     )
+
                 }
             }
 

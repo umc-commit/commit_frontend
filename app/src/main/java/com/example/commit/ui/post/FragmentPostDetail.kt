@@ -33,4 +33,3 @@ class FragmentPostDetail : Fragment() {
         (requireActivity() as? MainActivity)?.showBottomNav(true)
     }
 }
-
