@@ -31,7 +31,7 @@ fun PostBottomBar(
             .background(Color.White)
             .windowInsetsPadding(WindowInsets.navigationBars)
     ) {
-        // 슬롯/마감 상태 아이콘 + 텍스트를 신청 버튼 상단에 배치
+        // 슬롯/마감 상태 아이콘
         Row(
             modifier = Modifier
                 .align(Alignment.TopStart)

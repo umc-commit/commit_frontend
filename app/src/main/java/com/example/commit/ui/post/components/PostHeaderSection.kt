@@ -36,7 +36,7 @@ fun PostHeaderSection(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 90.dp) // 하단 버튼과 겹치지 않게
+                .padding(bottom = 90.dp)
         ) {
             // 상단 바
             Box(

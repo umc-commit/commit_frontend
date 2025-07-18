@@ -10,14 +10,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.commit.ui.post.components.PostBottomBar
 import com.example.commit.ui.post.components.PostHeaderSection
-import androidx.compose.foundation.layout.navigationBarsPadding
 
 
 @Composable
 fun PostScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // 본문 - 스크롤 가능 영역
+        // 본문
         Column(
             modifier = Modifier
                 .fillMaxSize()

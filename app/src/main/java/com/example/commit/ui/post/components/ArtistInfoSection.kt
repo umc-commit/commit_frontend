@@ -1,6 +1,5 @@
 package com.example.commit.ui.post.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -128,57 +127,85 @@ fun ArtistInfoSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // 후기 요약
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "작가의 커미션 후기 ",
-                fontSize = 13.sp,
-                color = Color.Black
-            )
-            Text(
-                text = "0개",
-                fontSize = 13.sp,
-                color = Color(0xFF17D5C6),
-                fontWeight = FontWeight.Medium
-            )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
-                .padding(vertical = 20.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = String.format("%.1f", rating), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+        if (reviewCount == 0) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
+                    .background(Color.White)
+                    .padding(vertical = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "아직 남겨진 후기가 없어요.",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row {
                     repeat(5) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_star_yellow),
+                            painter = painterResource(id = R.drawable.ic_star),
                             contentDescription = null,
-                            modifier = Modifier.size(11.dp),
-                            tint = Color.Unspecified
+                            tint = Color(0xFFD3D3D3),
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
             }
+        } else {
+            // 후기 요약 영역
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "작가의 커미션 후기 ",
+                    fontSize = 13.sp,
+                    color = Color.Black
+                )
+                Text(
+                    text = "${reviewCount}개",
+                    fontSize = 13.sp,
+                    color = Color(0xFF17D5C6),
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
-            Box(
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
                 modifier = Modifier
-                    .width(1.dp)
-                    .height(36.dp)
-                    .background(Color(0xFFE0E0E0))
-            )
+                    .fillMaxWidth()
+                    .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
+                    .padding(vertical = 20.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = String.format("%.1f", rating), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        repeat(5) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_star_yellow),
+                                contentDescription = null,
+                                modifier = Modifier.size(11.dp),
+                                tint = Color.Unspecified
+                            )
+                        }
+                    }
+                }
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "$recommendRate%", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = "추천해요", fontSize = 12.sp, color = Color.DarkGray)
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(36.dp)
+                        .background(Color(0xFFE0E0E0))
+                )
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = "$recommendRate%", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "추천해요", fontSize = 12.sp, color = Color.DarkGray)
+                }
             }
         }
 
