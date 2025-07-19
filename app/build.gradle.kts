@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.compose.runtime.livedata)
     debugImplementation(libs.compose.ui.tooling)
 
+
     // 테스트
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
