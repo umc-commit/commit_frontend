@@ -39,10 +39,9 @@ fun ChatEditTopBar(
 
         // 오른쪽 정렬
         IconButton(
-            onClick = onSettingClick, // ✅ 전달된 람다 실행
+            onClick = onSettingClick, // 전달된 람다 실행
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 28.dp)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_setting),

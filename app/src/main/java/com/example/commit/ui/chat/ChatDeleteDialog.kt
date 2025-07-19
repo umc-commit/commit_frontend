@@ -32,8 +32,8 @@ fun DeleteOptionBottomSheet(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color.White
-        // 🔥 핵심: 전체 시트 배경을 흰색으로!
+        containerColor = Color(0xFFFFFFFF), // 내용 영역 배경
+        tonalElevation = 0.dp
     ) {
         Column(
             modifier = Modifier
@@ -55,6 +55,7 @@ fun DeleteOptionBottomSheet(
         }
     }
 }
+
 
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 130)

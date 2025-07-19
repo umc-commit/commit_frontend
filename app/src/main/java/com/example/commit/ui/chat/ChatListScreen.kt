@@ -12,13 +12,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.commit.R
-import com.example.commit.data.model.ChatItem
+import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.ui.Theme.CommitTheme
 
 @Composable
-fun ChatListScreen(chatItems: List<ChatItem>, onItemClick: (ChatItem) -> Unit) {
+fun ChatListScreen(
+    chatItems: List<ChatItem>,
+    onItemClick: (ChatItem) -> Unit,
+    onSettingClick: () -> Unit // ✅ 수정: 외부로부터 받는 콜백
+) {
     var query by remember { mutableStateOf("") }
-    var showBottomSheet by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -27,47 +30,40 @@ fun ChatListScreen(chatItems: List<ChatItem>, onItemClick: (ChatItem) -> Unit) {
                 .padding(horizontal = 16.dp)
         ) {
             ChatEditTopBar(
-                onSettingClick = { showBottomSheet = true }
+                onSettingClick = onSettingClick // ✅ 여기서 그대로 전달
             )
 
             ChatSearchBar(
                 query = query,
-                onQueryChange = { query = it }
+                onQueryChange = { query = it },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             LazyColumn {
                 items(chatItems) { item ->
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onItemClick(item) }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                item.isNew = false
+                                onItemClick(item)
+                            }
                     ) {
-                        ChatListItem(item = item)
+                        ChatListItem(item = item, showNewIndicator = item.isNew)
                     }
                     Divider(color = Color(0xFFE8E8E8), thickness = 1.dp)
                 }
             }
         }
-
-        // 이 부분은 Column 바깥이어야 함!
-        if (showBottomSheet) {
-            DeleteOptionBottomSheet(
-                onDismiss = { showBottomSheet = false },
-                onDeleteClick = {
-                    // 삭제 모드 전환 처리 등
-                    showBottomSheet = false
-                }
-            )
-        }
     }
 }
-
 
 @Preview(
     name = "Chat List",
     showBackground = true,
-    widthDp = 360, // 실제 디바이스 기준
+    widthDp = 360,
     heightDp = 640
 )
 @Composable
@@ -90,7 +86,10 @@ fun ChatListScreenPreview() {
     )
 
     CommitTheme {
-        ChatListScreen(chatItems = sampleChats,
-            onItemClick = {})
+        ChatListScreen(
+            chatItems = sampleChats,
+            onItemClick = {},
+            onSettingClick = {} // ✅ 필수 파라미터 추가
+        )
     }
 }

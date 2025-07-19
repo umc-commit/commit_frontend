@@ -23,11 +23,12 @@ import com.example.commit.ui.Theme.CommitTheme
 @Composable
 fun ChatSearchBar(
     query: String,
-    onQueryChange: (String) -> Unit
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = Modifier
-            .width(344.dp)
+            .fillMaxWidth()
             .height(34.dp)
             .border(
                 width = 1.dp,

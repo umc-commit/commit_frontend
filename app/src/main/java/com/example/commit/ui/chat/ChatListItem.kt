@@ -12,13 +12,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.commit.data.model.ChatItem
+import com.example.commit.data.model.entities.ChatItem
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-fun ChatListItem(item: ChatItem) {
+fun ChatListItem(item: ChatItem,showNewIndicator: Boolean = true) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
