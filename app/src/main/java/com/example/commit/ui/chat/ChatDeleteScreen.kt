@@ -91,7 +91,7 @@ fun ChatDeleteScreen(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    ChatListItem(item = item, showNewIndicator = false) // 🔴 점 비활성
+                    ChatListItem(item = item, showNewIndicator = false)
                 }
                 Divider(color = Color(0xFFE8E8E8), thickness = 1.dp)
             }
@@ -135,7 +135,7 @@ fun CustomCheckbox(
         colors = CheckboxDefaults.colors(
             checkedColor = Color(0xFF00C8B0),
             uncheckedColor = Color(0xFF00C8B0),
-            checkmarkColor = Color.White
+            checkmarkColor = Color(0xFF00C8B0)
         )
     )
 }
