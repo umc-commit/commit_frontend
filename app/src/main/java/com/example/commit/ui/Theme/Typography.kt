@@ -2,9 +2,18 @@ package com.example.commit.ui.Theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import com.example.commit.ui.request.notoSansKR
+import androidx.compose.ui.unit.sp
+import com.example.commit.R
+
+val notoSansKR = FontFamily(
+    Font(R.font.notosanskr_regular, FontWeight.Normal),
+    Font(R.font.notosanskr_medium, FontWeight.Medium),
+    Font(R.font.notosanskr_semibold, FontWeight.SemiBold),
+    Font(R.font.notosanskr_bold, FontWeight.Bold)
+)
 
 val CommitTypography = Typography(
 

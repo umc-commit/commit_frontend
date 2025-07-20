@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.commit.R
+import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
 fun PostBottomBar(
@@ -31,12 +31,12 @@ fun PostBottomBar(
             .background(Color.White)
             .windowInsetsPadding(WindowInsets.navigationBars)
     ) {
-        // 슬롯/마감 상태 아이콘
+        // 슬롯 상태 아이콘
         Row(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(start = 20.dp)
-                .offset(x = 15.dp,y = (-28).dp),
+                .offset(x = 15.dp, y = (-28).dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -44,7 +44,7 @@ fun PostBottomBar(
                     Box(
                         modifier = Modifier
                             .size(80.dp)
-                            .offset(x = 35.dp, y = (0).dp),
+                            .offset(x = 35.dp, y = 0.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -56,7 +56,7 @@ fun PostBottomBar(
 
                         Text(
                             text = "남은 슬롯 ${remainingSlots}개",
-                            fontSize = 10.sp,
+                            style = CommitTypography.labelSmall,
                             color = Color.White,
                             modifier = Modifier.offset(y = (-2).dp)
                         )
@@ -71,12 +71,11 @@ fun PostBottomBar(
                             .size(75.dp)
                             .offset(x = 35.dp, y = 0.dp)
                     )
-
                 }
             }
         }
 
-        // 하단 버튼 영역
+        // 하단 버튼
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -84,7 +83,7 @@ fun PostBottomBar(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // 신청하기 버튼
+            // 신청하기
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -106,7 +105,7 @@ fun PostBottomBar(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = if (isRecruiting) "신청하기" else "신청불가",
-                        fontSize = 14.sp,
+                        style = CommitTypography.bodyMedium,
                         color = if (isRecruiting) Color.White else Color.Gray
                     )
                 }
@@ -114,7 +113,7 @@ fun PostBottomBar(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // 채팅하기 버튼
+            // 채팅하기
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -133,7 +132,7 @@ fun PostBottomBar(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "채팅하기",
-                        fontSize = 14.sp,
+                        style = CommitTypography.bodyMedium,
                         color = Color.White
                     )
                 }

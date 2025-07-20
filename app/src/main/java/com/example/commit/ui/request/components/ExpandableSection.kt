@@ -14,10 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.commit.R
 import com.example.commit.data.model.*
-import com.example.commit.ui.request.notoSansKR
+import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
 fun RequestDetailSectionList(
@@ -51,77 +50,56 @@ fun RequestDetailSectionList(
             onToggle = { isPaymentExpanded = !isPaymentExpanded }
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-
-                // 결제일시 + 상태
                 Text(
                     text = "${paymentInfo.paidAt} 결제완료",
-                    fontSize = 12.sp,
-                    fontFamily = notoSansKR,
-                    color = Color.Gray
+                    style = CommitTypography.labelSmall.copy(color = Color.Gray)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 기본 금액
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = "기본 금액",
-                        fontSize = 14.sp,
-                        fontFamily = notoSansKR,
-                        color = Color.Gray
+                        style = CommitTypography.bodyMedium.copy(color = Color.Gray)
                     )
                     Text(
                         text = "${"%,d".format(paymentInfo.basePrice)}P",
-                        fontSize = 14.sp,
-                        fontFamily = notoSansKR,
-                        color = Color.Black
+                        style = CommitTypography.bodyMedium.copy(color = Color.Black)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 추가 금액
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = "추가 금액",
-                        fontSize = 14.sp,
-                        fontFamily = notoSansKR,
-                        color = Color.Gray
+                        style = CommitTypography.bodyMedium.copy(color = Color.Gray)
                     )
                     Text(
                         text = "${"%,d".format(paymentInfo.additionalPrice)}P",
-                        fontSize = 14.sp,
-                        fontFamily = notoSansKR,
-                        color = Color.Black
+                        style = CommitTypography.bodyMedium.copy(color = Color.Black)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 총 결제 금액
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = "총 결제 금액",
-                        fontSize = 16.sp,
-                        fontFamily = notoSansKR,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        style = CommitTypography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
                         text = "${"%,d".format(paymentInfo.totalPrice)}P",
-                        fontSize = 16.sp,
-                        fontFamily = notoSansKR,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        style = CommitTypography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
@@ -156,24 +134,19 @@ fun ExpandableItem(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = title,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Black
+                style = CommitTypography.bodyMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1C1C1C)
+                )
             )
             Spacer(modifier = Modifier.weight(1f))
-            if (expanded) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_up_vector),
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp)
-                )
-            } else {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_under_vector),
-                    contentDescription = null,
-                    modifier = Modifier.size(15.dp)
-                )
-            }
+            Icon(
+                painter = painterResource(
+                    id = if (expanded) R.drawable.ic_up_vector else R.drawable.ic_under_vector
+                ),
+                contentDescription = null,
+                modifier = Modifier.size(15.dp)
+            )
         }
 
         if (expanded) {

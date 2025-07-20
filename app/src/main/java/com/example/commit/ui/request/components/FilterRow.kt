@@ -13,12 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.commit.R
-import com.example.commit.ui.request.notoSansKR
+import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
 fun FilterRow(selected: String, onSelect: (String) -> Unit) {
@@ -44,10 +42,7 @@ fun FilterRow(selected: String, onSelect: (String) -> Unit) {
                         )
                         .border(
                             width = 1.dp,
-                            color = if (isSelected)
-                                Color(0xFF00E2BC)
-                            else
-                                Color(0xFF00E2BC),
+                            color = Color(0xFF00E2BC),
                             shape = RoundedCornerShape(16.dp)
                         )
                         .clickable { onSelect(label) },
@@ -55,13 +50,9 @@ fun FilterRow(selected: String, onSelect: (String) -> Unit) {
                 ) {
                     Text(
                         text = label,
-                        fontSize = 14.sp,
-                        fontFamily = notoSansKR,
-                        fontWeight = FontWeight.Medium,
-                        color = if (isSelected)
-                            Color.White
-                        else
-                            Color(0xFF909090)
+                        style = CommitTypography.labelMedium.copy(
+                            color = if (isSelected) Color.White else Color(0xFF909090)
+                        )
                     )
                 }
             }
@@ -72,10 +63,7 @@ fun FilterRow(selected: String, onSelect: (String) -> Unit) {
         ) {
             Text(
                 text = "정렬",
-                fontSize = 14.sp,
-                fontFamily = notoSansKR,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF4D4D4D) // black2
+                style = CommitTypography.labelMedium.copy(color = Color(0xFF4D4D4D))
             )
 
             Spacer(modifier = Modifier.width(4.dp))
@@ -83,7 +71,7 @@ fun FilterRow(selected: String, onSelect: (String) -> Unit) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_under_vector),
                 contentDescription = "정렬 화살표",
-                tint = Color(0xFF4D4D4D), // black2
+                tint = Color(0xFF4D4D4D),
                 modifier = Modifier.size(14.dp)
             )
         }

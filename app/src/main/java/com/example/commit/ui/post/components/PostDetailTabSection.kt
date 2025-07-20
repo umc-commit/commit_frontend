@@ -11,8 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-
+import com.example.commit.ui.Theme.CommitTypography
 
 enum class TabType {
     DETAIL, ARTIST
@@ -48,8 +47,9 @@ fun PostDetailTabSection(
                             TabType.DETAIL -> "상세글"
                             TabType.ARTIST -> "작가정보"
                         },
-                        fontSize = 14.sp,
-                        fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal,
+                        style = CommitTypography.bodyMedium.copy(
+                            fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal
+                        ),
                         color = if (selectedTab == tab) Color.Black else Color(0xFFB0B0B0)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -79,27 +79,41 @@ fun PostDetailTabSection(
                                 "빠르게 받아보시고 싶은 분들은 편하게 문의 주세요 :)\n\n" +
                                 "신청 시에 캐릭터 참고 이미지 첨부해 주시면 되고,\n" +
                                 "추가로 원하시는 포즈나 표정 함께 말씀해 주세요!",
-                        fontSize = 14.sp,
+                        style = CommitTypography.bodyMedium,
                         color = Color(0xFF333333)
                     )
                 }
             }
 
             TabType.ARTIST -> {
-                ArtistInfoSection(
-                    artistName = "키르",
-                    followerCount = 32,
-                    workCount = 11,
+                ReviewItem(
                     rating = 5.0f,
-                    recommendRate = 100,
-                    reviewCount = 3,
-                    onFollowClick = { /* TODO: 팔로우 버튼 눌렀을 때 처리 */ }
+                    title = "낙서 타임 커미션",
+                    duration = "12시간",
+                    content = "친절하게 응대해주셨습니다. 감사해요!",
+                    writer = "위시",
+                    date = "2일 전"
+                )
+                ReviewItem(
+                    rating = 4.0f,
+                    title = "2인 커플 커미션",
+                    duration = "3일",
+                    content = "복잡한 의상이었는데도 디테일 살려서 잘 그려주셨어요 :)",
+                    writer = "헤더",
+                    date = "4일 전"
+                )
+                ReviewItem(
+                    rating = 5.0f,
+                    title = "낙서 타임 커미션",
+                    duration = "20시간",
+                    content = "답장도 빠르고 잘 대해주셨어요. 감사합니다 !",
+                    writer = "마루",
+                    date = "5일 전"
                 )
             }
         }
     }
 }
-
 
 @Composable
 fun TabItem(title: String, selected: Boolean, onClick: () -> Unit) {
@@ -111,8 +125,9 @@ fun TabItem(title: String, selected: Boolean, onClick: () -> Unit) {
     ) {
         Text(
             text = title,
-            fontSize = 14.sp,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            style = CommitTypography.bodyMedium.copy(
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+            ),
             color = if (selected) Color.Black else Color(0xFFB0B0B0)
         )
     }

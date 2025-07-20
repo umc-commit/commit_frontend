@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -29,6 +28,7 @@ import com.example.commit.activity.MainActivity
 import com.example.commit.data.model.*
 import com.example.commit.ui.request.components.RequestDetailItem
 import com.example.commit.ui.request.components.RequestDetailSectionList
+import com.example.commit.ui.Theme.CommitTypography
 
 class FragmentRequestDetail : Fragment() {
     override fun onCreateView(
@@ -54,7 +54,7 @@ class FragmentRequestDetail : Fragment() {
                         onBackClick = { requireActivity().onBackPressedDispatcher.onBackPressed() }
                     )
                 } else {
-                    Text("데이터를 불러오지 못했습니다.")
+                    Text("데이터를 불러오지 못했습니다.", style = CommitTypography.bodyMedium)
                 }
             }
         }
@@ -111,9 +111,8 @@ fun RequestDetailScreen(
             // 가운데 텍스트
             Text(
                 text = "상세정보",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                fontFamily = notoSansKR,
+                fontSize = 18.sp,
+                style = CommitTypography.titleMedium,
                 color = Color.Black,
                 modifier = Modifier.align(Alignment.Center)
             )

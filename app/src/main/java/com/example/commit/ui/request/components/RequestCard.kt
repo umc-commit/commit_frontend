@@ -1,6 +1,7 @@
 package com.example.commit.ui.request.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -16,14 +17,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.commit.R
 import com.example.commit.data.model.Artist
 import com.example.commit.data.model.RequestItem
-import com.example.commit.ui.request.notoSansKR
-import androidx.compose.foundation.clickable
-
+import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
 fun RequestCard(item: RequestItem, onClick: () -> Unit) {
@@ -47,10 +45,8 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
             ) {
                 Text(
                     text = if (isInProgress) "진행 중" else "작업 완료",
-                    fontSize = 14.sp,
-                    fontFamily = notoSansKR,
-                    color = Color.Black,
-                    fontWeight = FontWeight.SemiBold
+                    style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = Color.Black
                 )
                 Icon(
                     painter = painterResource(id = R.drawable.vector),
@@ -80,22 +76,18 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = item.artist.nickname,
-                        fontSize = 12.sp,
-                        color = Color(0xFFB0B0B0),
-                        fontFamily = notoSansKR
+                        style = CommitTypography.labelSmall,
+                        color = Color(0xFFB0B0B0)
                     )
                     Text(
                         text = item.title,
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        fontFamily = notoSansKR,
-                        fontWeight = FontWeight.SemiBold
+                        style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = Color.Black
                     )
                     Text(
                         text = "${item.price}P",
-                        fontSize = 14.sp,
-                        color = Color(0xFF4D4D4D),
-                        fontFamily = notoSansKR
+                        style = CommitTypography.bodyMedium,
+                        color = Color(0xFF4D4D4D)
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
@@ -103,8 +95,7 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "작가에게 문의하기",
-                            fontSize = 12.sp,
-                            fontFamily = notoSansKR,
+                            style = CommitTypography.labelSmall,
                             color = Color(0xFF4D4D4D)
                         )
                         Spacer(modifier = Modifier.width(2.dp))
@@ -127,17 +118,17 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
                 ) {
                     Text(
                         text = "수락",
-                        fontSize = 12.sp,
+                        style = CommitTypography.labelSmall,
                         color = if (item.status == "ACCEPTED") Color(0xFF17D5C6) else Color(0xFFB0B0B0)
                     )
                     Text(
                         text = "진행중",
-                        fontSize = 12.sp,
+                        style = CommitTypography.labelSmall,
                         color = if (item.status == "IN_PROGRESS") Color(0xFF17D5C6) else Color(0xFFB0B0B0)
                     )
                     Text(
                         text = "작업완료",
-                        fontSize = 12.sp,
+                        style = CommitTypography.labelSmall,
                         color = if (item.status == "DONE") Color(0xFF17D5C6) else Color(0xFFB0B0B0)
                     )
                 }
