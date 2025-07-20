@@ -1,6 +1,7 @@
 package com.example.commit.ui.chat
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +23,9 @@ import com.example.commit.ui.Theme.CommitTheme
 import com.example.commit.ui.request.notoSansKR
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialogDefaults.containerColor
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 
@@ -84,10 +87,11 @@ fun ChatDeleteScreen(
                         .clickable { onItemToggle(item) },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CustomCheckbox(
+                    RoundedCheckbox(
                         checked = selectedItems.contains(item),
                         onCheckedChange = { onItemToggle(item) }
                     )
+
 
                     Spacer(modifier = Modifier.width(12.dp))
 
@@ -106,8 +110,8 @@ fun ChatDeleteScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .height(52.dp)
-                .clip(RoundedCornerShape(12.dp)),
+                .height(52.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (isEnabled) Color(0xFF4D4D4D) else Color(0xFFEDEDED),
                 contentColor = Color.Unspecified
@@ -124,21 +128,34 @@ fun ChatDeleteScreen(
 }
 
 @Composable
-fun CustomCheckbox(
+fun RoundedCheckbox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    Checkbox(
-        checked = checked,
-        onCheckedChange = onCheckedChange,
-        modifier = Modifier.size(16.dp),
-        colors = CheckboxDefaults.colors(
-            checkedColor = Color(0xFF00C8B0),
-            uncheckedColor = Color(0xFF00C8B0),
-            checkmarkColor = Color(0xFF00C8B0)
-        )
-    )
+    val borderColor = if (checked) Color(0xFF17D5C6.toInt()) else Color.LightGray
+    val backgroundColor = if (checked) Color(0xFF17D5C6) else Color.Transparent
+    val checkmarkColor = Color(0xFF17D5C6)
+
+    Box(
+        modifier = Modifier
+            .size(18.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(backgroundColor)
+            .border(1.dp, borderColor, RoundedCornerShape(4.dp))
+            .clickable { onCheckedChange(!checked) },
+        contentAlignment = Alignment.Center
+    ) {
+        if (checked) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = "Checked",
+                tint = checkmarkColor,
+                modifier = Modifier.size(12.dp)
+            )
+        }
+    }
 }
+
 
 
 @Preview(showBackground = true)
