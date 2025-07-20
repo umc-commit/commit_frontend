@@ -11,10 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.commit.R
+import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
 fun ReviewItem(
@@ -44,23 +43,44 @@ fun ReviewItem(
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "$rating", fontSize = 14.sp)
+                Text(
+                    text = "$rating",
+                    style = CommitTypography.bodyMedium
+                )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = title,
+                    style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                )
             }
-            Text(text = "작업기간: $duration", fontSize = 12.sp, color = Color.Gray)
+            Text(
+                text = "작업기간: $duration",
+                style = CommitTypography.labelSmall,
+                color = Color.Gray
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(text = content, fontSize = 14.sp)
+        Text(
+            text = content,
+            style = CommitTypography.bodyMedium
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Row(modifier = Modifier.fillMaxWidth()) {
-            Text(text = writer, fontSize = 12.sp, color = Color.Gray)
+            Text(
+                text = writer,
+                style = CommitTypography.labelSmall,
+                color = Color.Gray
+            )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = date, fontSize = 12.sp, color = Color.Gray)
+            Text(
+                text = date,
+                style = CommitTypography.labelSmall,
+                color = Color.Gray
+            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -99,10 +119,4 @@ fun ReviewListSection() {
             date = "5일 전"
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewReviewListSection() {
-    ReviewListSection()
 }

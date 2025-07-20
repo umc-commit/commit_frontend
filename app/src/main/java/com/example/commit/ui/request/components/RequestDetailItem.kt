@@ -16,11 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.commit.R
 import com.example.commit.data.model.Artist
 import com.example.commit.data.model.RequestItem
+import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
 fun RequestDetailItem(item: RequestItem) {
@@ -39,14 +39,13 @@ fun RequestDetailItem(item: RequestItem) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = statusText,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = statusColor
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "25.05.01(목) 작업 완료", // TODO: 실제 날짜 반영
-                fontSize = 12.sp,
+                style = CommitTypography.labelSmall,
                 color = Color.Gray
             )
         }
@@ -68,15 +67,21 @@ fun RequestDetailItem(item: RequestItem) {
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column {
-                Text("${item.artist.nickname}", fontSize = 12.sp, color = Color.Gray)
+                Text(
+                    text = "${item.artist.nickname}",
+                    style = CommitTypography.labelSmall,
+                    color = Color.Gray
+                )
                 Text(
                     text = item.title,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text("${item.price}P", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = "${item.price}P",
+                    style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                )
             }
         }
 
@@ -94,8 +99,8 @@ fun RequestDetailItem(item: RequestItem) {
         ) {
             Text(
                 text = "작업물 확인",
-                color = if (isInProgress) Color.Gray else Color.White,
-                fontWeight = FontWeight.Bold
+                style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = if (isInProgress) Color.Gray else Color.White
             )
         }
 
@@ -117,14 +122,17 @@ fun RequestDetailItem(item: RequestItem) {
                         .padding(horizontal = 4.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(buttonBackground)
-                        .then(if (!disableFirst) Modifier.clickable { /* TODO: 클릭 동작 */ } else Modifier),
+                        .then(if (!disableFirst) Modifier.clickable { /* TODO */ } else Modifier),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(label, fontSize = 13.sp, color = textColor)
+                    Text(
+                        text = label,
+                        style = CommitTypography.labelSmall,
+                        color = textColor
+                    )
                 }
             }
         }
-
     }
 }
 

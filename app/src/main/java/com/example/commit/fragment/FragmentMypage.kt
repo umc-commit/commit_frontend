@@ -10,6 +10,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import androidx.fragment.app.Fragment
 import com.example.commit.databinding.FragmentMypageBinding
 import com.example.commit.databinding.ProfileBottomsheetBinding
+import com.example.commit.ui.point.FragmentPoint
+import com.example.commit.ui.point.FragmentPointHistory
+
 
 class FragmentMypage : Fragment() {
 
@@ -27,6 +30,18 @@ class FragmentMypage : Fragment() {
 
         binding.dropdownIcon.setOnClickListener {
             showProfileBottomSheet()
+        }
+        binding.chargePointsLayout.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(id, FragmentPoint.newInstance(hideBottomBar = true))
+                .addToBackStack(null)
+                .commit()
+        }
+        binding.chargeHistoryItemLayout.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(id, FragmentPointHistory.newInstance(hideBottomBar = true))
+                .addToBackStack(null)
+                .commit()
         }
 
         return binding.root

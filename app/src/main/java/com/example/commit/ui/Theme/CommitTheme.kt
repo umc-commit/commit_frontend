@@ -6,7 +6,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.example.commit.ui.request.notoSansKR
 
 private val LightColorScheme = lightColorScheme(
     primary = Color(0xFF17D5C6),
