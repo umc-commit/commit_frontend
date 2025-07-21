@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.sp
 import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTheme
 import com.example.commit.ui.Theme.notoSansKR
-
 @Composable
 fun ChatEditTopBar(
     modifier: Modifier = Modifier,

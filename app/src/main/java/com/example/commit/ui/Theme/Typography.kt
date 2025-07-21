@@ -24,7 +24,6 @@ val CommitTypography = Typography(
         lineHeight = 18.sp
     ),
 
-
     titleMedium = TextStyle(
         fontFamily = notoSansKR,
         fontWeight = FontWeight.SemiBold,
