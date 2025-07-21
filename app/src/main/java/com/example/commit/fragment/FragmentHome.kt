@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.commit.activity.AlarmActivity
 import com.example.commit.activity.MainActivity
+import com.example.commit.activity.ProfileActivity
+import com.example.commit.activity.ProfileEditActivity
 import com.example.commit.adapter.AuthorCardAdapter
 import com.example.commit.adapter.HomeCardAdapter
 import com.example.commit.adapter.ReviewCardAdapter
@@ -30,6 +32,11 @@ class FragmentHome : Fragment() {
     ): View {
         Log.d(TAG, "onCreateView 시작")
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+
+        binding.ivProfile.setOnClickListener {
+            val intent = Intent(requireContext(), ProfileActivity::class.java)
+            startActivity(intent)
+        }
 
 
         binding.ivAlarm.setOnClickListener {

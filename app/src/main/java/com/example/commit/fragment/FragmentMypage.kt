@@ -1,7 +1,6 @@
 package com.example.commit.fragment
 
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +11,7 @@ import com.example.commit.databinding.FragmentMypageBinding
 import com.example.commit.databinding.ProfileBottomsheetBinding
 import com.example.commit.ui.point.FragmentPoint
 import com.example.commit.ui.point.FragmentPointHistory
-
+import com.example.commit.activity.ProfileActivity
 
 class FragmentMypage : Fragment() {
 
@@ -27,6 +26,12 @@ class FragmentMypage : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMypageBinding.inflate(inflater, container, false)
+
+        // 1. 프로필 버튼 클릭 시 ProfileActivity로 이동
+        binding.profileButton.setOnClickListener {
+            val intent = Intent(requireContext(), ProfileActivity::class.java)
+            startActivity(intent)
+        }
 
         binding.dropdownIcon.setOnClickListener {
             showProfileBottomSheet()
@@ -54,13 +59,12 @@ class FragmentMypage : Fragment() {
 
         // 배경 투명 & 그림자 효과
         bottomSheetDialog.window?.apply {
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
             setDimAmount(0.6f)
         }
 
         bottomSheetDialog.show()
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
