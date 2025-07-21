@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.example.commit.ui.Theme.CommitTheme
-import com.example.commit.ui.chat.ChatRoomScreen
+import com.example.commit.ui.chatroom.ChatRoomScreen
 
 class FragmentChatDetail : Fragment() {
 
@@ -19,7 +19,10 @@ class FragmentChatDetail : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 CommitTheme {
-                    ChatRoomScreen(chatName = chatName)
+                    ChatRoomScreen(
+                        commissionTitle = chatName,
+                        onPayClick = { println("결제 클릭") }
+                    )
                 }
             }
         }

@@ -1,4 +1,4 @@
-package com.example.commit.ui.chat
+package com.example.commit.ui.chatlist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,8 +25,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.AlertDialogDefaults.containerColor
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 
 @Composable

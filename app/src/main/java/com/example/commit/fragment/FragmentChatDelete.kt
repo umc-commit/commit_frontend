@@ -1,4 +1,4 @@
-package com.example.commit.ui.chat
+package com.example.commit.ui.chatlist
 
 import android.os.Bundle
 import android.view.LayoutInflater

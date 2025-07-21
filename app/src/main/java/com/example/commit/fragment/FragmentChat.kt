@@ -12,11 +12,10 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.example.commit.R
 import com.example.commit.data.model.entities.ChatItem
-import com.example.commit.databinding.FragmentChatBinding
 import com.example.commit.ui.Theme.CommitTheme
-import com.example.commit.ui.chat.ChatDeleteFragment
-import com.example.commit.ui.chat.ChatListScreen
-import com.example.commit.ui.chat.DeleteOptionBottomSheet
+import com.example.commit.ui.chatlist.ChatDeleteFragment
+import com.example.commit.ui.chatlist.ChatListScreen
+import com.example.commit.ui.chatlist.DeleteOptionBottomSheet
 
 class FragmentChat : Fragment() {
     override fun onCreateView(

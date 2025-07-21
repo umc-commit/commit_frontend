@@ -1,4 +1,4 @@
-package com.example.commit.ui.chat
+package com.example.commit.ui.chatlist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
