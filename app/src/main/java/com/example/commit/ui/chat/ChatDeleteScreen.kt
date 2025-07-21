@@ -19,12 +19,12 @@ import androidx.compose.ui.unit.sp
 import com.example.commit.R
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.ui.Theme.CommitTheme
-import com.example.commit.ui.request.notoSansKR
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
+import com.example.commit.ui.Theme.notoSansKR
 
 @Composable
 fun ChatDeleteScreen(
