@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="250dp"
-    android:background="@drawable/bottomsheet_rounded">
+    android:background="@drawable/bg_bottom_sheet_white">
 
     <!-- 타이틀 -->
     <TextView

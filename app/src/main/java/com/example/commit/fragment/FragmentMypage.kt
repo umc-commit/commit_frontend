@@ -7,11 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import androidx.fragment.app.Fragment
+import com.example.commit.activity.AgreeFirstActivity
 import com.example.commit.databinding.FragmentMypageBinding
-import com.example.commit.databinding.ProfileBottomsheetBinding
 import com.example.commit.ui.point.FragmentPoint
 import com.example.commit.ui.point.FragmentPointHistory
 import com.example.commit.activity.ProfileActivity
+import com.example.commit.activity.MyPageCommissionActivity
+import com.example.commit.databinding.BottomSheetProfileBinding
 
 class FragmentMypage : Fragment() {
 
@@ -19,7 +21,7 @@ class FragmentMypage : Fragment() {
     private val binding get() = _binding!!
 
     private var bottomSheetDialog: BottomSheetDialog? = null
-    private var profileSheetBinding: ProfileBottomsheetBinding? = null
+    private var profileSheetBinding: BottomSheetProfileBinding? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,7 +29,7 @@ class FragmentMypage : Fragment() {
     ): View {
         _binding = FragmentMypageBinding.inflate(inflater, container, false)
 
-        // 1. 프로필 버튼 클릭 시 ProfileActivity로 이동
+        // 프로필 버튼 클릭 시 ProfileActivity로 이동
         binding.profileButton.setOnClickListener {
             val intent = Intent(requireContext(), ProfileActivity::class.java)
             startActivity(intent)
@@ -35,6 +37,17 @@ class FragmentMypage : Fragment() {
 
         binding.dropdownIcon.setOnClickListener {
             showProfileBottomSheet()
+        }
+
+        binding.logoutLayout.setOnClickListener {
+            val intent = Intent(requireContext(), AgreeFirstActivity::class.java)
+            startActivity(intent)
+        }
+
+        // 완료된 커미션 클릭 시 MyPageCommissionActivity로 이동
+        binding.completedCommissionsLayout.setOnClickListener {
+            val intent = Intent(requireContext(), MyPageCommissionActivity::class.java)
+            startActivity(intent)
         }
         binding.chargePointsLayout.setOnClickListener {
             parentFragmentManager.beginTransaction()
@@ -54,7 +67,7 @@ class FragmentMypage : Fragment() {
 
     private fun showProfileBottomSheet() {
         val bottomSheetDialog = BottomSheetDialog(requireContext())
-        val sheetBinding = ProfileBottomsheetBinding.inflate(layoutInflater)
+        val sheetBinding = BottomSheetProfileBinding.inflate(layoutInflater)
         bottomSheetDialog.setContentView(sheetBinding.root)
 
         // 배경 투명 & 그림자 효과
