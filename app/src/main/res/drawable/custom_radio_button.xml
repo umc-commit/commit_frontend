@@ -1,0 +1,7 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 체크된 상태일 때 -->
+    <item android:state_checked="true"
+        android:drawable="@drawable/btn_checkbox_checked" />
+    <!-- 기본 (체크되지 않은) 상태일 때 -->
+    <item android:drawable="@drawable/btn_checkbox"  />
+</selector>

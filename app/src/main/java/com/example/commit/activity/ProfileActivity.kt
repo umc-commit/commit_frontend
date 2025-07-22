@@ -9,15 +9,26 @@ import com.example.commit.R
 import com.example.commit.adapter.PhotoReviewAdapter
 import com.example.commit.databinding.ActivityProfileBinding
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.commit.data.model.entities.FollowingUser
 
 class ProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityProfileBinding
     private var isReviewOn = false // 이미지 상태 저장 변수
 
+    // 실제 앱에서는 이 데이터를 서버나 로컬 DB에서 가져오게 됩니다.
+    private val followingUsersData = listOf(
+        FollowingUser(R.drawable.ic_pf_charac, "키르", 32, true),
+        FollowingUser(R.drawable.ic_pf_charac, "곤", 15, true),
+        FollowingUser(R.drawable.ic_pf_charac, "레오리오", 20, true)
+        // 여기에 더미 데이터를 추가하거나, 실제 데이터를 로드하는 로직으로 대체하세요.
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        updateFollowingCount()
 
         binding.ivBack.setOnClickListener {
             finish()   // 이전 화면으로 돌아가기
@@ -53,5 +64,23 @@ class ProfileActivity : AppCompatActivity() {
             val intent = Intent(this, ProfileEditActivity::class.java)
             startActivity(intent)
         }
+
+        binding.btnFollowing.setOnClickListener {
+            val intent = Intent(this, ProfileFollowingActivity::class.java)
+            startActivity(intent)
+        }
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // ProfileFollowingActivity에서 돌아왔을 때 등, 화면에 다시 나타날 때마다 팔로잉 수 업데이트
+        updateFollowingCount()
+    }
+
+    // 팔로잉 수를 업데이트하는 함수
+    private fun updateFollowingCount() {
+        val count = followingUsersData.size // 데이터 리스트의 실제 개수를 가져옴
+        binding.btnFollowing.text = "팔로잉 $count" // 버튼 텍스트 업데이트
     }
 } 

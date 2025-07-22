@@ -10,6 +10,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.commit.R
 import com.example.commit.activity.AlarmActivity
 import com.example.commit.activity.MainActivity
 import com.example.commit.activity.ProfileActivity
@@ -17,8 +18,10 @@ import com.example.commit.activity.ProfileEditActivity
 import com.example.commit.adapter.AuthorCardAdapter
 import com.example.commit.adapter.HomeCardAdapter
 import com.example.commit.adapter.ReviewCardAdapter
+import com.example.commit.databinding.BottomSheetHomeBinding
 import com.example.commit.databinding.FragmentHomeBinding
 import com.example.commit.ui.post.components.PostHeaderSection
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class FragmentHome : Fragment() {
 
@@ -117,6 +120,40 @@ class FragmentHome : Fragment() {
         }
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // MainActivity로부터 전달받은 인자 확인
+        val showSignupBottomSheet = arguments?.getBoolean("show_signup_bottom_sheet", false) ?: false
+
+        if (showSignupBottomSheet) {
+            showSignupCompleteBottomSheet()
+        }
+    }
+
+    private fun showSignupCompleteBottomSheet() {
+        // BottomSheetDialog 생성 시 TransparentBottomSheetDialog 스타일을 적용합니다.
+        val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.TransparentBottomSheetDialog)
+        val sheetBinding = BottomSheetHomeBinding.inflate(layoutInflater)
+        bottomSheetDialog.setContentView(sheetBinding.root)
+
+        // 바텀 시트가 닫힐 때 하단바를 다시 보이도록 리스너 설정
+        bottomSheetDialog.setOnDismissListener {
+            (activity as? MainActivity)?.showBottomNav(true)
+        }
+
+        // 바텀 시트 윈도우 설정 (투명도 60% 효과)
+        bottomSheetDialog.window?.apply {
+            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+            setDimAmount(0.6f) // 투명도 60% (0.0f는 완전 투명, 1.0f는 완전 불투명)
+        }
+
+        bottomSheetDialog.show()
+
+        // 바텀 시트가 나타날 때 하단바 숨기기
+        (activity as? MainActivity)?.showBottomNav(false)
     }
 
     override fun onDestroyView() {
