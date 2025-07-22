@@ -9,9 +9,9 @@
 - 홈화면: ViewPager2+TabLayout, SearchView, RecyclerView
 - 마이페이지: SharedPreferences, Glide
 
- ## 구현방식 상세
- - 홈화면, 마이페이지, 로그인, 북마크, 알림화면 : XML(ConstraintLayout)+ViewBinding
- - 채팅, 결제, 신청함, 신청서, 후기, 포인트충전: Jetpack Compose
+ ## 화면 구현방식(Compose+XML 혼용)
+ - XML(ConstraintLayout) : 홈화면, 마이페이지, 로그인, 북마크, 알림화면
+ - Jetpack Compose : 채팅, 결제, 신청함, 신청서, 후기, 포인트충전
 
 ## 🧑‍💻 Git 브랜치 전략
 - 기능 단위 브랜치로 분리
