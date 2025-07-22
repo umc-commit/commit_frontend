@@ -2,13 +2,16 @@
 
 ## 🛠 기술 스택
 - 언어: Kotlin
-- UI: Jetpack Compose + XML(ConstrainLayout)
 - 서버 연결: Retrofit
 - 알림: FCM(Firebase Cloud Messaging)
 - 결제: WebView
 - 채팅: Socket.IO client
 - 홈화면: ViewPager2+TabLayout, SearchView, RecyclerView
 - 마이페이지: SharedPreferences, Glide
+
+ ## 구현방식 상세
+ - 홈화면, 마이페이지, 로그인, 북마크, 알림화면 : XML(ConstraintLayout)+ViewBinding
+ - 채팅, 결제, 신청함, 신청서, 후기, 포인트충전: Jetpack Compose
 
 ## 🧑‍💻 Git 브랜치 전략
 - 기능 단위 브랜치로 분리
