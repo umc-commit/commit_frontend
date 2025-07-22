@@ -2,7 +2,7 @@
 
 ## 🛠 기술 스택
 - 언어: Kotlin
-- UI: Jetpack Compose
+- UI: Jetpack Compose + XML(ConstrainLayout)
 - 서버 연결: Retrofit
 - 알림: FCM(Firebase Cloud Messaging)
 - 결제: WebView
