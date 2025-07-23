@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
@@ -43,6 +44,8 @@ fun ChatInputBar(
     onSendMessage: () -> Unit,
     onPlusClick: () -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -51,7 +54,10 @@ fun ChatInputBar(
     ) {
         // + 버튼
         IconButton(
-            onClick = onPlusClick,
+            onClick = {
+                keyboardController?.hide() // 키보드 숨김
+                onPlusClick()
+            },
             modifier = Modifier.size(36.dp)
         ) {
             Icon(
@@ -98,29 +104,6 @@ fun ChatInputBar(
         }
     }
 }
-
-@Composable
-fun ChatBottomSection(
-    message: String,
-    onMessageChange: (String) -> Unit,
-    onSendMessage: () -> Unit,
-    isMenuOpen: Boolean,
-    onToggleMenu: () -> Unit
-) {
-    Column {
-        if (isMenuOpen) {
-            FileOptionMenu() // 앨범/카메라/파일 아이콘 UI
-        }
-
-        ChatInputBar(
-            message = message,
-            onMessageChange = onMessageChange,
-            onSendMessage = onSendMessage,
-            onPlusClick = onToggleMenu
-        )
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable

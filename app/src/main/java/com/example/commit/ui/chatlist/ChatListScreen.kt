@@ -89,7 +89,7 @@ fun ChatListScreenPreview() {
         ChatListScreen(
             chatItems = sampleChats,
             onItemClick = {},
-            onSettingClick = {} // ✅ 필수 파라미터 추가
+            onSettingClick = {} // 필수 파라미터 추가
         )
     }
 }

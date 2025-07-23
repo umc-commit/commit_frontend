@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.example.commit.R
+import com.example.commit.activity.MainActivity
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.ui.Theme.CommitTheme
 import com.example.commit.ui.chatlist.ChatDeleteFragment
@@ -18,6 +19,11 @@ import com.example.commit.ui.chatlist.ChatListScreen
 import com.example.commit.ui.chatlist.DeleteOptionBottomSheet
 
 class FragmentChat : Fragment() {
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.showBottomNav(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

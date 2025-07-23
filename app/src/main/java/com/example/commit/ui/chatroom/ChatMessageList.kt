@@ -13,10 +13,13 @@ import com.example.commit.data.model.MessageType
 
 
 @Composable
-fun ChatMessageList(messages: List<ChatMessage>, onPayClick: () -> Unit) {
+fun ChatMessageList(
+    messages: List<ChatMessage>,
+    onPayClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxHeight(1f)
+        modifier = modifier
             .padding(horizontal = 12.dp)
     ) {
         items(messages) { msg ->
@@ -25,11 +28,10 @@ fun ChatMessageList(messages: List<ChatMessage>, onPayClick: () -> Unit) {
                 MessageType.SYSTEM -> SystemMessage(msg)
                 MessageType.PAYMENT -> PaymentRequestCard(msg.amount ?: 0, onPayClick)
             }
-
-
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewChatMessageList() {
