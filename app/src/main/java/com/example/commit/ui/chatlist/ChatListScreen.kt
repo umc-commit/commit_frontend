@@ -19,7 +19,7 @@ import com.example.commit.ui.Theme.CommitTheme
 fun ChatListScreen(
     chatItems: List<ChatItem>,
     onItemClick: (ChatItem) -> Unit,
-    onSettingClick: () -> Unit // ✅ 수정: 외부로부터 받는 콜백
+    onSettingClick: () -> Unit // 수정: 외부로부터 받는 콜백
 ) {
     var query by remember { mutableStateOf("") }
 

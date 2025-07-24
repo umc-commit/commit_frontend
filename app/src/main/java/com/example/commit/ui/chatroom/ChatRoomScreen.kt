@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.imePadding
 @Composable
 fun ChatRoomScreen(
     commissionTitle: String,
+    authorName: String,
     onPayClick: () -> Unit,
     viewModel: ChatViewModel = viewModel()
 ) {
@@ -26,12 +27,12 @@ fun ChatRoomScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .imePadding() // ✅ 키보드 대응
+            .imePadding() // 키보드 대응
     ) {
         Spacer(modifier = Modifier.height(22.dp))
 
         ChatroomTopBar(
-            authorName = "사과",
+            authorName = authorName,
             averageResponseTime = "평균 30분 이내 응답",
             onBackClick = {},
             onProfileClick = {}
@@ -41,16 +42,16 @@ fun ChatRoomScreen(
 
         CommissionInfoCard(title = commissionTitle)
 
-        // ✅ 메시지 목록만 스크롤 가능
+        // 메시지 목록만 스크롤 가능
         ChatMessageList(
             messages = viewModel.chatMessages,
             onPayClick = onPayClick,
             modifier = Modifier
-                .weight(1f) // 🔥 중요: 메시지 영역만 확장됨
+                .weight(1f) // 중요: 메시지 영역만 확장됨
                 .fillMaxWidth()
         )
 
-        // ✅ 항상 하단 고정 입력창 (파일 메뉴 포함)
+        // 항상 하단 고정 입력창 (파일 메뉴 포함)
         ChatBottomSection(
             message = viewModel.message,
             onMessageChange = viewModel::onMessageChange,

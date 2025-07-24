@@ -28,6 +28,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.ReviewWriteActivity" />
+        <activity android:name=".activity.WrittenReviewsActivity" />
+
     </application>
 
 </manifest>

@@ -20,12 +20,15 @@ class FragmentChatDetail : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val chatName = arguments?.getString("chatName") ?: "채팅방"
+        val authorName = arguments?.getString("authorName") ?: "익명"
+
 
         return ComposeView(requireContext()).apply {
             setContent {
                 CommitTheme {
                     ChatRoomScreen(
                         commissionTitle = chatName,
+                        authorName = authorName,
                         onPayClick = { println("결제 클릭") }
                     )
                 }

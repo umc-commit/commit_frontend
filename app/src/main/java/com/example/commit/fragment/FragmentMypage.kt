@@ -1,5 +1,6 @@
 package com.example.commit.fragment
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -8,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import androidx.fragment.app.Fragment
+import com.example.commit.activity.WrittenReviewsActivity
 import com.example.commit.databinding.FragmentMypageBinding
 import com.example.commit.databinding.ProfileBottomsheetBinding
 
@@ -19,6 +21,7 @@ class FragmentMypage : Fragment() {
     private var bottomSheetDialog: BottomSheetDialog? = null
     private var profileSheetBinding: ProfileBottomsheetBinding? = null
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -28,6 +31,11 @@ class FragmentMypage : Fragment() {
         binding.dropdownIcon.setOnClickListener {
             showProfileBottomSheet()
         }
+        binding.writtenReviewsLayout.setOnClickListener {
+            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
+            startActivity(intent)
+        }
+
 
         return binding.root
     }

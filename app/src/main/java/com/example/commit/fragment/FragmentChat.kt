@@ -38,7 +38,7 @@ class FragmentChat : Fragment() {
                         ChatItem(R.drawable.ic_profile, "브로콜리", "[커미션 완료] 일러스트 타입", "2일 전", false)
                     )
 
-                    // ✅ ChatListScreen에 onSettingClick 인자를 넘김
+                    // ChatListScreen에 onSettingClick 인자를 넘김
                     ChatListScreen(
                         chatItems = chatItems,
                         onItemClick = { clickedItem ->
@@ -54,7 +54,7 @@ class FragmentChat : Fragment() {
                         }
                     )
 
-                    // ✅ 바텀시트 조건부 표시
+                    // 바텀시트 조건부 표시
                     if (showBottomSheet.value) {
                         val activity = requireActivity() as AppCompatActivity
 
