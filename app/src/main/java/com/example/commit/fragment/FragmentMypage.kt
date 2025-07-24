@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import androidx.fragment.app.Fragment
+import com.example.commit.activity.WrittenReviewsActivity
 import com.example.commit.activity.AgreeFirstActivity
 import com.example.commit.databinding.FragmentMypageBinding
 import com.example.commit.ui.point.FragmentPoint
@@ -38,6 +39,11 @@ class FragmentMypage : Fragment() {
         binding.dropdownIcon.setOnClickListener {
             showProfileBottomSheet()
         }
+        binding.writtenReviewsLayout.setOnClickListener {
+            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
+            startActivity(intent)
+        }
+
 
         binding.logoutLayout.setOnClickListener {
             val intent = Intent(requireContext(), AgreeFirstActivity::class.java)
@@ -78,6 +84,7 @@ class FragmentMypage : Fragment() {
 
         bottomSheetDialog.show()
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

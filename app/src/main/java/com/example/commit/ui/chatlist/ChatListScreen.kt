@@ -1,4 +1,4 @@
-package com.example.commit.ui.chat
+package com.example.commit.ui.chatlist
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,7 +19,7 @@ import com.example.commit.ui.Theme.CommitTheme
 fun ChatListScreen(
     chatItems: List<ChatItem>,
     onItemClick: (ChatItem) -> Unit,
-    onSettingClick: () -> Unit // ✅ 수정: 외부로부터 받는 콜백
+    onSettingClick: () -> Unit // 수정: 외부로부터 받는 콜백
 ) {
     var query by remember { mutableStateOf("") }
 
@@ -89,7 +89,7 @@ fun ChatListScreenPreview() {
         ChatListScreen(
             chatItems = sampleChats,
             onItemClick = {},
-            onSettingClick = {} // ✅ 필수 파라미터 추가
+            onSettingClick = {} // 필수 파라미터 추가
         )
     }
 }

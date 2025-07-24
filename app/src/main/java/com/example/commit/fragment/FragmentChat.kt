@@ -11,14 +11,19 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.example.commit.R
+import com.example.commit.activity.MainActivity
 import com.example.commit.data.model.entities.ChatItem
-import com.example.commit.databinding.FragmentChatBinding
 import com.example.commit.ui.Theme.CommitTheme
-import com.example.commit.ui.chat.ChatDeleteFragment
-import com.example.commit.ui.chat.ChatListScreen
-import com.example.commit.ui.chat.DeleteOptionBottomSheet
+import com.example.commit.ui.chatlist.ChatDeleteFragment
+import com.example.commit.ui.chatlist.ChatListScreen
+import com.example.commit.ui.chatlist.DeleteOptionBottomSheet
 
 class FragmentChat : Fragment() {
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.showBottomNav(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -33,7 +38,7 @@ class FragmentChat : Fragment() {
                         ChatItem(R.drawable.ic_profile, "브로콜리", "[커미션 완료] 일러스트 타입", "2일 전", false)
                     )
 
-                    // ✅ ChatListScreen에 onSettingClick 인자를 넘김
+                    // ChatListScreen에 onSettingClick 인자를 넘김
                     ChatListScreen(
                         chatItems = chatItems,
                         onItemClick = { clickedItem ->
@@ -49,7 +54,7 @@ class FragmentChat : Fragment() {
                         }
                     )
 
-                    // ✅ 바텀시트 조건부 표시
+                    // 바텀시트 조건부 표시
                     if (showBottomSheet.value) {
                         val activity = requireActivity() as AppCompatActivity
 

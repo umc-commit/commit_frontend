@@ -1,5 +1,6 @@
 package com.example.commit.ui.request.components
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,19 +12,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.commit.R
+import com.example.commit.activity.ReviewWriteActivity
 import com.example.commit.data.model.Artist
 import com.example.commit.data.model.RequestItem
 import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
 fun RequestDetailItem(item: RequestItem) {
+    val context = LocalContext.current
     val isInProgress = item.status == "IN_PROGRESS" || item.status == "ACCEPTED"
     val statusText = if (isInProgress) "진행 중" else "거래 완료"
     val statusColor = if (isInProgress) Color(0xFF17D5C6) else Color.Black
@@ -122,7 +127,25 @@ fun RequestDetailItem(item: RequestItem) {
                         .padding(horizontal = 4.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(buttonBackground)
-                        .then(if (!disableFirst) Modifier.clickable { /* TODO */ } else Modifier),
+                        .let {
+                            if (!disableFirst) {
+                                it.clickable {
+                                    when (label) {
+                                        "후기작성" -> {
+                                            val intent = Intent(context, ReviewWriteActivity::class.java)
+                                            intent.putExtra("requestId", item.requestId)
+                                            context.startActivity(intent)
+                                        }
+                                        "거래완료" -> {
+                                            // TODO: 거래완료 처리
+                                        }
+                                        "문의하기" -> {
+                                            // TODO: 문의하기 처리
+                                        }
+                                    }
+                                }
+                            } else it
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -133,6 +156,7 @@ fun RequestDetailItem(item: RequestItem) {
                 }
             }
         }
+
     }
 }
 
