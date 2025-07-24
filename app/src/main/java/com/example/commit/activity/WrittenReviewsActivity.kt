@@ -1,6 +1,7 @@
 package com.example.commit.activity
 
 import android.os.Bundle
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +17,11 @@ class WrittenReviewsActivity : AppCompatActivity() {
 
         val recyclerView = findViewById<RecyclerView>(R.id.reviewsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val backButton = findViewById<ImageView>(R.id.btnback)
+        backButton.setOnClickListener {
+            finish()
+        }
 
         // 임시 더미 데이터
         val reviewList = listOf(
