@@ -1,8 +1,8 @@
 package com.example.commit.ui.chatroom
 
 
-import android.R.attr.contentDescription
-import androidx.compose.foundation.layout.Column
+
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,14 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
-import androidx.compose.material3.TextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -33,7 +30,9 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import com.example.commit.R
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,8 +76,12 @@ fun ChatInputBar(
             placeholder = { Text(" ", color = Color(0xFFB0B0B0)) },
             modifier = Modifier
                 .weight(1f)
-                .height(36.dp), // Figma 기준
-            shape = RoundedCornerShape(20.dp), // radius 20
+                .height(36.dp), // ✅ 36 -> 48로 변경
+            shape = RoundedCornerShape(20.dp),
+            textStyle = TextStyle(
+                fontSize = 14.sp,
+                lineHeight = 20.sp// ✅ 가독성 향상
+            ),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 containerColor = Color.White,
                 focusedBorderColor = Color(0xFFB0B0B0),
@@ -86,6 +89,8 @@ fun ChatInputBar(
                 cursorColor = Color(0xFFB0B0B0)
             )
         )
+
+
 
         Spacer(modifier = Modifier.width(8.dp))
 
