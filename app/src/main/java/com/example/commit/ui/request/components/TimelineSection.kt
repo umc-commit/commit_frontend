@@ -9,14 +9,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.commit.R
 import com.example.commit.data.model.TimelineEvent
 import com.example.commit.data.model.TimelineItem
-import com.example.commit.ui.request.notoSansKR
+import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
 fun TimelineSection(events: List<TimelineEvent>) {
@@ -50,16 +48,13 @@ fun TimelineSection(events: List<TimelineEvent>) {
                 Column(modifier = Modifier.padding(top = 2.dp)) {
                     Text(
                         text = event.description,
-                        fontSize = 14.sp,
-                        fontFamily = notoSansKR,
-                        fontWeight = FontWeight.Normal,
+                        style = CommitTypography.bodyMedium,
                         color = Color.Black
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = event.date,
-                        fontSize = 12.sp,
-                        fontFamily = notoSansKR,
+                        style = CommitTypography.labelSmall,
                         color = Color.Gray
                     )
                 }
@@ -84,7 +79,6 @@ fun TimelineItem.toEvent(): TimelineEvent {
         date = this.changedAt
     )
 }
-
 
 @Preview(showBackground = true)
 @Composable

@@ -20,24 +20,16 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cv_profile"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                app:cardCornerRadius="12dp"
+            <ImageView
+                android:id="@+id/iv_profile"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_profile"
                 android:layout_marginStart="1dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent">
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
-                <ImageView
-                    android:id="@+id/iv_profile"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_profile"
-                    android:scaleType="centerCrop" />
-
-            </androidx.cardview.widget.CardView>
 
             <TextView
                 android:id="@+id/tv_nickname"
@@ -48,10 +40,9 @@
                 android:textSize="12sp"
                 android:textColor="@color/black1"
                 android:includeFontPadding="false"
-
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
-                app:layout_constraintStart_toEndOf="@id/cv_profile"
+                app:layout_constraintStart_toEndOf="@id/iv_profile"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
 

@@ -15,23 +15,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.example.commit.R
 import com.example.commit.data.model.*
+import com.example.commit.ui.Theme.CommitTypography
 import com.example.commit.ui.request.components.FilterRow
 import com.example.commit.ui.request.components.RequestCard
+import androidx.compose.ui.unit.sp
 
-val notoSansKR = FontFamily(
-    Font(R.font.notosanskr_regular, FontWeight.Normal),
-    Font(R.font.notosanskr_medium, FontWeight.Medium),
-    Font(R.font.notosanskr_semibold, FontWeight.SemiBold),
-    Font(R.font.notosanskr_bold, FontWeight.Bold)
-)
 
 class FragmentRequest : Fragment() {
     override fun onCreateView(
@@ -83,18 +75,13 @@ class FragmentRequest : Fragment() {
                             arguments = Bundle().apply {
                                 putParcelable("requestItem", item)
 
-                                // mock 데이터 전달
                                 putParcelableArrayList("timeline", arrayListOf(
-                                    TimelineItem(
-                                        status = "IN_PROGRESS",
-                                        label = "작가가 작업을 시작했어요.",
-                                        changedAt = "2025-06-30 20:12"
-                                    ),
-                                    TimelineItem(
-                                        status = "SUBMITTED",
-                                        label = "작가가 작업을 완료했어요.",
-                                        changedAt = "2025-06-30 20:40"
-                                    )
+                                    TimelineItem("COMPLETED", "작업이 완료 되었어요.", "25.05.03 10:57"),
+                                    TimelineItem("CONFIRMED", "작업물을 확인했어요.", "25.05.03 10:44"),
+                                    TimelineItem("DELIVERED", "추가금 4,000P를 결제했어요.", "25.05.01 13:11"),
+                                    TimelineItem("DELIVERED", "작업물이 전달되었어요.", "25.05.01 12:30"),
+                                    TimelineItem("STARTED", "작가가 작업을 시작했어요.", "25.04.25 17:00"),
+                                    TimelineItem("ACCEPTED", "작가가 작업을 수락했어요.", "25.04.25 16:00")
                                 ))
 
                                 putParcelable("paymentInfo", PaymentInfo(
@@ -106,25 +93,10 @@ class FragmentRequest : Fragment() {
                                 ))
 
                                 putParcelableArrayList("formSchema", arrayListOf(
-                                    FormItem(
-                                        type = "radio",
-                                        label = "당일마감 옵션",
-                                        options = listOf(OptionItem("O (+10000P)"))
-                                    ),
-                                    FormItem(
-                                        type = "radio",
-                                        label = "신청 부위",
-                                        options = listOf(OptionItem("전신"))
-                                    ),
-                                    FormItem(
-                                        type = "checkbox",
-                                        label = "프로필 공지사항 확인해주세요 !",
-                                        options = listOf(OptionItem("확인했습니다."))
-                                    ),
-                                    FormItem(
-                                        type = "textarea",
-                                        label = "신청 내용"
-                                    )
+                                    FormItem("radio", "당일마감 옵션", listOf(OptionItem("O (+10000P)"))),
+                                    FormItem("radio", "신청 부위", listOf(OptionItem("전신"))),
+                                    FormItem("checkbox", "프로필 공지사항 확인해주세요 !", listOf(OptionItem("확인했습니다."))),
+                                    FormItem("textarea", "신청 내용")
                                 ))
 
                                 putSerializable("formAnswer", hashMapOf<String, Any>(
@@ -159,6 +131,8 @@ fun RequestScreen(
         "진행 중" -> requests.filter { it.status == "IN_PROGRESS" || it.status == "ACCEPTED" }
         "작업 완료" -> requests.filter { it.status == "DONE" }
         else -> requests
+
+
     }
 
     Column(
@@ -174,12 +148,11 @@ fun RequestScreen(
         ) {
             Text(
                 text = "신청함",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                fontFamily = notoSansKR,
+                style = CommitTypography.headlineSmall.copy(fontSize = 18.sp),
                 color = Color.Black,
                 modifier = Modifier.align(Alignment.Center)
             )
+
         }
 
         Spacer(modifier = Modifier.height(16.dp))

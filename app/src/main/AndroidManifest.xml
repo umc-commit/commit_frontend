@@ -29,7 +29,16 @@
         </activity>
         <activity android:name=".activity.ReviewWriteActivity" />
         <activity android:name=".activity.WrittenReviewsActivity" />
-
+        <activity android:name=".activity.ProfileActivity" />
+        <activity android:name=".activity.ProfileEditActivity" />
+        <activity android:name=".activity.PhotoReviewActivity" />
+        <activity android:name=".activity.MyPageCommissionActivity" />
+        <activity android:name=".activity.ProfileFollowingActivity" />
+        <activity android:name=".activity.AgreeFirstActivity" />
+        <activity android:name=".activity.LoginActivity" />
+        <activity android:name=".activity.LoginRoleActivity" />
+        <activity android:name=".activity.NicknameActivity" />
+        <activity android:name=".activity.OnboardingActivity" />
     </application>
 
 </manifest>

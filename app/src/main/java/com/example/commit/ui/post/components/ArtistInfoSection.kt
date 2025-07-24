@@ -13,11 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.commit.R
+import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
 fun ExpandableItem(
@@ -35,8 +34,7 @@ fun ExpandableItem(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = title,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
+                style = CommitTypography.bodyMedium,
                 color = Color.Black
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -70,7 +68,6 @@ fun ArtistInfoSection(
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
 
-        // 프로필 영역
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
@@ -88,14 +85,13 @@ fun ArtistInfoSection(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = artistName,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = CommitTypography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
                         color = Color.Black
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "팔로워 $followerCount",
-                        fontSize = 11.sp,
+                        style = CommitTypography.labelSmall,
                         color = Color.Gray
                     )
                 }
@@ -103,14 +99,13 @@ fun ArtistInfoSection(
                 Row {
                     Text(
                         text = "총 작업수 ",
-                        fontSize = 11.sp,
+                        style = CommitTypography.labelSmall,
                         color = Color.Gray
                     )
                     Text(
                         text = "${workCount}건",
-                        fontSize = 11.sp,
-                        color = Color(0xFF17D5C6),
-                        fontWeight = FontWeight.Medium
+                        style = CommitTypography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
+                        color = Color(0xFF17D5C6)
                     )
                 }
             }
@@ -121,7 +116,11 @@ fun ArtistInfoSection(
                     .clickable { onFollowClick() }
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
-                Text(text = "팔로우", fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Text(
+                    text = "팔로우",
+                    style = CommitTypography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
+                    color = Color.Black
+                )
             }
         }
 
@@ -138,7 +137,7 @@ fun ArtistInfoSection(
             ) {
                 Text(
                     text = "아직 남겨진 후기가 없어요.",
-                    fontSize = 14.sp,
+                    style = CommitTypography.bodyMedium,
                     color = Color.Gray
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -154,18 +153,16 @@ fun ArtistInfoSection(
                 }
             }
         } else {
-            // 후기 요약 영역
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "작가의 커미션 후기 ",
-                    fontSize = 13.sp,
+                    style = CommitTypography.labelSmall,
                     color = Color.Black
                 )
                 Text(
                     text = "${reviewCount}개",
-                    fontSize = 13.sp,
-                    color = Color(0xFF17D5C6),
-                    fontWeight = FontWeight.Medium
+                    style = CommitTypography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
+                    color = Color(0xFF17D5C6)
                 )
             }
 
@@ -180,7 +177,11 @@ fun ArtistInfoSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = String.format("%.1f", rating), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = String.format("%.1f", rating),
+                        style = CommitTypography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                        color = Color.Black
+                    )
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         repeat(5) {
@@ -202,9 +203,17 @@ fun ArtistInfoSection(
                 )
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "$recommendRate%", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "$recommendRate%",
+                        style = CommitTypography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                        color = Color.Black
+                    )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "추천해요", fontSize = 12.sp, color = Color.DarkGray)
+                    Text(
+                        text = "추천해요",
+                        style = CommitTypography.labelSmall,
+                        color = Color.DarkGray
+                    )
                 }
             }
         }
@@ -227,7 +236,7 @@ fun ArtistInfoSection(
                 ) {
                     Text(
                         text = "아직 남겨진 후기가 없어요.",
-                        fontSize = 14.sp,
+                        style = CommitTypography.bodyMedium,
                         color = Color.Gray
                     )
                     Spacer(modifier = Modifier.height(8.dp))

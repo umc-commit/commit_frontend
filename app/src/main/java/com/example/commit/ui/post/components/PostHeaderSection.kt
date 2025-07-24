@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.commit.R
+import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
 fun PostHeaderSection(
@@ -31,7 +31,6 @@ fun PostHeaderSection(
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // 스크롤 가능한 전체 콘텐츠
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -60,8 +59,7 @@ fun PostHeaderSection(
 
                 Text(
                     text = title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = CommitTypography.headlineSmall,
                     color = Color.Black,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -69,7 +67,7 @@ fun PostHeaderSection(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 썸네일 이미지 영역 (임시 박스)
+            // 썸네일 (임시 박스)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -109,8 +107,7 @@ fun PostHeaderSection(
                 ) {
                     Text(
                         text = title,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = CommitTypography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                         color = Color.Black,
                         modifier = Modifier.weight(1f)
                     )
@@ -150,7 +147,7 @@ fun PostHeaderSection(
                         ) {
                             Text(
                                 text = tag,
-                                fontSize = 12.sp,
+                                style = CommitTypography.labelSmall,
                                 color = if (isCategory) Color(0xFF17D5C6) else Color(0xFFB0B0B0)
                             )
                         }
@@ -161,8 +158,7 @@ fun PostHeaderSection(
 
                 Text(
                     text = String.format("%,dP~", minPrice),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    style = CommitTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = Color.Black
                 )
 
@@ -170,16 +166,17 @@ fun PostHeaderSection(
 
                 Text(
                     text = summary,
-                    fontSize = 14.sp,
+                    style = CommitTypography.bodyMedium,
                     color = Color(0xFF333333)
                 )
             }
+
             Spacer(modifier = Modifier.height(5.dp))
             PostDetailTabSection(onTabSelected = {})
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-        // 하단 고정 바
+
         PostBottomBar(
             isRecruiting = true,
             remainingSlots = 11,
