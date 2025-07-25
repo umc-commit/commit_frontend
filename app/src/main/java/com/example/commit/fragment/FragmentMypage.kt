@@ -14,6 +14,7 @@ import com.example.commit.ui.point.FragmentPoint
 import com.example.commit.ui.point.FragmentPointHistory
 import com.example.commit.activity.ProfileActivity
 import com.example.commit.activity.MyPageCommissionActivity
+import com.example.commit.activity.ReportActivity
 import com.example.commit.databinding.BottomSheetProfileBinding
 
 class FragmentMypage : Fragment() {
@@ -43,7 +44,10 @@ class FragmentMypage : Fragment() {
             val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
             startActivity(intent)
         }
-
+        binding.commissionReportItemLayout.setOnClickListener {
+            val intent = Intent(requireContext(), ReportActivity::class.java)
+            startActivity(intent)
+        }
 
         binding.logoutLayout.setOnClickListener {
             val intent = Intent(requireContext(), AgreeFirstActivity::class.java)

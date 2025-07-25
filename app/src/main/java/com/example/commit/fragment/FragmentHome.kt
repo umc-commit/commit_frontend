@@ -1,21 +1,31 @@
 package com.example.commit.fragment
 
 import android.content.Intent
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.commit.R
 import com.example.commit.activity.AlarmActivity
 import com.example.commit.activity.MainActivity
 import com.example.commit.activity.ProfileActivity
 import com.example.commit.activity.ProfileEditActivity
 import com.example.commit.adapter.AuthorCardAdapter
+import com.example.commit.adapter.FollowingPostAdapter
 import com.example.commit.adapter.HomeCardAdapter
 import com.example.commit.adapter.ReviewCardAdapter
 import com.example.commit.databinding.BottomSheetHomeBinding
@@ -27,14 +37,17 @@ class FragmentHome : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val TAG = "FragmentHome"
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Log.d(TAG, "onCreateView 시작")
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+
+        //전체 거래수 api 연동 시 꼭 지우기
+        setBannerTransactionCount(4257)
 
         binding.ivProfile.setOnClickListener {
             val intent = Intent(requireContext(), ProfileActivity::class.java)
@@ -43,18 +56,15 @@ class FragmentHome : Fragment() {
 
 
         binding.ivAlarm.setOnClickListener {
-            Log.d(TAG, "알람 아이콘 클릭")
             val intent = Intent(requireContext(), AlarmActivity::class.java)
             startActivity(intent)
         }
 
         // 카드 클릭 시 PostHeaderSection 띄우기 + 바텀바 숨기기
         val homeCardClick: (String) -> Unit = { title ->
-            Log.d(TAG, "카드 클릭됨: $title")
 
             val composeView = ComposeView(requireContext()).apply {
                 setContent {
-                    Log.d(TAG, "ComposeView.setContent 실행됨")
                     PostHeaderSection(
                         title = "그림 커미션",
                         tags = listOf("그림", "#LD", "#당일마감"),
@@ -119,6 +129,53 @@ class FragmentHome : Fragment() {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
+        binding.tvFollowing.setOnClickListener {
+            // 팔로우 탭 UI 표시
+            binding.rvFollowingPosts.visibility = View.VISIBLE
+            binding.nestedScrollView.visibility = View.GONE
+
+            // 탭 텍스트 색상 변경
+            binding.tvRecommend.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray2))
+            binding.tvFollowing.setTextColor(ContextCompat.getColor(requireContext(), R.color.black1))
+
+            // indicator 이동
+            binding.indicatorRecommend.visibility = View.GONE
+            binding.indicatorFollowing?.visibility = View.VISIBLE
+
+            // 리스트 어댑터 설정
+            val dummyList = listOf("타임글1", "타임글2", "타임글3", "타입글4", "타입글5")
+            binding.rvFollowingPosts.apply {
+                adapter = FollowingPostAdapter(dummyList) {
+                    // iv_more 클릭 시 바텀시트 띄우는 로직
+                    val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_post_more, null)
+                    val bottomSheetDialog = BottomSheetDialog(requireContext())
+                    bottomSheetDialog.setContentView(bottomSheetView)
+
+                    bottomSheetDialog.window?.apply {
+                        setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+                        setDimAmount(0.6f)
+                    }
+
+                    bottomSheetDialog.show()
+                }
+                layoutManager = LinearLayoutManager(requireContext())
+            }
+        }
+
+        binding.tvRecommend.setOnClickListener {
+            // 추천 콘텐츠 표시
+            binding.nestedScrollView.visibility = View.VISIBLE
+            binding.rvFollowingPosts.visibility = View.GONE
+
+            // 탭 텍스트 색상 변경
+            binding.tvRecommend.setTextColor(ContextCompat.getColor(requireContext(), R.color.black1))
+            binding.tvFollowing.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray2))
+
+            // indicator 변경
+            binding.indicatorRecommend.visibility = View.VISIBLE
+            binding.indicatorFollowing?.visibility = View.GONE
+        }
+
         return binding.root
     }
 
@@ -154,6 +211,20 @@ class FragmentHome : Fragment() {
 
         // 바텀 시트가 나타날 때 하단바 숨기기
         (activity as? MainActivity)?.showBottomNav(false)
+    }
+
+    private fun setBannerTransactionCount(count: Int) {
+        val number = String.format("%,d", count)
+        val color = ContextCompat.getColor(requireContext(), R.color.mint1)
+
+        val builder = SpannableStringBuilder()
+            .append("현재 ")
+            .append(SpannableString(number).apply {
+                setSpan(ForegroundColorSpan(color), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            })
+            .append("건의 거래가 완료됐어요.")
+
+        binding.root.findViewById<TextView>(R.id.tv_banner_text).text = builder
     }
 
     override fun onDestroyView() {

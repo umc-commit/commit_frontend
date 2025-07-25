@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="63dp"
+    android:background="@drawable/bg_bottom_sheet_white">
+
+    <TextView
+        android:id="@+id/tv_toggle_alarm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="알림 끄기"
+        android:textSize="16sp"
+        android:textColor="@color/black1"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:includeFontPadding="false"
+        android:layout_marginTop="41dp"
+        android:layout_marginStart="26dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/tv_report_post"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="게시물 신고"
+        android:textSize="16sp"
+        android:textColor="@color/red1"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:includeFontPadding="false"
+        android:layout_marginTop="33dp"
+        android:layout_marginStart="26dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_toggle_alarm"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
