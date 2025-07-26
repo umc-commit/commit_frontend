@@ -58,11 +58,16 @@ class ReportActivity : AppCompatActivity() {
     }
 
     private fun saveReportImage() {
+        // tv_description만 잠깐 숨겼다가 다시 보이게
+        binding.tvDescription.visibility = android.view.View.INVISIBLE
+
         // 캡처 대상: bg_mint_area ~ tv_save_tip 바로 위까지
         binding.root.post {
             val topY = binding.bgMintArea.top
             val bottomY = binding.tvSaveTip.top
             val bitmap = getBitmapFromPartialView(binding.root, topY, bottomY)
+
+            binding.tvDescription.visibility = android.view.View.VISIBLE
 
             if (bitmap != null) {
                 saveBitmapToGallery(bitmap)
