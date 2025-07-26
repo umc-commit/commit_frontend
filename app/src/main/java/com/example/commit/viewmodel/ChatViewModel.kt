@@ -9,6 +9,8 @@ import com.example.commit.data.model.MessageType
 
 class ChatViewModel : ViewModel() {
 
+    val currentUserId = "me"
+
     var message by mutableStateOf("")
         private set
 
@@ -23,31 +25,28 @@ class ChatViewModel : ViewModel() {
     fun sendMessage() {
         if (message.isBlank()) return
 
-        // 새 메시지를 리스트에 추가
         val newChat = ChatMessage(
             id = System.currentTimeMillis().toString(),
-            senderId = "me",
-            message = message,
+            senderId = currentUserId,
+            content = message,
             timestamp = System.currentTimeMillis(),
             type = MessageType.TEXT,
             amount = null
         )
 
         chatMessages = chatMessages + newChat
-
         println("보낸 메시지: $message")
         message = ""
     }
 
-    // 결제 요청 등 시스템 메시지도 여기에 추가 가능
-    fun sendSystemMessage(text: String) {
-        chatMessages = chatMessages + ChatMessage(
-            id = System.currentTimeMillis().toString(),
-            senderId = "system",
-            message = text,
-            timestamp = System.currentTimeMillis(),
-            type = MessageType.SYSTEM,
-            amount = null
+    init {
+        chatMessages = listOf(
+            ChatMessage("1", "me", "안녕하세요", System.currentTimeMillis(), MessageType.TEXT, null),
+            ChatMessage("2", "artist", "반가워요!", System.currentTimeMillis(), MessageType.TEXT, null),
+            ChatMessage("3", "me", "25.06.02 17:50", System.currentTimeMillis(), MessageType.COMMISSION_REQUEST, null),
+            ChatMessage("4", "artist", "낙서 타임 커미션", System.currentTimeMillis(), MessageType.COMMISSION_ACCEPTED, null),
+            ChatMessage("5", "artist", "", System.currentTimeMillis(), MessageType.PAYMENT, 50000)
         )
     }
+
 }
