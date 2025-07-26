@@ -2,15 +2,15 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="90dp"
+    android:layout_height="wrap_content"
     app:cardCornerRadius="10dp"
     android:background="#E0F7FA">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="#E8FBFA"
-        android:paddingLeft="15dp">
+        android:paddingStart="15dp">
 
         <TextView
             android:id="@+id/tv_banner_title"
@@ -27,11 +27,11 @@
             app:layout_constraintEnd_toStartOf="@id/iv_cat_mascot" />
 
         <TextView
-            android:id="@+id/tv_banner_subtitle1"
+            android:id="@+id/tv_banner_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="현재 "
             android:fontFamily="@font/notosanskr_semibold"
+            android:text="현재 10건의 거래가 완료됐어요."
             android:textSize="10sp"
             android:textColor="@color/black2"
             android:includeFontPadding="false"
@@ -39,31 +39,6 @@
             app:layout_constraintTop_toBottomOf="@id/tv_banner_title"
             android:layout_marginTop="5dp" />
 
-        <TextView
-            android:id="@+id/tv_banner_number"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="4,257"
-            android:fontFamily="@font/notosanskr_semibold"
-            android:textSize="10sp"
-            android:textColor="@color/mint1"
-            android:includeFontPadding="false"
-            app:layout_constraintStart_toEndOf="@id/tv_banner_subtitle1"
-            app:layout_constraintTop_toTopOf="@id/tv_banner_subtitle1"
-            android:layout_marginStart="2dp" />
-
-        <TextView
-            android:id="@+id/tv_banner_subtitle2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="건의 거래가 완료됐어요."
-            android:fontFamily="@font/notosanskr_semibold"
-            android:textSize="10sp"
-            android:textColor="@color/black2"
-            android:includeFontPadding="false"
-            app:layout_constraintStart_toEndOf="@id/tv_banner_number"
-            app:layout_constraintTop_toTopOf="@id/tv_banner_subtitle1"
-            android:layout_marginStart="2dp" />
 
         <ImageView
             android:id="@+id/iv_cat_mascot"
@@ -73,7 +48,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="7dp"/>
+            android:layout_marginBottom="7dp"
+            android:layout_marginTop="7dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

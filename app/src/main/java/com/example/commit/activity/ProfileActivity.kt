@@ -1,14 +1,19 @@
 package com.example.commit.activity
 
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Paint
 import android.os.Bundle
+import android.view.Gravity
+import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.commit.R
 import com.example.commit.adapter.PhotoReviewAdapter
 import com.example.commit.databinding.ActivityProfileBinding
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.commit.adapter.BadgeAdapter
 import com.example.commit.data.model.entities.FollowingUser
 
 class ProfileActivity : AppCompatActivity() {
@@ -70,6 +75,21 @@ class ProfileActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val badgeList = listOf(
+            R.drawable.badge_applicant_1,
+            R.drawable.badge_applicant_5,
+            R.drawable.badge_applicant_15,
+            R.drawable.badge_applicant_50
+        )
+
+        val badgeAdapter = BadgeAdapter(badgeList) { badgeResId ->
+            // 클릭 시 배지 팝업 띄우기
+            showBadgePopup(badgeResId)
+        }
+
+        binding.recyclerBadges.adapter = badgeAdapter
+        binding.recyclerBadges.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
     }
 
     override fun onResume() {
@@ -78,9 +98,54 @@ class ProfileActivity : AppCompatActivity() {
         updateFollowingCount()
     }
 
-    // 팔로잉 수를 업데이트하는 함수
+    // 팔로잉 수를 업데이트하는 함수s
     private fun updateFollowingCount() {
         val count = followingUsersData.size // 데이터 리스트의 실제 개수를 가져옴
         binding.btnFollowing.text = "팔로잉 $count" // 버튼 텍스트 업데이트
     }
+
+    private fun showBadgePopup(badgeResId: Int) {
+        val badgeCount = when (badgeResId) {
+            R.drawable.badge_applicant_50 -> 50
+            R.drawable.badge_applicant_15 -> 15
+            R.drawable.badge_applicant_5 -> 5
+            else -> 1
+        }
+
+        val badgeLevel = when {
+            badgeCount >= 50 -> "다이아"
+            badgeCount >= 15 -> "금"
+            badgeCount >= 5 -> "은"
+            else -> "동"
+        }
+
+        val popupView = layoutInflater.inflate(R.layout.badge_popup, null)
+        val tvBadgeText = popupView.findViewById<TextView>(R.id.tv_badge_popup_text)
+        val tvBadgeDesc = popupView.findViewById<TextView>(R.id.tv_badge_popup_text2)
+        val ivBadgePopup = popupView.findViewById<ImageView>(R.id.iv_badge_popup)
+
+        tvBadgeText.text = "커미션 신청 배지 ($badgeLevel)"
+        tvBadgeDesc.text = "조건 : 커미션 신청 횟수 ${badgeCount}회 달성"
+        ivBadgePopup.setImageResource(badgeResId)
+
+        val dialog = Dialog(this)
+        dialog.setContentView(popupView)
+
+        val displayMetrics = resources.displayMetrics
+        val screenWidth = displayMetrics.widthPixels
+        val marginPx = (92 * displayMetrics.density).toInt()
+        val targetWidth = screenWidth - (marginPx * 2)
+
+        dialog.window?.apply {
+            setBackgroundDrawableResource(android.R.color.transparent) // 둥근 배경 살리기
+            setDimAmount(0.6f) // 배경 어둡게
+            setLayout(
+                targetWidth,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            setGravity(Gravity.CENTER) // 중앙 정렬
+        }
+        dialog.show()
+    }
+
 } 
