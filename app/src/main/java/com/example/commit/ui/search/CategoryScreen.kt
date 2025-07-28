@@ -21,7 +21,10 @@ import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
-fun CategoryScreen(onBackClicked: () -> Unit) {
+fun CategoryScreen(
+    onBackClicked: () -> Unit,
+    onCategoryClick: (String) -> Unit
+) {
     val categories = listOf(
         R.drawable.ic_text to "글",
         R.drawable.ic_drawing to "그림",
@@ -90,6 +93,7 @@ fun CategoryScreen(onBackClicked: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clickable { onCategoryClick(label) }
                         .padding(end = 12.dp)
                 ) {
                     Box(
@@ -122,5 +126,8 @@ fun CategoryScreen(onBackClicked: () -> Unit) {
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
 fun CategoryScreenPreview() {
-    CategoryScreen(onBackClicked = {})
+    CategoryScreen(
+        onBackClicked = {},
+        onCategoryClick = {}
+    )
 }

@@ -31,6 +31,9 @@ class FragmentCategory : Fragment() {
                 CategoryScreen(
                     onBackClicked = {
                         navigateToSearch()
+                    },
+                    onCategoryClick = { category ->
+                        navigateToSearchResult(category)
                     }
                 )
             }
@@ -44,6 +47,12 @@ class FragmentCategory : Fragment() {
             .commit()
     }
 
+    private fun navigateToSearchResult(category: String) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.Nav_Frame, FragmentSearchResult.newInstance(category))
+            .addToBackStack(null)
+            .commit()
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
