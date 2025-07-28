@@ -1,12 +1,17 @@
 package com.example.commit.fragment
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
+import com.example.commit.R
 import com.example.commit.activity.WrittenReviewsActivity
 import com.example.commit.activity.AgreeFirstActivity
 import com.example.commit.databinding.FragmentMypageBinding
@@ -30,6 +35,9 @@ class FragmentMypage : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMypageBinding.inflate(inflater, container, false)
+
+        //닉네임 불러오기
+        updateNicknameFromPrefs()
 
         // 프로필 버튼 클릭 시 ProfileActivity로 이동
         binding.profileButton.setOnClickListener {
@@ -89,6 +97,34 @@ class FragmentMypage : Fragment() {
         bottomSheetDialog.show()
     }
 
+    //닉네임 반영
+    private fun updateNicknameFromPrefs() {
+        val prefs = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+        val nickname = prefs.getString("nickname", "로지")
+        val imageUriString = prefs.getString("imageUri", null)
+        Log.d("ProfileImage", "Loaded URI: $imageUriString")
+        binding.userName.text = nickname
+        binding.userName2.text = nickname
+        if (!imageUriString.isNullOrEmpty()) {
+            val imageUri = Uri.parse(imageUriString)
+            binding.userProfile.post {
+                Glide.with(requireContext())
+                    .load(imageUri)
+                    .placeholder(R.drawable.ic_profile)
+                    .error(R.drawable.ic_profile)
+                    .into(binding.userProfile)
+            }
+        } else {
+            binding.userProfile.setImageResource(R.drawable.ic_profile)
+        }
+
+    }
+
+    //닉네임을 바꾸고 돌아왔을 때 최신 닉네임 반영
+    override fun onResume() {
+        super.onResume()
+        updateNicknameFromPrefs()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -97,4 +133,5 @@ class FragmentMypage : Fragment() {
         bottomSheetDialog = null
         profileSheetBinding = null
     }
+
 }
