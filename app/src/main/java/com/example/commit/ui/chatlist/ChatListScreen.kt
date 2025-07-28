@@ -30,7 +30,7 @@ fun ChatListScreen(
                 .padding(horizontal = 16.dp)
         ) {
             ChatEditTopBar(
-                onSettingClick = onSettingClick // ✅ 여기서 그대로 전달
+                onSettingClick = onSettingClick
             )
 
             ChatSearchBar(
@@ -54,11 +54,18 @@ fun ChatListScreen(
                         ChatListItem(item = item, showNewIndicator = item.isNew)
                     }
                     Divider(color = Color(0xFFE8E8E8), thickness = 1.dp)
+
+
                 }
+
             }
+
         }
+
     }
+
 }
+
 
 @Preview(
     name = "Chat List",

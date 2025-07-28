@@ -39,7 +39,7 @@ fun ChatSearchBar(
         Icon(
             painter = painterResource(id = R.drawable.ic_search_gray),
             contentDescription = "검색 아이콘",
-            modifier = Modifier.size(10.dp),
+            modifier = Modifier.size(12.dp),
             tint = Color.Gray
         )
 

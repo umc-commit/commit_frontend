@@ -4,10 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import com.example.commit.R
 import com.example.commit.activity.MainActivity
 import com.example.commit.ui.Theme.CommitTheme
+import com.example.commit.ui.chatlist.ChatDeleteFragment
+import com.example.commit.ui.chatlist.DeleteOptionBottomSheet
+import com.example.commit.ui.chatroom.ChatOptionDialog
 import com.example.commit.ui.chatroom.ChatRoomScreen
 
 class FragmentChatDetail : Fragment() {
@@ -26,11 +33,28 @@ class FragmentChatDetail : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 CommitTheme {
+                    val showBottomSheet = remember { mutableStateOf(false) }
                     ChatRoomScreen(
                         commissionTitle = chatName,
                         authorName = authorName,
-                        onPayClick = { println("결제 클릭") }
+                        onPayClick = {
+                            // 삭제 로직 구현 (예: DB 삭제 후 popBackStack)
+                            parentFragmentManager.popBackStack()
+                        },
+                        onBackClick = {
+                            parentFragmentManager.popBackStack()
+                        },
+                        onSettingClick = {
+                            showBottomSheet.value = true
+                        }
                     )
+                    if (showBottomSheet.value) {
+                        val activity = requireActivity() as AppCompatActivity
+
+                        ChatOptionDialog(
+                            onDismiss = { showBottomSheet.value = false }
+                        )
+                    }
                 }
             }
         }

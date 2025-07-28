@@ -71,6 +71,8 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.compose.runtime.livedata)
     debugImplementation(libs.compose.ui.tooling)
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.7.7")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.7.7")
 
 
     // 테스트
