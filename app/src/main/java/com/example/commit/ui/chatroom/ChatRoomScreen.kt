@@ -1,4 +1,4 @@
-// ✅ ChatMessageList 연결 완료 버전
+
 package com.example.commit.ui.chatroom
 
 import androidx.compose.foundation.background
@@ -15,12 +15,18 @@ import com.example.commit.ui.Theme.CommitTheme
 import com.example.commit.ui.chatroom.ChatMessageList
 import com.example.commit.viewmodel.ChatViewModel
 import androidx.compose.foundation.layout.imePadding
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.commit.ui.chatroom.ChatroomTopBar
+
 
 @Composable
 fun ChatRoomScreen(
     commissionTitle: String,
     authorName: String,
     onPayClick: () -> Unit,
+    onBackClick: () -> Unit,
+    onSettingClick: () -> Unit,
     viewModel: ChatViewModel = viewModel()
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
@@ -34,10 +40,11 @@ fun ChatRoomScreen(
         Spacer(modifier = Modifier.height(22.dp))
 
         ChatroomTopBar(
-            authorName = authorName,
+            Name = authorName,
             averageResponseTime = "평균 30분 이내 응답",
-            onBackClick = {},
-            onProfileClick = {}
+            onProfileClick = {},
+            onBackClick = onBackClick,
+            onSettingClick = onSettingClick
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -62,6 +69,7 @@ fun ChatRoomScreen(
             isMenuOpen = isMenuOpen,
             onToggleMenu = { isMenuOpen = !isMenuOpen }
         )
+        Spacer(modifier = Modifier.height(69.dp))
     }
 }
 
@@ -76,7 +84,10 @@ fun PreviewChatRoomScreen() {
         ChatMessage("2", "artist", "반가워요!", System.currentTimeMillis(), MessageType.TEXT, null),
         ChatMessage("3", "me", "25.06.02 17:50", System.currentTimeMillis(), MessageType.COMMISSION_REQUEST, null),
         ChatMessage("4", "artist", "낙서 타임 커미션", System.currentTimeMillis(), MessageType.COMMISSION_ACCEPTED, null),
-        ChatMessage("5", "artist", "", System.currentTimeMillis(), MessageType.PAYMENT, 50000)
+        ChatMessage("5", "artist", "", System.currentTimeMillis(), MessageType.PAYMENT, 50000),
+        ChatMessage("6", "me", "", System.currentTimeMillis(), MessageType.PAYMENT_COMPLETE, null),
+        ChatMessage("7", "artist", "", System.currentTimeMillis(), MessageType.COMMISSION_START, null),
+        ChatMessage("8", "artist", "25.06.02 17:50", System.currentTimeMillis(), MessageType.COMMISSION_COMPLETE, null)
     )
 
     CommitTheme {
@@ -89,10 +100,10 @@ fun PreviewChatRoomScreen() {
             Spacer(modifier = Modifier.height(22.dp))
 
             ChatroomTopBar(
-                authorName = "사과",
                 averageResponseTime = "평균 30분 이내 응답",
+                onProfileClick = {},
                 onBackClick = {},
-                onProfileClick = {}
+                onSettingClick = {}
             )
 
             Spacer(modifier = Modifier.height(4.dp))

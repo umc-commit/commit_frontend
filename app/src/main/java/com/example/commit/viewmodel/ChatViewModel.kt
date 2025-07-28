@@ -45,8 +45,12 @@ class ChatViewModel : ViewModel() {
             ChatMessage("2", "artist", "반가워요!", System.currentTimeMillis(), MessageType.TEXT, null),
             ChatMessage("3", "me", "25.06.02 17:50", System.currentTimeMillis(), MessageType.COMMISSION_REQUEST, null),
             ChatMessage("4", "artist", "낙서 타임 커미션", System.currentTimeMillis(), MessageType.COMMISSION_ACCEPTED, null),
-            ChatMessage("5", "artist", "", System.currentTimeMillis(), MessageType.PAYMENT, 50000)
+            ChatMessage("5", "artist", "", System.currentTimeMillis(), MessageType.PAYMENT, 50000),
+            ChatMessage("6", "me", "", System.currentTimeMillis(), MessageType.PAYMENT_COMPLETE, null),
+            ChatMessage("7", "artist", "", System.currentTimeMillis(), MessageType.COMMISSION_START, null),
+            ChatMessage("8", "artist", "25.06.02 17:50", System.currentTimeMillis(), MessageType.COMMISSION_COMPLETE, null)
         )
     }
+
 
 }

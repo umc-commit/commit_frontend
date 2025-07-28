@@ -32,29 +32,36 @@ fun MessageWithTimestamp(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp),
-        horizontalArrangement = if (isMe) Arrangement.End else Arrangement.Start
+            .padding(horizontal = 27.dp),
+        horizontalArrangement = if (isMe) Arrangement.End else Arrangement.Start,
+        verticalAlignment = Alignment.Bottom // 말풍선과 시간 아래 정렬
     ) {
-        Row(
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            modifier = Modifier.wrapContentWidth()
-        ) {
-            if (!isMe) {
-                ChatBubble(message = message, onPayClick = onPayClick)
-                Text(
-                    text = formatTime(message.timestamp),
-                    fontSize = 10.sp,
-                    color = Color.Gray
-                )
-            } else {
-                Text(
-                    text = formatTime(message.timestamp),
-                    fontSize = 10.sp,
-                    color = Color.Gray
-                )
-                ChatBubble(message = message, onPayClick = onPayClick)
-            }
+        if (!isMe) {
+            ChatBubble(
+                message = message,
+                onPayClick = onPayClick,
+                modifier = Modifier.align(Alignment.Bottom)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = formatTime(message.timestamp),
+                fontSize = 10.sp,
+                color = Color.Gray,
+                modifier = Modifier.align(Alignment.Bottom)
+            )
+        } else {
+            Text(
+                text = formatTime(message.timestamp),
+                fontSize = 10.sp,
+                color = Color.Gray,
+                modifier = Modifier.align(Alignment.Bottom)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            ChatBubble(
+                message = message,
+                onPayClick = onPayClick,
+                modifier = Modifier.align(Alignment.Bottom)
+            )
         }
     }
 }
@@ -89,7 +96,7 @@ fun PreviewMessageWithTimestamp() {
             currentUserId = "me",
             onPayClick = {}
         )
-        // 1. 오른쪽 정렬: 내가 보낸 커미션 신청
+
         MessageWithTimestamp(
             message = ChatMessage(
                 id = "msg1",
@@ -103,7 +110,6 @@ fun PreviewMessageWithTimestamp() {
             onPayClick = {}
         )
 
-        // 2. 왼쪽 정렬: 상대가 보낸 커미션 수락
         MessageWithTimestamp(
             message = ChatMessage(
                 id = "msg2",
@@ -130,8 +136,45 @@ fun PreviewMessageWithTimestamp() {
             onPayClick = {}
         )
 
-    }
+        // 추가된 메시지들
+        MessageWithTimestamp(
+            message = ChatMessage(
+                id = "msg6",
+                senderId = "me",
+                content = "",
+                timestamp = System.currentTimeMillis(),
+                type = MessageType.PAYMENT_COMPLETE,
+                amount = null
+            ),
+            currentUserId = "me",
+            onPayClick = {}
+        )
 
+        MessageWithTimestamp(
+            message = ChatMessage(
+                id = "msg7",
+                senderId = "artist",
+                content = "",
+                timestamp = System.currentTimeMillis(),
+                type = MessageType.COMMISSION_START,
+                amount = null
+            ),
+            currentUserId = "me",
+            onPayClick = {}
+        )
+        MessageWithTimestamp(
+            message = ChatMessage(
+                id = "msg8",
+                senderId = "artist",
+                content = "25.06.02 17:50",
+                timestamp = System.currentTimeMillis(),
+                type = MessageType.COMMISSION_COMPLETE,
+                amount = null
+            ),
+            currentUserId = "me",
+            onPayClick = {}
+        )
+    }
 }
 
 

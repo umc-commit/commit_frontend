@@ -10,17 +10,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.commit.data.model.ChatMessage
 import com.example.commit.data.model.MessageType
+import com.example.commit.ui.Theme.notoSansKR
 
 @Composable
-fun TextMessageBubble(message: ChatMessage, currentUserId: String = "me") {
+fun TextMessageBubble(
+    message: ChatMessage,
+    currentUserId: String = "me",
+    modifier: Modifier = Modifier
+) {
     val isMe = message.senderId == currentUserId
-
-    // 1. 공백 제거 후 20자 초과 시 수동 줄바꿈
     val cleanLength = message.content.replace(" ", "").length
     val chunkedText = if (cleanLength > 20) {
         message.content.chunked(20).joinToString("\n")
@@ -28,29 +33,37 @@ fun TextMessageBubble(message: ChatMessage, currentUserId: String = "me") {
         message.content
     }
 
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        horizontalArrangement = if (isMe) Arrangement.End else Arrangement.Start
+    Box(
+        modifier = modifier
+            .clip(
+                RoundedCornerShape(
+                    topStart = if (isMe) 8.dp else 0.dp,
+                    topEnd = if (isMe) 0.dp else 8.dp,
+                    bottomEnd = 8.dp,
+                    bottomStart = 8.dp
+                )
+            )
+            .background(Color.White)
+            .padding(horizontal = 14.dp, vertical = 11.dp)
+            .wrapContentWidth(unbounded = true)
     ) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.White)
-                .padding(horizontal = 14.dp, vertical = 11.dp)
-                .wrapContentWidth() // 너무 길어지지 않도록 제한
-        ) {
-            Text(
-                text = chunkedText,
+        Text(
+            text = chunkedText,
+            style = TextStyle(
+                fontFamily = notoSansKR,
+                fontWeight = FontWeight.Medium,
                 fontSize = 11.sp,
                 lineHeight = 15.sp,
-                color = Color.Black,
-                softWrap = true,         // 자동 줄바꿈 허용
-                maxLines = Int.MAX_VALUE // 줄 수 제한 없음
-            )
-        }
+                letterSpacing = 0.sp
+            ),
+            color = Color.Black
+        )
+
+
     }
 }
+
+
 
 
 @Preview(showBackground = true)

@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.sp
 import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
-fun CommissionRequestBubble(
-    requestedAt: String,
+fun CommissionComplete(
+    completeAt: String,
     onConfirmClick: () -> Unit
 ) {
     Column(
@@ -30,13 +30,13 @@ fun CommissionRequestBubble(
             .width(200.dp)
     ) {
         Text(
-            text = "커미션 신청",
+            text = "커미션 작업 완료",
             style = CommitTypography.headlineSmall.copy(fontSize = 12.sp),
             color = Color.Black
         )
         Spacer(modifier = Modifier.height(9.dp))
         Text(
-            text = "신청 시간 : $requestedAt",
+            text = "완료 시간 : ${completeAt}",
             fontSize = 10.sp,
             color = Color(0xFF4D4D4D)
         )
@@ -60,7 +60,7 @@ fun CommissionRequestBubble(
             border = BorderStroke(0.5.dp, Color(0xFF4D4D4D))
         ) {
             Text(
-                text = "신청서 확인하기",
+                text = "작업물 확인하기",
                 style = CommitTypography.bodyMedium.copy(fontSize = 12.sp,color = Color(0xFF4D4D4D))
             )
         }
@@ -69,9 +69,9 @@ fun CommissionRequestBubble(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewCommissionRequestBubble() {
-    CommissionRequestBubble(
-        requestedAt = "25.06.02 17:50",
-        onConfirmClick = { println("신청서 확인하기 클릭됨") }
+fun PreviewCommissionComplete() {
+    CommissionComplete(
+        completeAt = "25.06.02 17:50",
+        onConfirmClick = { println("작업물 확인하기 클릭됨") }
     )
 }

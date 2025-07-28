@@ -2,15 +2,21 @@ package com.example.commit.ui.chatroom
 
 
 
+import android.R.attr.query
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.getValue
@@ -18,6 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -31,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import com.example.commit.R
 
 
@@ -48,16 +57,15 @@ fun ChatInputBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 28.dp, vertical = 20.dp), // 바깥 여백
+            .padding(horizontal = 28.dp, vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // + 버튼
         IconButton(
             onClick = {
-                keyboardController?.hide() // 키보드 숨김
+                keyboardController?.hide()
                 onPlusClick()
             },
-            modifier = Modifier.size(36.dp)
+            modifier = Modifier.size(36.dp) // 36x36 고정
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_plus),
@@ -68,38 +76,43 @@ fun ChatInputBar(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        // 텍스트 입력 영역
-        OutlinedTextField(
+        BasicTextField(
             value = message,
             onValueChange = onMessageChange,
             singleLine = true,
-            placeholder = { Text(" ", color = Color(0xFFB0B0B0)) },
-            modifier = Modifier
-                .weight(1f)
-                .height(36.dp), // ✅ 36 -> 48로 변경
-            shape = RoundedCornerShape(20.dp),
-            textStyle = TextStyle(
-                fontSize = 14.sp,
-                lineHeight = 20.sp// ✅ 가독성 향상
+            textStyle = LocalTextStyle.current.copy(
+                fontSize = 10.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Medium
             ),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                containerColor = Color.White,
-                focusedBorderColor = Color(0xFFB0B0B0),
-                unfocusedBorderColor = Color(0xFFB0B0B0),
-                cursorColor = Color(0xFFB0B0B0)
-            )
+            modifier = Modifier
+                .size(width = 258.dp, height = 36.dp), // Figma 기준 너비/높이
+            decorationBox = { innerTextField ->
+                Box(
+                    contentAlignment = Alignment.CenterStart,
+                    modifier = Modifier
+                        .background(
+                            color = Color.White,
+                            shape = RoundedCornerShape(20.dp) // Radius 20
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFFB0B0B0),       // 연한 회색 테두리
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .padding(horizontal = 10.dp) // 텍스트 패딩
+                ) {
+                    innerTextField()
+                }
+            }
         )
 
-
-
         Spacer(modifier = Modifier.width(8.dp))
-
-        // 전송 버튼
         IconButton(
             onClick = {
                 if (message.isNotBlank()) onSendMessage()
             },
-            modifier = Modifier.size(36.dp)
+            modifier = Modifier.size(36.dp) // 36x36 고정
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_chatsend),
@@ -108,6 +121,7 @@ fun ChatInputBar(
             )
         }
     }
+
 }
 
 @Preview(showBackground = true)

@@ -44,7 +44,10 @@ class FragmentChat : Fragment() {
                         onItemClick = { clickedItem ->
                             parentFragmentManager.beginTransaction()
                                 .replace(R.id.Nav_Frame, FragmentChatDetail().apply {
-                                    arguments = bundleOf("chatName" to clickedItem.name)
+                                    arguments = bundleOf(
+//                                        "chatName" to clickedItem.message,     //  커미션 제목
+                                        "authorName" to clickedItem.name       //  작가 이름
+                                    )
                                 })
                                 .addToBackStack(null)
                                 .commit()

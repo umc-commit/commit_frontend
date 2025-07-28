@@ -22,10 +22,11 @@ import com.example.commit.ui.Theme.CommitTheme
 
 @Composable
 fun ChatroomTopBar(
-    authorName: String = "사과",
+    Name: String = "사과",
     averageResponseTime: String = "평균 30분 이내 응답",
+    onProfileClick: () -> Unit,
     onBackClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onSettingClick: () -> Unit = {}
 ) {
     Column {
         // 상단 TopBar 영역
@@ -60,7 +61,7 @@ fun ChatroomTopBar(
                     ) {
                         // 작가 이름
                         Text(
-                            text = authorName,
+                            text = Name,
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.padding(end = 6.dp)
                         )
@@ -126,7 +127,7 @@ fun ChatroomTopBar(
                 }
 
                 IconButton(
-                    onClick = { /* TODO: More */ },
+                    onClick = onSettingClick,
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
@@ -147,7 +148,6 @@ fun ChatroomTopBar(
 fun ChatroomTopBarPreview() {
     CommitTheme {
         ChatroomTopBar(
-            authorName = "사과",
             averageResponseTime = "평균 30분 이내 응답",
             onBackClick = {},
             onProfileClick = {}

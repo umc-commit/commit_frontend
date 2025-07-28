@@ -7,8 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.commit.ui.Theme.notoSansKR
 
 @Composable
 fun DateHeader(dateText: String) {
@@ -21,8 +24,13 @@ fun DateHeader(dateText: String) {
     ) {
         Text(
             text = dateText,
-            color = Color(0xFFB0B0B0),
-            fontSize = 12.sp
+            style = TextStyle(
+                fontFamily = notoSansKR,
+                fontWeight = FontWeight.Medium,
+                fontSize = 10.sp,
+                letterSpacing = 0.sp
+            ),
+            color = Color(0xFFB0B0B0)
         )
     }
 }
