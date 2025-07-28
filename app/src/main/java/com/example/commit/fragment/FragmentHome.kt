@@ -10,6 +10,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.commit.R
 import com.example.commit.activity.AlarmActivity
 import com.example.commit.activity.MainActivity
 import com.example.commit.adapter.AuthorCardAdapter
@@ -17,6 +18,7 @@ import com.example.commit.adapter.HomeCardAdapter
 import com.example.commit.adapter.ReviewCardAdapter
 import com.example.commit.databinding.FragmentHomeBinding
 import com.example.commit.ui.post.components.PostHeaderSection
+import com.example.commit.ui.search.FragmentSearch
 
 class FragmentHome : Fragment() {
 
@@ -31,11 +33,20 @@ class FragmentHome : Fragment() {
         Log.d(TAG, "onCreateView 시작")
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
 
-
+        // 알람 아이콘 클릭
         binding.ivAlarm.setOnClickListener {
             Log.d(TAG, "알람 아이콘 클릭")
             val intent = Intent(requireContext(), AlarmActivity::class.java)
             startActivity(intent)
+        }
+
+        // 검색 아이콘 클릭 시 FragmentCategory로 이동
+        binding.ivSearch.setOnClickListener {
+            Log.d(TAG, "검색 아이콘 클릭됨")
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.Nav_Frame, FragmentSearch())
+                .addToBackStack(null)
+                .commit()
         }
 
         // 카드 클릭 시 PostHeaderSection 띄우기 + 바텀바 숨기기
@@ -51,7 +62,6 @@ class FragmentHome : Fragment() {
                         minPrice = 10000,
                         summary = "작업 설명입니다"
                     )
-
                 }
             }
 
@@ -61,7 +71,6 @@ class FragmentHome : Fragment() {
                 addView(composeView)
             }
 
-            // 바텀바 숨기기
             (activity as? MainActivity)?.showBottomNav(false)
         }
 
