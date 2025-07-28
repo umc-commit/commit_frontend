@@ -4,198 +4,170 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="16dp"
+    android:paddingTop="20dp"
     android:paddingBottom="16dp"
     android:background="@android:color/white">
 
-    <!-- 카드 테두리 -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/reviewCard"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        app:cardCornerRadius="4dp"
-        app:cardElevation="0dp"
-        app:cardBackgroundColor="@android:color/white"
+        android:padding="20dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+
+        <!-- 썸네일 -->
+        <ImageView
+            android:id="@+id/ivThumbnail"
+            android:layout_width="80dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            android:layout_marginStart="28dp"
+            android:background="@drawable/bg_thumbnail_rounded"
+            android:contentDescription="@string/thumbnail"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- 작성자 이름 -->
+        <TextView
+            android:id="@+id/tvNickname"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:text="키르"
+            android:textSize="10sp"
+            android:textColor="#222222"
+            android:fontFamily="@font/notosanskr_medium"
+            android:includeFontPadding="false"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toEndOf="@id/ivThumbnail"
+            app:layout_constraintTop_toTopOf="@id/ivThumbnail" />
 
-            <!-- 썸네일 -->
-            <ImageView
-                android:id="@+id/ivThumbnail"
-                android:layout_width="80dp"
-                android:layout_height="60dp"
-                android:scaleType="centerCrop"
-                android:background="@drawable/bg_thumbnail_rounded"
-                android:contentDescription="썸네일"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+        <!-- 커미션 제목 -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="낙서 타입 커미션"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#222222"
+            android:fontFamily="@font/notosanskr_medium"
+            android:includeFontPadding="false"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintTop_toBottomOf="@id/tvNickname"
+            app:layout_constraintStart_toEndOf="@id/ivThumbnail"
+            app:layout_constraintEnd_toStartOf="@id/tvDate"
+            app:layout_constraintHorizontal_bias="0" />
 
-            <!-- 작성자 이름 -->
-            <TextView
-                android:id="@+id/tvNickname"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="키르"
-                android:textSize="10sp"
-                android:textColor="#222222"
-                android:fontFamily="@font/notosanskr_medium"
-                android:includeFontPadding="false"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintStart_toEndOf="@id/ivThumbnail"
-                app:layout_constraintTop_toTopOf="@id/ivThumbnail" />
+        <!-- 작업기간 -->
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="작업기간 : 23시간"
+            android:textSize="10sp"
+            android:textColor="#666666"
+            android:fontFamily="@font/notosanskr_regular"
+            android:includeFontPadding="false"
+            android:layout_marginEnd="28dp"
+            app:layout_constraintTop_toTopOf="@id/ivThumbnail"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- 커미션 제목 -->
-            <TextView
-                android:id="@+id/tvTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="낙서 타입 커미션"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="#222222"
-                android:fontFamily="@font/notosanskr_medium"
-                android:includeFontPadding="false"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintTop_toBottomOf="@id/tvNickname"
-                app:layout_constraintStart_toEndOf="@id/ivThumbnail"
-                app:layout_constraintEnd_toStartOf="@id/tvDate"
-                app:layout_constraintHorizontal_bias="0" />
+        <!-- 별점 -->
+        <LinearLayout
+            android:id="@+id/starContainer"
+            android:layout_width="63dp"
+            android:layout_height="10dp"
+            android:orientation="horizontal"
+            android:layout_marginTop="25dp"
+            android:layout_marginStart="4dp"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            app:layout_constraintStart_toStartOf="@id/ivThumbnail">
 
+            <ImageView android:layout_width="10dp" android:layout_height="10dp" android:layout_marginEnd="2dp" android:src="@drawable/ic_star_off" android:scaleType="fitXY"/>
+            <ImageView android:layout_width="10dp" android:layout_height="10dp" android:layout_marginEnd="2dp" android:src="@drawable/ic_star_off" android:scaleType="fitXY"/>
+            <ImageView android:layout_width="10dp" android:layout_height="10dp" android:layout_marginEnd="2dp" android:src="@drawable/ic_star_off" android:scaleType="fitXY"/>
+            <ImageView android:layout_width="10dp" android:layout_height="10dp" android:layout_marginEnd="2dp" android:src="@drawable/ic_star_off" android:scaleType="fitXY"/>
+            <ImageView android:layout_width="10dp" android:layout_height="10dp" android:src="@drawable/ic_star_off" android:scaleType="fitXY"/>
+        </LinearLayout>
 
-            <!-- 작업기간 -->
-            <TextView
-                android:id="@+id/tvDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="작업기간 : 23시간"
-                android:textSize="8sp"
-                android:textColor="#999999"
-                android:fontFamily="@font/notosanskr_regular"
-                android:includeFontPadding="false"
-                app:layout_constraintTop_toTopOf="@id/ivThumbnail"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginEnd="8dp" />
+        <!-- 후기 내용 -->
+        <TextView
+            android:id="@+id/tvContent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/notosanskr_regular"
+            android:includeFontPadding="false"
+            android:text="요청사항도 잘 들어주시고 마감도 빠르게 해주셨어요! 감사합니다."
+            android:textColor="#222222"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@id/starContainer"
+            app:layout_constraintTop_toBottomOf="@id/starContainer"
+            app:layout_constraintEnd_toStartOf="@id/ivMiniThumbnail" />
 
+        <!-- 미니 썸네일 -->
+        <ImageView
+            android:id="@+id/ivMiniThumbnail"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/bg_thumbnail_rounded"
+            android:contentDescription="@string/mini_thumbnail"
+            app:layout_constraintTop_toTopOf="@id/tvContent"
+            app:layout_constraintBottom_toBottomOf="@id/tvContent"
+            app:layout_constraintStart_toEndOf="@id/tvContent"
+            app:layout_constraintEnd_toEndOf="@id/btnDelete" />
 
-            <!-- 별점 -->
-            <LinearLayout
-                android:id="@+id/starContainer"
-                android:layout_width="63dp"
-                android:layout_height="10dp"
-                android:orientation="horizontal"
-                android:layout_marginTop="25dp"
-                android:layout_marginStart="4dp"
-                app:layout_constraintTop_toBottomOf="@id/tvTitle"
-                app:layout_constraintStart_toStartOf="@id/ivThumbnail">
+        <!-- 수정 버튼 -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnEdit"
+            android:layout_width="48dp"
+            android:layout_height="22dp"
+            android:text="@string/edit"
+            android:textSize="10sp"
+            android:textColor="#222222"
+            android:background="@drawable/bg_button_outline_gray"
+            android:fontFamily="@font/notosanskr_medium"
+            android:includeFontPadding="false"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/tvContent"
+            app:layout_constraintEnd_toStartOf="@id/btnDelete"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="10dp" />
 
-                <ImageView
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:layout_marginEnd="2dp"
-                    android:src="@drawable/ic_star_off"
-                    android:scaleType="fitXY" />
+        <!-- 삭제 버튼 -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnDelete"
+            android:layout_width="48dp"
+            android:layout_height="22dp"
+            android:text="@string/delete"
+            android:textSize="10sp"
+            android:textColor="#222222"
+            android:background="@drawable/bg_button_outline_gray"
+            android:fontFamily="@font/notosanskr_medium"
+            android:includeFontPadding="false"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/tvContent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="28dp" />
 
-                <ImageView
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:layout_marginEnd="2dp"
-                    android:src="@drawable/ic_star_off"
-                    android:scaleType="fitXY" />
+        <!-- 구분선 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:background="#EBEBEB"
+            app:layout_constraintTop_toBottomOf="@id/btnDelete"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-                <ImageView
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:layout_marginEnd="2dp"
-                    android:src="@drawable/ic_star_off"
-                    android:scaleType="fitXY" />
-
-                <ImageView
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:layout_marginEnd="2dp"
-                    android:src="@drawable/ic_star_off"
-                    android:scaleType="fitXY" />
-
-                <ImageView
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:src="@drawable/ic_star_off"
-                    android:scaleType="fitXY" />
-            </LinearLayout>
-
-            <!-- 후기 내용 -->
-            <TextView
-                android:id="@+id/tvContent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:fontFamily="@font/notosanskr_regular"
-                android:includeFontPadding="false"
-                android:text="요청사항도 잘 들어주시고 마감도 빠르게 해주셨어요! 감사합니다."
-                android:textColor="#222222"
-                android:textSize="10sp"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="@id/starContainer"
-                app:layout_constraintTop_toBottomOf="@id/starContainer" />
-
-            <!-- 미니 썸네일 -->
-            <ImageView
-                android:id="@+id/ivMiniThumbnail"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:scaleType="centerCrop"
-                android:background="@drawable/bg_thumbnail_rounded"
-                android:contentDescription="미니썸네일"
-                app:layout_constraintTop_toTopOf="@id/tvContent"
-                app:layout_constraintBottom_toBottomOf="@id/tvContent"
-                app:layout_constraintStart_toEndOf="@id/tvContent"
-                android:layout_marginStart="32dp" />
-
-            <!-- 수정 버튼 -->
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnEdit"
-                android:layout_width="48dp"
-                android:layout_height="22dp"
-                android:text="수정"
-                android:textSize="10sp"
-                android:textColor="#222222"
-                android:background="@drawable/bg_button_outline_gray"
-                android:fontFamily="@font/notosanskr_regular"
-                android:includeFontPadding="false"
-                android:gravity="center"
-                app:layout_constraintTop_toBottomOf="@id/tvContent"
-                app:layout_constraintEnd_toStartOf="@id/btnDelete"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="10dp" />
-
-            <!-- 삭제 버튼 -->
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnDelete"
-                android:layout_width="48dp"
-                android:layout_height="22dp"
-                android:text="삭제"
-                android:textSize="10sp"
-                android:textColor="#222222"
-                android:background="@drawable/bg_button_outline_gray"
-                android:fontFamily="@font/notosanskr_regular"
-                android:includeFontPadding="false"
-                android:gravity="center"
-                app:layout_constraintTop_toBottomOf="@id/tvContent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="24dp" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
