@@ -134,8 +134,10 @@ fun ReviewItem(review: Review,
                     ),
                     border = ButtonDefaults.outlinedButtonBorder.copy(
                         brush = SolidColor(Color(0xFFB0B0B0))
-                    )
-                ) {
+                    ),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+                )
+                {
                     Text(
                         text = "수정",
                         fontSize = 10.sp,
@@ -155,7 +157,8 @@ fun ReviewItem(review: Review,
                     ),
                     border = ButtonDefaults.outlinedButtonBorder.copy(
                         brush = SolidColor(Color(0xFFB0B0B0))
-                    )
+                    ),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
                 ) {
                     Text(
                         text = "삭제",
