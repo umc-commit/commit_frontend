@@ -56,6 +56,7 @@ class FragmentSearch : Fragment() {
             .addToBackStack(null)
             .commit()
     }
+
     private fun navigateToCategory() {
         parentFragmentManager.beginTransaction()
             .replace(R.id.Nav_Frame, FragmentCategory())

@@ -24,6 +24,7 @@ import com.example.commit.ui.search.components.FilterButtonRow
 import com.example.commit.ui.search.components.FilterBottomSheet
 import com.example.commit.ui.search.components.SearchInputBar
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,13 +93,15 @@ fun SearchResultScreen(
                             Text(
                                 text = "11건",
                                 color = Color(0xFF17D5C6),
-                                fontSize = 14.sp
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.width(2.dp))
                             Text(
                                 text = "의 커미션이 검색되었어요.",
                                 color = Color(0xFF2B2B2B),
-                                fontSize = 14.sp
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
 

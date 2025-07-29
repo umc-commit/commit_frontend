@@ -22,6 +22,7 @@ import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
 fun CategoryRow(
+    onCategoryClick: (String) -> Unit = {},
     onTotalClick: () -> Unit = {}
 ) {
     val scrollableCategories = listOf(
@@ -52,11 +53,15 @@ fun CategoryRow(
                     .padding(start = 44.dp, end = 48.dp)
             ) {
                 items(scrollableCategories) { (iconRes, label) ->
-                    CategoryItem(iconRes = iconRes, label = label)
+                    CategoryItem(
+                        iconRes = iconRes,
+                        label = label,
+                        onClick = { onCategoryClick(label) }
+                    )
                 }
             }
 
-            // 고정된 "전체" 카테고리 (클릭 시 이동)
+            // 고정된 "전체" 카테고리
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -87,7 +92,7 @@ fun CategoryRow(
             }
         }
 
-        // 흰색 오버레이 박스
+        // 오른쪽 오버레이
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -99,8 +104,15 @@ fun CategoryRow(
 }
 
 @Composable
-private fun CategoryItem(label: String, iconRes: Int) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+private fun CategoryItem(
+    label: String,
+    iconRes: Int,
+    onClick: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier.clickable { onClick() },
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Box(
             modifier = Modifier
                 .size(48.dp)
@@ -127,5 +139,8 @@ private fun CategoryItem(label: String, iconRes: Int) {
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
 fun CategoryRowPreview() {
-    CategoryRow()
+    CategoryRow(
+        onCategoryClick = { label -> println("카테고리 선택됨: $label") },
+        onTotalClick = { println("전체 클릭됨") }
+    )
 }

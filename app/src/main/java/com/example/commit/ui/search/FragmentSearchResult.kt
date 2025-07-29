@@ -5,9 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.example.commit.ui.request.components.Commission
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+
 
 class FragmentSearchResult : Fragment() {
 
@@ -37,34 +42,36 @@ class FragmentSearchResult : Fragment() {
             )
 
             setContent {
-                var selectedFilters by remember { mutableStateOf(setOf(keyword)) }
-                var showFollowOnly by remember { mutableStateOf(false) }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    var selectedFilters by rememberSaveable { mutableStateOf(setOf(keyword)) }
+                    var showFollowOnly by rememberSaveable { mutableStateOf(false) }
 
-                val dummyCommissions = List(10) {
-                    Commission(
-                        nickname = "작가$it",
-                        title = "테스트 커미션 $it",
-                        tags = listOf("그림", "#예시", "#귀여움")
+                    val dummyCommissions = List(10) {
+                        Commission(
+                            nickname = "작가$it",
+                            title = "테스트 커미션 $it",
+                            tags = listOf("그림", "#예시", "#귀여움")
+                        )
+                    }
+
+                    SearchResultScreen(
+                        keyword = keyword,
+                        commissions = dummyCommissions,
+                        selectedFilters = selectedFilters,
+                        showFollowOnly = showFollowOnly,
+                        onFilterClick = { label ->
+                            selectedFilters = if (selectedFilters.contains(label)) {
+                                selectedFilters - label
+                            } else {
+                                selectedFilters + label
+                            }
+                        },
+                        onFollowToggle = { showFollowOnly = it },
+                        onBackClick = { requireActivity().onBackPressedDispatcher.onBackPressed() },
+                        onClearClick = {},
+                        onHomeClick = {}
                     )
                 }
-
-                SearchResultScreen(
-                    keyword = keyword,
-                    commissions = dummyCommissions,
-                    selectedFilters = selectedFilters,
-                    showFollowOnly = showFollowOnly,
-                    onFilterClick = { label ->
-                        selectedFilters = if (selectedFilters.contains(label)) {
-                            selectedFilters - label
-                        } else {
-                            selectedFilters + label
-                        }
-                    },
-                    onFollowToggle = { showFollowOnly = it },
-                    onBackClick = { requireActivity().onBackPressedDispatcher.onBackPressed() },
-                    onClearClick = {},
-                    onHomeClick = {}
-                )
             }
         }
     }
