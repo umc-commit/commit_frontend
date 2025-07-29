@@ -309,7 +309,7 @@
         android:layout_marginStart="28dp"
         android:layout_marginEnd="28dp"
         android:layout_marginBottom="56dp"
-        android:text="작성완료"
+        android:text="수정완료"
         android:enabled="false"
         android:background="@drawable/login_button_gray"
         android:textColor="@color/white"
