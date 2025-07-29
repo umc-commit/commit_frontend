@@ -44,6 +44,8 @@
         <activity android:name=".activity.NicknameActivity" android:exported="false"/>
         <activity android:name=".activity.OnboardingActivity" android:exported="false"/>
         <activity android:name=".activity.ReportActivity" android:exported="false"/>
+        <activity android:name=".activity.ReviewEditActivity" android:exported="false"/>
+
     </application>
 
 </manifest>

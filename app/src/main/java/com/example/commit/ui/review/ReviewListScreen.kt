@@ -1,5 +1,6 @@
 package com.example.commit.ui.review
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,8 +16,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.commit.R
+import com.example.commit.activity.ReviewEditActivity
 import com.example.commit.data.model.entities.Review
 import com.example.commit.ui.review.ReviewItem
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun ReviewListScreen(
@@ -27,6 +30,7 @@ fun ReviewListScreen(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var selectedReview by remember { mutableStateOf<Review?>(null) }
+    val context = LocalContext.current
 
     Column(modifier = Modifier.fillMaxSize()
         .background(Color.White)) {
@@ -40,7 +44,9 @@ fun ReviewListScreen(
             items(reviews) { review ->
                 ReviewItem(
                     review = review,
-                    onEditClick = { onEditClick(review) },
+                    onEditClick = { val intent = Intent(context, ReviewEditActivity::class.java)
+                        intent.putExtra("reviewId", review.id) // review 데이터가 있다면 넘기기
+                        context.startActivity(intent) },
                     onDeleteClick = {
                         selectedReview = review
                         showDialog = true

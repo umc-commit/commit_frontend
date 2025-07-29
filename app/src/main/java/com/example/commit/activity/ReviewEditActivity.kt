@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.commit.R
 import android.Manifest
 
-class ReviewWriteActivity : AppCompatActivity() {
+class ReviewEditActivity : AppCompatActivity() {
 
     private var currentRating = 0
     private lateinit var imageSlot: ImageView
@@ -29,7 +29,7 @@ class ReviewWriteActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_review_write)
+        setContentView(R.layout.activity_review_edit)
 
         val btnClose = findViewById<ImageView>(R.id.btnClose)
         btnClose.setOnClickListener { finish() }
@@ -108,7 +108,7 @@ class ReviewWriteActivity : AppCompatActivity() {
             }
 
             // TODO: 서버 전송
-            Toast.makeText(this, "리뷰가 등록되었습니다. (ID: $requestId)", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "리뷰가 수정되었습니다. (ID: $requestId)", Toast.LENGTH_SHORT).show()
             finish()
         }
 
