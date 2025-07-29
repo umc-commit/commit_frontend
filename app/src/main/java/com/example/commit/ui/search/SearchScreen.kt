@@ -15,7 +15,8 @@ import com.example.commit.ui.request.components.Commission
 @Composable
 fun SearchScreen(
     onBackClick: () -> Unit = {},
-    onTotalClick: () -> Unit = {} // ✅ 전체 클릭 시 전달받는 람다
+    onTotalClick: () -> Unit = {},
+    onCategoryClick: (String) -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedKeyword by remember { mutableStateOf("") }
@@ -62,8 +63,11 @@ fun SearchScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             CategoryRow(
-                onCategoryClick = { label -> selectedKeyword = label }, // ✅ 개별 아이콘 클릭 시
-                onTotalClick = onTotalClick // ✅ 전체 아이콘 클릭 시 → 외부로 위임
+                onCategoryClick = { label ->
+                    selectedKeyword = label
+                    onCategoryClick(label)
+                },
+                onTotalClick = onTotalClick
             )
 
             Spacer(modifier = Modifier.height(24.dp))

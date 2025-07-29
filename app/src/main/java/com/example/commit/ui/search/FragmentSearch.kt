@@ -31,7 +31,8 @@ class FragmentSearch : Fragment() {
             setContent {
                 SearchScreen(
                     onBackClick = { navigateToHome() },
-                    onTotalClick = { navigateToCategory() }
+                    onTotalClick = { navigateToCategory() },
+                    onCategoryClick = { category -> navigateToSearchResult(category) }
                 )
             }
         }
@@ -59,7 +60,14 @@ class FragmentSearch : Fragment() {
 
     private fun navigateToCategory() {
         parentFragmentManager.beginTransaction()
-            .replace(R.id.Nav_Frame, FragmentCategory())
+            .replace(R.id.Nav_Frame, FragmentCategory.newInstance(true)) // 👈 hideBottomBar 인자 전달
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun navigateToSearchResult(category: String) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.Nav_Frame, FragmentSearchResult.newInstance(category))
             .addToBackStack(null)
             .commit()
     }
