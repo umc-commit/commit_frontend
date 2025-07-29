@@ -7,11 +7,13 @@ import android.view.ViewGroup
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import com.example.commit.ui.request.components.Commission
 
 class FragmentSearchResult : Fragment() {
 
     companion object {
         private const val ARG_KEYWORD = "keyword"
+
         fun newInstance(keyword: String): FragmentSearchResult {
             return FragmentSearchResult().apply {
                 arguments = Bundle().apply {
@@ -29,12 +31,26 @@ class FragmentSearchResult : Fragment() {
         val keyword = arguments?.getString(ARG_KEYWORD) ?: ""
 
         return ComposeView(requireContext()).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+
             setContent {
-                var selectedFilters by remember { mutableStateOf(setOf(keyword)) }  // keyword 선택된 상태로 진입
+                var selectedFilters by remember { mutableStateOf(setOf(keyword)) }
                 var showFollowOnly by remember { mutableStateOf(false) }
+
+                val dummyCommissions = List(10) {
+                    Commission(
+                        nickname = "작가$it",
+                        title = "테스트 커미션 $it",
+                        tags = listOf("그림", "#예시", "#귀여움")
+                    )
+                }
 
                 SearchResultScreen(
                     keyword = keyword,
+                    commissions = dummyCommissions,
                     selectedFilters = selectedFilters,
                     showFollowOnly = showFollowOnly,
                     onFilterClick = { label ->
@@ -44,10 +60,12 @@ class FragmentSearchResult : Fragment() {
                             selectedFilters + label
                         }
                     },
-                    onFollowToggle = { showFollowOnly = it }
+                    onFollowToggle = { showFollowOnly = it },
+                    onBackClick = { requireActivity().onBackPressedDispatcher.onBackPressed() },
+                    onClearClick = {},
+                    onHomeClick = {}
                 )
             }
-
         }
     }
 }

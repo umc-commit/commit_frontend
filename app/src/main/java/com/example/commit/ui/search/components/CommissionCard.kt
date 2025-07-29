@@ -22,25 +22,26 @@ import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTypography
 import com.example.commit.ui.search.components.Tag
 
+data class Commission(
+    val nickname: String,
+    val title: String,
+    val tags: List<String>
+)
+
 @Composable
-fun CommissionCard() {
+fun CommissionCard(commission: Commission) {
     Card(
         modifier = Modifier
             .width(160.dp)
-            .height(162.dp)
-            .padding(end = 11.dp, bottom = 2.dp),
+            .height(162.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-
             // 프로필 + 닉네임
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(start = 8.dp, top = 8.dp)
+                modifier = Modifier.padding(start = 8.dp, top = 8.dp)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_profile),
@@ -49,11 +50,9 @@ fun CommissionCard() {
                         .size(16.dp)
                         .clip(CircleShape)
                 )
-
                 Spacer(modifier = Modifier.width(4.dp))
-
                 Text(
-                    text = "키르",
+                    text = commission.nickname,
                     style = CommitTypography.bodyMedium,
                     color = Color(0xFF2B2B2B)
                 )
@@ -61,7 +60,7 @@ fun CommissionCard() {
 
             Spacer(modifier = Modifier.height(6.dp))
 
-
+            // 이미지 더미
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -73,7 +72,7 @@ fun CommissionCard() {
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // 제목 + 북마크 오른쪽
+            // 제목 + 북마크
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -81,7 +80,7 @@ fun CommissionCard() {
                     .fillMaxWidth()
             ) {
                 Text(
-                    text = "낙서 타임 커미션",
+                    text = commission.title,
                     style = CommitTypography.bodyMedium,
                     color = Color(0xFF2B2B2B),
                     maxLines = 1,
@@ -98,14 +97,13 @@ fun CommissionCard() {
 
             Spacer(modifier = Modifier.height(4.dp))
 
-
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.padding(start = 8.dp)
             ) {
-                Tag(text = "그림", isSelected = true, fontSize = 8.sp)
-                Tag(text = "#LD", fontSize = 8.sp)
-                Tag(text = "#커플", fontSize = 8.sp)
+                commission.tags.forEachIndexed { index, tag ->
+                    Tag(text = tag, isSelected = index == 0, fontSize = 8.sp)
+                }
             }
         }
     }
@@ -114,5 +112,11 @@ fun CommissionCard() {
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
 fun CommissionCardPreview() {
-    CommissionCard()
+    CommissionCard(
+        Commission(
+            nickname = "키르",
+            title = "낙서 타임 커미션",
+            tags = listOf("그림", "#LD", "#커플")
+        )
+    )
 }
