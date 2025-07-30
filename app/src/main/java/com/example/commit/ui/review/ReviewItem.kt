@@ -169,7 +169,6 @@ fun ReviewItem(review: Review,
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
         }
 
     }
