@@ -45,15 +45,13 @@ class ProfileActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK) {
                 val nickname = result.data?.getStringExtra("nickname")
                 val imageUriString = result.data?.getStringExtra("imageUri")
+                val intro = result.data?.getStringExtra("intro")
                 val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
 
                 prefs.edit().apply {
-                    if (!nickname.isNullOrEmpty()) {
-                        putString("nickname", nickname)
-                    }
-                    if (!imageUriString.isNullOrEmpty()) {
-                        putString("imageUri", imageUriString)
-                    }
+                    if (!nickname.isNullOrEmpty()) putString("nickname", nickname)
+                    if (!imageUriString.isNullOrEmpty()) putString("imageUri", imageUriString)
+                    if (!intro.isNullOrEmpty()) putString("intro", intro)
                     apply()
                 }
 
@@ -107,8 +105,10 @@ class ProfileActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
         val nickname = prefs.getString("nickname", "로지")
         val imageUriString = prefs.getString("imageUri", null)
+        val intro = prefs.getString("intro", "입력된 소개가 없습니다.")
 
         binding.tvUsername.text = nickname
+        binding.tvIntroContent.text = intro
 
         if (!imageUriString.isNullOrEmpty()) {
             val uri = Uri.parse(imageUriString)

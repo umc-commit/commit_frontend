@@ -43,7 +43,7 @@ class NicknameActivity : AppCompatActivity() {
         // '다음' 버튼 클릭 리스너 설정
         binding.nextButton.setOnClickListener {
             if (binding.nextButton.isEnabled) {
-                val nickname = binding.inputNickname.text.toString()
+                //val nickname = binding.inputNickname.text.toString()
                 val intent = Intent(this, MainActivity::class.java)
                 intent.putExtra("start_fragment", R.id.nav_home)
                 intent.putExtra("show_signup_bottom_sheet", true)

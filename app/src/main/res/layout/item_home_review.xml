@@ -54,15 +54,18 @@
             android:layout_marginStart="11dp"/>
 
         <!-- 리뷰 이미지 -->
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/iv_review"
             android:layout_width="65dp"
             android:layout_height="65dp"
-            android:background="@drawable/image_placeholder"
+            android:scaleType="centerCrop"
+            android:src="@drawable/image_placeholder"
+            android:clipToOutline="true"
+            app:shapeAppearanceOverlay="@style/ImageRoundedCorner"
             app:layout_constraintTop_toBottomOf="@id/iv_star"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="9dp"
-            android:layout_marginStart="18dp"/>
+            android:layout_marginStart="18dp" />
 
         <!-- 리뷰 내용 -->
         <TextView

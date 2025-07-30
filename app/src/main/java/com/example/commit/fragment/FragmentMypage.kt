@@ -94,6 +94,24 @@ class FragmentMypage : Fragment() {
             setDimAmount(0.6f)
         }
 
+        // MyPage의 닉네임, 이미지와 동일하게 설정
+        val prefs = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+        val nickname = prefs.getString("nickname", "로지")
+        val imageUriString = prefs.getString("imageUri", null)
+
+        sheetBinding.profileName.text = nickname
+
+        if (!imageUriString.isNullOrEmpty()) {
+            val imageUri = Uri.parse(imageUriString)
+            Glide.with(requireContext())
+                .load(imageUri)
+                .placeholder(R.drawable.ic_profile)
+                .error(R.drawable.ic_profile)
+                .into(sheetBinding.profileImage)
+        } else {
+            sheetBinding.profileImage.setImageResource(R.drawable.ic_profile)
+        }
+
         bottomSheetDialog.show()
     }
 
