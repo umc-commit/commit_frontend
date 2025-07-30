@@ -66,15 +66,9 @@ class AlarmAdapter(
         // 선택 삭제 모드일 때 체크박스 보임
         holder.binding.ivSelectMode.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
 
-        // 삭제 체크박스 클릭 리스너 (추가 선택 기능 가능)
-        holder.binding.ivSelectMode.setOnClickListener {
-            Toast.makeText(holder.itemView.context, "${item.title} 선택됨", Toast.LENGTH_SHORT).show()
-        }
-
         // 카드 클릭 리스너 예시
         holder.itemView.setOnClickListener {
             if (!isDeleteMode) {
-                Toast.makeText(holder.itemView.context, "${item.title} 클릭됨", Toast.LENGTH_SHORT).show()
 
                 holder.binding.ivUnreadDot.visibility = View.GONE
             } else {

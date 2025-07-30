@@ -93,6 +93,28 @@ class FragmentHome : Fragment() {
             (activity as? MainActivity)?.showBottomNav(false)
         }
 
+        val homeReviewClick: (String) -> Unit = { title ->
+
+            val composeView = ComposeView(requireContext()).apply {
+                setContent {
+                    PostHeaderSection(
+                        title = "그림 커미션",
+                        tags = listOf("그림", "#LD", "#당일마감"),
+                        minPrice = 10000,
+                        summary = "작업 설명입니다"
+                    )
+                }
+            }
+
+            binding.frameComposeContainer.apply {
+                visibility = View.VISIBLE
+                removeAllViews()
+                addView(composeView)
+            }
+
+            (activity as? MainActivity)?.showBottomNav(false)
+        }
+
         // 뒤로가기 누르면 바텀바 다시 보이기
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -128,7 +150,7 @@ class FragmentHome : Fragment() {
         }
 
         binding.rvReviewContent.apply {
-            adapter = ReviewCardAdapter(listOf("리뷰1", "리뷰2", "리뷰3", "리뷰4"))
+            adapter = ReviewCardAdapter(listOf("리뷰1", "리뷰2", "리뷰3", "리뷰4"), homeReviewClick)
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
