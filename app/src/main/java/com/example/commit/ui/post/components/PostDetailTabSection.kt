@@ -86,29 +86,14 @@ fun PostDetailTabSection(
             }
 
             TabType.ARTIST -> {
-                ReviewItem(
-                    rating = 5.0f,
-                    title = "낙서 타임 커미션",
-                    duration = "12시간",
-                    content = "친절하게 응대해주셨습니다. 감사해요!",
-                    writer = "위시",
-                    date = "2일 전"
-                )
-                ReviewItem(
-                    rating = 4.0f,
-                    title = "2인 커플 커미션",
-                    duration = "3일",
-                    content = "복잡한 의상이었는데도 디테일 살려서 잘 그려주셨어요 :)",
-                    writer = "헤더",
-                    date = "4일 전"
-                )
-                ReviewItem(
-                    rating = 5.0f,
-                    title = "낙서 타임 커미션",
-                    duration = "20시간",
-                    content = "답장도 빠르고 잘 대해주셨어요. 감사합니다 !",
-                    writer = "마루",
-                    date = "5일 전"
+                ArtistInfoSection(
+                    artistName = "위시",
+                    followerCount = 1200,
+                    workCount = 35,
+                    rating = 4.8f,
+                    recommendRate = 96,
+                    reviewCount = 43,
+                    onFollowClick = { /* 팔로우 버튼 클릭 시 처리 */ }
                 )
             }
         }

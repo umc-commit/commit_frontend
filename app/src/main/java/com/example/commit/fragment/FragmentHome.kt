@@ -31,7 +31,9 @@ import com.example.commit.adapter.ReviewCardAdapter
 import com.example.commit.databinding.BottomSheetHomeBinding
 import com.example.commit.databinding.FragmentHomeBinding
 import com.example.commit.ui.post.components.PostHeaderSection
+import com.example.commit.ui.search.FragmentSearch
 import com.google.android.material.bottomsheet.BottomSheetDialog
+
 
 class FragmentHome : Fragment() {
 
@@ -54,10 +56,19 @@ class FragmentHome : Fragment() {
             startActivity(intent)
         }
 
-
+        // 알람 아이콘 클릭
         binding.ivAlarm.setOnClickListener {
             val intent = Intent(requireContext(), AlarmActivity::class.java)
             startActivity(intent)
+        }
+
+        // 검색 아이콘 클릭 시 FragmentCategory로 이동
+        binding.ivSearch.setOnClickListener {
+            Log.d(TAG, "검색 아이콘 클릭됨")
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.Nav_Frame, FragmentSearch())
+                .addToBackStack(null)
+                .commit()
         }
 
         // 카드 클릭 시 PostHeaderSection 띄우기 + 바텀바 숨기기
@@ -71,7 +82,6 @@ class FragmentHome : Fragment() {
                         minPrice = 10000,
                         summary = "작업 설명입니다"
                     )
-
                 }
             }
 
@@ -81,7 +91,6 @@ class FragmentHome : Fragment() {
                 addView(composeView)
             }
 
-            // 바텀바 숨기기
             (activity as? MainActivity)?.showBottomNav(false)
         }
 
