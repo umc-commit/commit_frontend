@@ -129,6 +129,8 @@ fun PreviewChatRoomScreen() {
                 isMenuOpen = dummyMenuOpen,
                 onToggleMenu = { dummyMenuOpen = !dummyMenuOpen }
             )
+            Spacer(modifier = Modifier.height(69.dp))
+
         }
     }
 }

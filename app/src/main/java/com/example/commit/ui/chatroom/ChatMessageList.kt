@@ -3,9 +3,13 @@ package com.example.commit.ui.chatroom
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -22,7 +26,15 @@ fun ChatMessageList(
     onPayClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(modifier = modifier.background(color = Color(0xFFF5F5F5))) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.scrollToItem(messages.size - 1)
+        }
+    }
+    LazyColumn(state = listState,modifier = modifier.background(color = Color(0xFFF5F5F5))
+        .imePadding()) {
         val itemsWithDate = buildList<Any> {
             var lastDate: String? = null
             for (message in messages) {
@@ -37,17 +49,22 @@ fun ChatMessageList(
 
         var lastMessage: ChatMessage? = null
 
-        items(itemsWithDate) { item ->
+        itemsIndexed(itemsWithDate) { index, item ->
             when (item) {
                 is ChatMessage -> {
-                    // 패딩 계산
-                    val topPadding = when {
-                        lastMessage == null -> 0.dp
-                        isSystem(lastMessage as ChatMessage) && isSystem(item) -> 15.dp
-                        isSystem(lastMessage as ChatMessage) xor isSystem(item) -> 10.dp
-                        else -> 5.dp
-                    }
+                    val prev = lastMessage
 
+                    val topPadding = when {
+                        prev == null -> 29.dp
+                        prev.senderId != item.senderId -> 29.dp
+                        isSystem(prev) && isSystem(item) &&
+                                prev.senderId == item.senderId -> 19.dp
+
+                        !isSystem(prev) && !isSystem(item) &&
+                                prev.senderId == item.senderId -> 10.dp
+
+                        else -> 19.dp
+                    }
 
                     Spacer(modifier = Modifier.height(topPadding))
 
@@ -58,14 +75,18 @@ fun ChatMessageList(
                     )
 
                     lastMessage = item
-                    Spacer(modifier = Modifier.height(33.dp))
+
+                    // ✅ 마지막 메시지라면 33dp Spacer 추가
+                    if (index == itemsWithDate.lastIndex) {
+                        Spacer(modifier = Modifier.height(33.dp))
+                    }
                 }
 
                 is String -> {
                     if (item.startsWith("HEADER:")) {
                         val dateText = item.removePrefix("HEADER:")
                         DateHeader(dateText = dateText)
-                        lastMessage = null // 헤더가 들어가면 다음 메시지가 첫 메시지 취급
+                        lastMessage = null
                     }
                 }
             }
