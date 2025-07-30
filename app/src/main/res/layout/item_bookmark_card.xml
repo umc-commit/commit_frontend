@@ -3,8 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="140dp"
     android:layout_height="200dp"
-    android:layout_marginEnd="11dp"
-    app:cardCornerRadius="12dp"
     app:cardElevation="0dp"
     android:background="@android:color/transparent"
     android:layout_marginBottom="2dp">
@@ -66,9 +64,46 @@
                 android:id="@+id/iv_bookmark"
                 android:layout_width="17dp"
                 android:layout_height="17dp"
-                android:layout_margin="8dp"
+                android:layout_margin="10dp"
                 android:layout_gravity="top|end"
-                android:src="@drawable/ic_home_bookmark"/>
+                android:visibility="gone"
+                android:src="@drawable/ic_bookmark_unchecked"/>
+
+            <!-- 남은 슬롯 텍스트 -->
+            <TextView
+                android:id="@+id/tv_remaining_slots"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="남은 슬롯 : 1"
+                android:fontFamily="@font/notosanskr_medium"
+                android:textSize="8sp"
+                android:textColor="@color/white"
+                android:includeFontPadding="false"
+                android:background="@drawable/bg_slot_black"
+                android:layout_gravity="bottom|end"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="4dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:visibility="visible"/>
+
+            <!-- 마감 라벨 -->
+            <TextView
+                android:id="@+id/tv_closed_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="마감"
+                android:fontFamily="@font/notosanskr_medium"
+                android:textSize="8sp"
+                android:textColor="@color/white"
+                android:includeFontPadding="false"
+                android:background="@drawable/bg_slot_gray"
+                android:paddingHorizontal="8.5dp"
+                android:paddingVertical="4dp"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:visibility="visible"/>
         </FrameLayout>
 
 
@@ -77,7 +112,7 @@
             android:id="@+id/tv_course_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="커미션 타임글 제목"
+            android:text="낙서 타입 커미션"
             android:fontFamily="@font/notosanskr_medium"
             android:textSize="14sp"
             android:textColor="@color/black1"

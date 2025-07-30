@@ -71,10 +71,12 @@ class ProfileEditActivity : AppCompatActivity() {
             if (binding.btnApply.isEnabled) {
                 val nickname = binding.etNickname.text.toString()
                 val imageUri = selectedImageUri?.toString()
+                val intro = binding.etIntro.text.toString() // 소개글 추가
 
                 val resultIntent = Intent().apply {
                     putExtra("nickname", nickname)
                     putExtra("imageUri", imageUri)
+                    putExtra("intro", intro)
                 }
                 setResult(RESULT_OK, resultIntent)
                 finish()
