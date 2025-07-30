@@ -64,7 +64,6 @@ class FragmentHome : Fragment() {
 
         // 검색 아이콘 클릭 시 FragmentCategory로 이동
         binding.ivSearch.setOnClickListener {
-            Log.d(TAG, "검색 아이콘 클릭됨")
             parentFragmentManager.beginTransaction()
                 .replace(R.id.Nav_Frame, FragmentSearch())
                 .addToBackStack(null)
