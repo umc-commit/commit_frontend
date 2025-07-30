@@ -27,13 +27,7 @@ fun FileOptionMenu(
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 36.dp,
-                top = 40.dp,
-                end = 36.dp,
-                bottom = 87.dp
-            ),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(50.dp, Alignment.CenterHorizontally)
     ) {
         FileOptionItem(
