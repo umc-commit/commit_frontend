@@ -48,7 +48,7 @@ class AlarmActivity : AppCompatActivity() {
 
         alarmList.addAll(listOf(
             AlarmItem(1, "payment_request", "결제 요청이 도착했어요", "작가님이 결제를 요청했어요.", "방금", false),
-            AlarmItem(2, "commission_approved", "커미션 신청서가 수락됐어요", "신청하신 커미션이 수락됐어요.", "5분 전", true),
+            AlarmItem(2, "commission_approved", "커미션 신청서가 수락됐어요", "신청하신 커미션이 수락됐어요.", "5분 전", false),
             AlarmItem(3, "commission_submitted", "커미션 신청 완료!", "커미션 신청이 정상 접수되었습니다.", "10분 전", false)
         ))
 
