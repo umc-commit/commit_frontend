@@ -1,18 +1,26 @@
 package com.example.commit.fragment
 
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
+import com.example.commit.R
+import com.example.commit.activity.WrittenReviewsActivity
+import com.example.commit.activity.AgreeFirstActivity
 import com.example.commit.databinding.FragmentMypageBinding
-import com.example.commit.databinding.ProfileBottomsheetBinding
 import com.example.commit.ui.point.FragmentPoint
 import com.example.commit.ui.point.FragmentPointHistory
-
+import com.example.commit.activity.ProfileActivity
+import com.example.commit.activity.MyPageCommissionActivity
+import com.example.commit.activity.ReportActivity
+import com.example.commit.databinding.BottomSheetProfileBinding
 
 class FragmentMypage : Fragment() {
 
@@ -20,7 +28,7 @@ class FragmentMypage : Fragment() {
     private val binding get() = _binding!!
 
     private var bottomSheetDialog: BottomSheetDialog? = null
-    private var profileSheetBinding: ProfileBottomsheetBinding? = null
+    private var profileSheetBinding: BottomSheetProfileBinding? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,8 +36,36 @@ class FragmentMypage : Fragment() {
     ): View {
         _binding = FragmentMypageBinding.inflate(inflater, container, false)
 
+        //닉네임 불러오기
+        updateNicknameFromPrefs()
+
+        // 프로필 버튼 클릭 시 ProfileActivity로 이동
+        binding.profileButton.setOnClickListener {
+            val intent = Intent(requireContext(), ProfileActivity::class.java)
+            startActivity(intent)
+        }
+
         binding.dropdownIcon.setOnClickListener {
             showProfileBottomSheet()
+        }
+        binding.writtenReviewsLayout.setOnClickListener {
+            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
+            startActivity(intent)
+        }
+        binding.commissionReportItemLayout.setOnClickListener {
+            val intent = Intent(requireContext(), ReportActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.logoutLayout.setOnClickListener {
+            val intent = Intent(requireContext(), AgreeFirstActivity::class.java)
+            startActivity(intent)
+        }
+
+        // 완료된 커미션 클릭 시 MyPageCommissionActivity로 이동
+        binding.completedCommissionsLayout.setOnClickListener {
+            val intent = Intent(requireContext(), MyPageCommissionActivity::class.java)
+            startActivity(intent)
         }
         binding.chargePointsLayout.setOnClickListener {
             parentFragmentManager.beginTransaction()
@@ -49,18 +85,64 @@ class FragmentMypage : Fragment() {
 
     private fun showProfileBottomSheet() {
         val bottomSheetDialog = BottomSheetDialog(requireContext())
-        val sheetBinding = ProfileBottomsheetBinding.inflate(layoutInflater)
+        val sheetBinding = BottomSheetProfileBinding.inflate(layoutInflater)
         bottomSheetDialog.setContentView(sheetBinding.root)
 
         // 배경 투명 & 그림자 효과
         bottomSheetDialog.window?.apply {
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
             setDimAmount(0.6f)
+        }
+
+        // MyPage의 닉네임, 이미지와 동일하게 설정
+        val prefs = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+        val nickname = prefs.getString("nickname", "로지")
+        val imageUriString = prefs.getString("imageUri", null)
+
+        sheetBinding.profileName.text = nickname
+
+        if (!imageUriString.isNullOrEmpty()) {
+            val imageUri = Uri.parse(imageUriString)
+            Glide.with(requireContext())
+                .load(imageUri)
+                .placeholder(R.drawable.ic_profile)
+                .error(R.drawable.ic_profile)
+                .into(sheetBinding.profileImage)
+        } else {
+            sheetBinding.profileImage.setImageResource(R.drawable.ic_profile)
         }
 
         bottomSheetDialog.show()
     }
 
+    //닉네임 반영
+    private fun updateNicknameFromPrefs() {
+        val prefs = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+        val nickname = prefs.getString("nickname", "로지")
+        val imageUriString = prefs.getString("imageUri", null)
+        Log.d("ProfileImage", "Loaded URI: $imageUriString")
+        binding.userName.text = nickname
+        binding.userName2.text = nickname
+        if (!imageUriString.isNullOrEmpty()) {
+            val imageUri = Uri.parse(imageUriString)
+            binding.userProfile.post {
+                Glide.with(requireContext())
+                    .load(imageUri)
+                    .placeholder(R.drawable.ic_profile)
+                    .error(R.drawable.ic_profile)
+                    .into(binding.userProfile)
+            }
+        } else {
+            binding.userProfile.setImageResource(R.drawable.ic_profile)
+        }
+
+    }
+
+    //닉네임을 바꾸고 돌아왔을 때 최신 닉네임 반영
+    override fun onResume() {
+        super.onResume()
+        updateNicknameFromPrefs()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -69,4 +151,5 @@ class FragmentMypage : Fragment() {
         bottomSheetDialog = null
         profileSheetBinding = null
     }
+
 }

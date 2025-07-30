@@ -22,23 +22,54 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initBottomNavigation()
+        // Intent에서 show_signup_bottom_sheet 값 가져오기
+        val showSignupBottomSheet = intent.getBooleanExtra("show_signup_bottom_sheet", false)
 
-        val startFragmentId = intent.getIntExtra("start_fragment", R.id.nav_home)
-        bottomNavigationView.selectedItemId = startFragmentId
+        // 액티비티가 처음 생성될 때만 초기 프래그먼트를 로드하고 바텀 시트 인자를 전달
+        if (savedInstanceState == null) {
+            val initialFragment = FragmentHome().apply {
+                arguments = Bundle().apply {
+                    putBoolean("show_signup_bottom_sheet", showSignupBottomSheet)
+                }
+            }
+            supportFragmentManager
+                .beginTransaction()
+                .replace(binding.NavFrame.id, initialFragment)
+                .commitAllowingStateLoss()
+
+            // 바텀 시트가 한 번 띄워진 후에는 Intent에서 해당 값 제거
+            if (showSignupBottomSheet) {
+                intent.removeExtra("show_signup_bottom_sheet")
+            }
+        }
+
+        initBottomNavigation()
     }
 
     private fun initBottomNavigation() {
         bottomNavigationView = binding.BottomNavi
-        bottomNavigationView.selectedItemId = R.id.nav_home
+        // onCreate에서 이미 초기 프래그먼트를 로드했으므로, 여기서 다시 R.id.nav_home을 선택할 필요는 없습니다.
+        // bottomNavigationView.selectedItemId = R.id.nav_home // 이 줄은 제거하거나 주석 처리
 
         bottomNavigationView.setOnItemSelectedListener { menuItem ->
+            // 닉네임 화면에서 넘어온 경우에만 바텀 시트를 띄우도록 인자를 전달
+            val showBottomSheetForHome = intent.getBooleanExtra("show_signup_bottom_sheet", false)
+
             when (menuItem.itemId) {
                 R.id.nav_home -> {
+                    val homeFragment = FragmentHome().apply {
+                        arguments = Bundle().apply {
+                            putBoolean("show_signup_bottom_sheet", showBottomSheetForHome)
+                        }
+                    }
                     supportFragmentManager
                         .beginTransaction()
-                        .replace(binding.NavFrame.id, FragmentHome())
+                        .replace(binding.NavFrame.id, homeFragment)
                         .commitAllowingStateLoss()
+                    // 바텀 시트가 한 번 띄워진 후에는 Intent에서 해당 값 제거
+                    if (showBottomSheetForHome) {
+                        intent.removeExtra("show_signup_bottom_sheet")
+                    }
                     return@setOnItemSelectedListener true
                 }
                 R.id.nav_bookmark -> {
