@@ -13,13 +13,14 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.commit.R
 import com.example.commit.activity.WrittenReviewsActivity
-import com.example.commit.activity.AgreeFirstActivity
+import com.example.commit.activity.login.AgreeFirstActivity
+import com.example.commit.activity.login.LoginActivity
 import com.example.commit.databinding.FragmentMypageBinding
 import com.example.commit.ui.point.FragmentPoint
 import com.example.commit.ui.point.FragmentPointHistory
-import com.example.commit.activity.ProfileActivity
-import com.example.commit.activity.MyPageCommissionActivity
-import com.example.commit.activity.ReportActivity
+import com.example.commit.activity.mypage.ProfileActivity
+import com.example.commit.activity.mypage.MyPageCommissionActivity
+import com.example.commit.activity.mypage.ReportActivity
 import com.example.commit.databinding.BottomSheetProfileBinding
 
 class FragmentMypage : Fragment() {
@@ -58,7 +59,7 @@ class FragmentMypage : Fragment() {
         }
 
         binding.logoutLayout.setOnClickListener {
-            val intent = Intent(requireContext(), AgreeFirstActivity::class.java)
+            val intent = Intent(requireContext(), LoginActivity::class.java)
             startActivity(intent)
         }
 

@@ -1,14 +1,13 @@
 package com.example.commit.fragment
 
 import android.content.Intent
-import android.graphics.Canvas
-import android.graphics.Paint
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,16 +17,14 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.commit.R
-import com.example.commit.activity.AlarmActivity
+import com.example.commit.activity.alarm.AlarmActivity
 import com.example.commit.activity.MainActivity
-import com.example.commit.activity.ProfileActivity
-import com.example.commit.activity.ProfileEditActivity
-import com.example.commit.adapter.AuthorCardAdapter
-import com.example.commit.adapter.FollowingPostAdapter
-import com.example.commit.adapter.HomeCardAdapter
-import com.example.commit.adapter.ReviewCardAdapter
+import com.example.commit.activity.mypage.ProfileActivity
+import com.example.commit.adapter.home.AuthorCardAdapter
+import com.example.commit.adapter.home.FollowingPostAdapter
+import com.example.commit.adapter.home.HomeCardAdapter
+import com.example.commit.adapter.home.ReviewCardAdapter
 import com.example.commit.databinding.BottomSheetHomeBinding
 import com.example.commit.databinding.FragmentHomeBinding
 import com.example.commit.ui.post.components.PostHeaderSection
@@ -182,7 +179,7 @@ class FragmentHome : Fragment() {
                     bottomSheetDialog.setContentView(bottomSheetView)
 
                     bottomSheetDialog.window?.apply {
-                        setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+                        setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                         setDimAmount(0.6f)
                     }
 
