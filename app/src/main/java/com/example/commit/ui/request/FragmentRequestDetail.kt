@@ -68,21 +68,25 @@ fun RequestDetailScreen(
     paymentInfo: PaymentInfo,
     formSchema: List<FormItem>,
     formAnswer: Map<String, Any>,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onFormAnswerClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
-    //  바텀바 숨기기
+    // 바텀바 숨기기
     LaunchedEffect(Unit) {
         (context as? MainActivity)?.showBottomNav(false)
     }
 
-    //  화면 나갈 때 바텀바 다시 보이기
+    // 화면 나갈 때 바텀바 다시 보이기
     DisposableEffect(Unit) {
         onDispose {
             (context as? MainActivity)?.showBottomNav(true)
         }
     }
+
+    val isCancel = item.status == "CANCEL"
+    val isReject = item.status == "REJECT"
 
     Column(
         modifier = Modifier
@@ -121,14 +125,31 @@ fun RequestDetailScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            RequestDetailItem(item = item)
-            Spacer(modifier = Modifier.height(16.dp))
-            RequestDetailSectionList(
-                timeline = timeline,
-                paymentInfo = paymentInfo,
-                formSchema = formSchema,
-                formAnswer = formAnswer
+            RequestDetailItem(
+                item = item,
+                onFormAnswerClick = {
+                    val newFragment = FragmentFormAnswer.newInstance(
+                        ArrayList(formSchema),
+                        HashMap(formAnswer)
+                    )
+                    (context as MainActivity).supportFragmentManager.beginTransaction()
+                        .replace(R.id.Nav_Frame, newFragment)
+                        .addToBackStack(null)
+                        .commit()
+                }
             )
+
+            // 취소 또는 거절 상태가 아니면 하단 상세 정보 보여주기
+            if (!isCancel && !isReject) {
+                Spacer(modifier = Modifier.height(16.dp))
+                RequestDetailSectionList(
+                    timeline = timeline,
+                    paymentInfo = paymentInfo,
+                    formSchema = formSchema,
+                    formAnswer = formAnswer
+                )
+            }
+
         }
     }
 }
