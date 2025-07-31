@@ -36,7 +36,7 @@ class FragmentRequest : Fragment() {
                 val sampleRequests = listOf(
                     RequestItem(
                         requestId = 1,
-                        status = "IN_PROGRESS",
+                        status = "PENDING",
                         title = "귀여운 타입 커미션",
                         price = 40000,
                         thumbnailImage = "",
@@ -52,7 +52,7 @@ class FragmentRequest : Fragment() {
                     ),
                     RequestItem(
                         requestId = 3,
-                        status = "DONE",
+                        status = "IN_PROGRESS",
                         title = "낙서 타입 커미션",
                         price = 40000,
                         thumbnailImage = "",
@@ -65,7 +65,23 @@ class FragmentRequest : Fragment() {
                         price = 60000,
                         thumbnailImage = "",
                         artist = Artist(11, "리아")
-                    )
+                    ) ,
+                    RequestItem(
+                        requestId = 5,
+                    status = "CANCEL",
+                    title = "낙서 타입 커미션",
+                    price = 40000,
+                    thumbnailImage = "",
+                    artist = Artist(10, "키르")
+                ),
+                RequestItem(
+                    requestId = 6,
+                    status = "REJECT",
+                    title = "낙서 타입 커미션",
+                    price = 40000,
+                    thumbnailImage = "",
+                    artist = Artist(10, "키르")
+                )
                 )
 
                 RequestScreen(

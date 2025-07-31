@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTypography
@@ -33,8 +32,8 @@ fun FilterBottomSheet(
     onApply: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        tonalElevation = 4.dp,
+        shape = RoundedCornerShape(topStart = 0.dp, topEnd = 20.dp),
+        tonalElevation = 0.dp,
         color = Color.White,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -42,6 +41,7 @@ fun FilterBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp)
+                .background(Color.White)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -181,33 +181,4 @@ fun FilterBottomSheet(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun FilterBottomSheetPreview() {
-    var sort by remember { mutableStateOf("최신순") }
-    var minPrice by remember { mutableStateOf("1000") }
-    var maxPrice by remember { mutableStateOf("30000") }
-    var deadline by remember { mutableStateOf("7일 이내") }
-
-    FilterBottomSheet(
-        selectedSort = sort,
-        onSortChange = { sort = it },
-        minPrice = minPrice,
-        maxPrice = maxPrice,
-        onMinPriceChange = { minPrice = it },
-        onMaxPriceChange = { maxPrice = it },
-        selectedDeadline = deadline,
-        onDeadlineChange = { deadline = it },
-        onReset = {
-            sort = ""
-            minPrice = ""
-            maxPrice = ""
-            deadline = ""
-        },
-        onApply = {
-            // 적용 로직
-        }
-    )
 }

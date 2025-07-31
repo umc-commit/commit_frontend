@@ -3,7 +3,6 @@ package com.example.commit.ui.request.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -81,31 +80,36 @@ fun FormAnswerSection(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
-                    .padding(12.dp)
-            ) {
-                if (!note.isNullOrBlank()) {
+            if (!note.isNullOrBlank()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                        .padding(vertical = 4.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFFF5F5F5))
+                        .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
+                        .padding(12.dp)
+                )
+                {
                     Text(
                         text = note,
                         style = CommitTypography.labelLarge,
                         color = Color.Black
                     )
                 }
+            }
 
-                if (!imageUrl.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = "첨부 이미지",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(160.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                    )
-                }
+            if (!imageUrl.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "첨부 이미지",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(160.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                )
             }
         }
     }

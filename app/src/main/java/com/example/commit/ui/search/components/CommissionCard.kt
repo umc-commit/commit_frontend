@@ -33,7 +33,7 @@ fun CommissionCard(commission: Commission) {
     Card(
         modifier = Modifier
             .width(160.dp)
-            .height(162.dp),
+            .height(180.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
@@ -64,7 +64,8 @@ fun CommissionCard(commission: Commission) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(80.dp)
+                    .width(160.dp)
+                    .height(95.dp)
                     .padding(horizontal = 8.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFFF3F3F3))
