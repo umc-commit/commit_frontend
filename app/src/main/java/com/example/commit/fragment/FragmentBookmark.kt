@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.commit.adapter.BookmarkAdapter
+import com.example.commit.adapter.bookmark.BookmarkAdapter
 import com.example.commit.data.model.entities.BookmarkItem
 import com.example.commit.databinding.FragmentBookmarkBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog

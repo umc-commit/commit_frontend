@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Commit"
         tools:targetApi="31">
-        <activity android:name=".activity.AlarmActivity"
+        <activity android:name=".activity.alarm.AlarmActivity"
             android:exported="false" />
         <activity
             android:name=".activity.MainActivity"
@@ -33,18 +33,19 @@
         </activity>
         <activity android:name=".activity.ReviewWriteActivity" android:exported="false"/>
         <activity android:name=".activity.WrittenReviewsActivity" android:exported="false"/>
-        <activity android:name=".activity.ProfileActivity" android:exported="false"/>
-        <activity android:name=".activity.ProfileEditActivity" android:exported="false"/>
-        <activity android:name=".activity.PhotoReviewActivity" android:exported="false"/>
-        <activity android:name=".activity.MyPageCommissionActivity" android:exported="false"/>
-        <activity android:name=".activity.ProfileFollowingActivity" android:exported="false"/>
-        <activity android:name=".activity.AgreeFirstActivity" android:exported="false"/>
-        <activity android:name=".activity.LoginActivity" android:exported="false"/>
-        <activity android:name=".activity.LoginRoleActivity" android:exported="false"/>
-        <activity android:name=".activity.NicknameActivity" android:exported="false"/>
-        <activity android:name=".activity.OnboardingActivity" android:exported="false"/>
-        <activity android:name=".activity.ReportActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.ProfileActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.ProfileEditActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.PhotoReviewActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.MyPageCommissionActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.ProfileFollowingActivity" android:exported="false"/>
+        <activity android:name=".activity.login.AgreeFirstActivity" android:exported="false"/>
+        <activity android:name=".activity.login.LoginActivity" android:exported="false"/>
+        <activity android:name=".activity.login.LoginRoleActivity" android:exported="false"/>
+        <activity android:name=".activity.login.NicknameActivity" android:exported="false"/>
+        <activity android:name=".activity.login.OnboardingActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.ReportActivity" android:exported="false"/>
         <activity android:name=".activity.ReviewEditActivity" android:exported="false"/>
+        <activity android:name=".activity.author.AuthorProfileActivity" android:exported="false"/>
 
     </application>
 
