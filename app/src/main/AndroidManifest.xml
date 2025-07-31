@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+
 
     <application
         android:allowBackup="true"
@@ -12,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Commit"
         tools:targetApi="31">
-        <activity android:name=".activity.AlarmActivity"
+        <activity android:name=".activity.alarm.AlarmActivity"
             android:exported="false" />
         <activity
             android:name=".activity.MainActivity"
@@ -23,6 +31,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.ReviewWriteActivity" android:exported="false"/>
+        <activity android:name=".activity.WrittenReviewsActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.ProfileActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.ProfileEditActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.PhotoReviewActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.MyPageCommissionActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.ProfileFollowingActivity" android:exported="false"/>
+        <activity android:name=".activity.login.AgreeFirstActivity" android:exported="false"/>
+        <activity android:name=".activity.login.LoginActivity" android:exported="false"/>
+        <activity android:name=".activity.login.LoginRoleActivity" android:exported="false"/>
+        <activity android:name=".activity.login.NicknameActivity" android:exported="false"/>
+        <activity android:name=".activity.login.OnboardingActivity" android:exported="false"/>
+        <activity android:name=".activity.mypage.ReportActivity" android:exported="false"/>
+        <activity android:name=".activity.ReviewEditActivity" android:exported="false"/>
+        <activity android:name=".activity.author.AuthorProfileActivity" android:exported="false"/>
+
     </application>
 
 </manifest>

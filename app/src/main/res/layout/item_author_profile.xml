@@ -18,12 +18,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp">
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_author_profile"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_profile"
-            android:background="@android:color/transparent" />
+            android:src="@drawable/ic_profile" />
 
     </androidx.cardview.widget.CardView>
 

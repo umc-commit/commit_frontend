@@ -1,4 +1,4 @@
-package com.example.commit.ui.chat
+package com.example.commit.ui.chatlist
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +10,8 @@ import androidx.fragment.app.Fragment
 import com.example.commit.R
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.ui.Theme.CommitTheme
+import com.example.commit.activity.MainActivity
+
 
 class ChatDeleteFragment : Fragment() {
 
@@ -19,6 +21,10 @@ class ChatDeleteFragment : Fragment() {
     )
 
     private val selectedItems = mutableStateListOf<ChatItem>()
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.showBottomNav(false)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
