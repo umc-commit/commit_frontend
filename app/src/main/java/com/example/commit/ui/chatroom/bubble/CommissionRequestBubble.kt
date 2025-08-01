@@ -17,7 +17,8 @@ import com.example.commit.ui.Theme.CommitTypography
 @Composable
 fun CommissionRequestBubble(
     requestedAt: String,
-    onConfirmClick: () -> Unit
+    onConfirmClick: () -> Unit,
+    onFormCheckClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -52,7 +53,7 @@ fun CommissionRequestBubble(
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedButton(
-            onClick = onConfirmClick,
+            onClick = onFormCheckClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(36.dp),
@@ -72,6 +73,7 @@ fun CommissionRequestBubble(
 fun PreviewCommissionRequestBubble() {
     CommissionRequestBubble(
         requestedAt = "25.06.02 17:50",
-        onConfirmClick = { println("신청서 확인하기 클릭됨") }
+        onConfirmClick = { println("신청서 확인하기 클릭됨") },
+        onFormCheckClick = { println("신청서 확인하기 클릭됨") }
     )
 }

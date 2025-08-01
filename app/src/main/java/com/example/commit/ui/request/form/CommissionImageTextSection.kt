@@ -1,6 +1,10 @@
 package com.example.commit.ui.request.form
 
+import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,13 +42,32 @@ fun CommissionImageTextSection(
     onAddClick: () -> Unit,
     onRemoveClick: (Int) -> Unit
 ) {
+    val context = LocalContext.current
+    
+    // 앨범에서 이미지 선택을 위한 launcher
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { selectedUri ->
+            try {
+                val inputStream = context.contentResolver.openInputStream(selectedUri)
+                val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+                inputStream?.close()
+                // 이미지 추가 로직 (실제로는 images 리스트에 추가해야 함)
+                onAddClick()
+            } catch (e: Exception) {
+                // 에러 처리
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
         Text(
-            text = "4. 신청 내용",
+            text = "신청 내용",
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.SemiBold
             )
@@ -61,7 +85,9 @@ fun CommissionImageTextSection(
                         .width(50.dp)
                         .clip(RoundedCornerShape(4.dp))
                         .background(Color(0xFFF0F0F0))
-                        .clickable { onAddClick() },
+                        .clickable { 
+                            imagePickerLauncher.launch("image/*")
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -97,7 +123,9 @@ fun CommissionImageTextSection(
                         .width(50.dp)
                         .clip(RoundedCornerShape(4.dp))
                         .background(Color(0xFFF0F0F0))
-                        .clickable { onAddClick() },
+                        .clickable { 
+                            imagePickerLauncher.launch("image/*")
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -146,7 +174,7 @@ fun CommissionImageTextSection(
                 onValueChange = {
                     if (it.length <= 5000) onTextChange(it)
                 },
-                placeholder = { },
+                placeholder = { Text("내용을 입력해주세요") },
                 modifier = Modifier
                     .fillMaxSize()
             )

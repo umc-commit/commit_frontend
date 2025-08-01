@@ -25,7 +25,8 @@ import com.example.commit.util.formatTime
 fun MessageWithTimestamp(
     message: ChatMessage,
     currentUserId: String,
-    onPayClick: () -> Unit
+    onPayClick: () -> Unit,
+    onFormCheckClick: () -> Unit
 ) {
     val isMe = message.senderId == currentUserId
 
@@ -40,6 +41,7 @@ fun MessageWithTimestamp(
             ChatBubble(
                 message = message,
                 onPayClick = onPayClick,
+                onFormCheckClick = onFormCheckClick,
                 modifier = Modifier.align(Alignment.Bottom)
             )
             Spacer(modifier = Modifier.width(4.dp))
@@ -60,6 +62,7 @@ fun MessageWithTimestamp(
             ChatBubble(
                 message = message,
                 onPayClick = onPayClick,
+                onFormCheckClick = onFormCheckClick,
                 modifier = Modifier.align(Alignment.Bottom)
             )
         }
@@ -81,7 +84,8 @@ fun PreviewMessageWithTimestamp() {
                 amount = null
             ),
             currentUserId = "me",
-            onPayClick = {}
+            onPayClick = {},
+            onFormCheckClick = {}
         )
 
         MessageWithTimestamp(
@@ -94,7 +98,8 @@ fun PreviewMessageWithTimestamp() {
                 amount = null
             ),
             currentUserId = "me",
-            onPayClick = {}
+            onPayClick = {},
+            onFormCheckClick = {}
         )
 
         MessageWithTimestamp(
@@ -107,7 +112,8 @@ fun PreviewMessageWithTimestamp() {
                 amount = null
             ),
             currentUserId = "me",
-            onPayClick = {}
+            onPayClick = {},
+            onFormCheckClick = {}
         )
 
         MessageWithTimestamp(
@@ -120,7 +126,8 @@ fun PreviewMessageWithTimestamp() {
                 amount = null
             ),
             currentUserId = "me",
-            onPayClick = {}
+            onPayClick = {},
+            onFormCheckClick = {}
         )
 
         MessageWithTimestamp(
@@ -133,7 +140,8 @@ fun PreviewMessageWithTimestamp() {
                 amount = 40000
             ),
             currentUserId = "me",
-            onPayClick = {}
+            onPayClick = {},
+            onFormCheckClick = {}
         )
 
         // 추가된 메시지들
@@ -147,7 +155,8 @@ fun PreviewMessageWithTimestamp() {
                 amount = null
             ),
             currentUserId = "me",
-            onPayClick = {}
+            onPayClick = {},
+            onFormCheckClick = {}
         )
 
         MessageWithTimestamp(
@@ -160,7 +169,8 @@ fun PreviewMessageWithTimestamp() {
                 amount = null
             ),
             currentUserId = "me",
-            onPayClick = {}
+            onPayClick = {},
+            onFormCheckClick = {}
         )
         MessageWithTimestamp(
             message = ChatMessage(
@@ -172,7 +182,8 @@ fun PreviewMessageWithTimestamp() {
                 amount = null
             ),
             currentUserId = "me",
-            onPayClick = {}
+            onPayClick = {},
+            onFormCheckClick = {}
         )
     }
 }

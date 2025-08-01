@@ -81,14 +81,16 @@ fun ChatListScreenPreview() {
             name = "키르",
             message = "[결제 요청] 낙서 타임 커미션",
             time = "방금 전",
-            isNew = true
+            isNew = true,
+            title = "낙서 타입 커미션"
         ),
         ChatItem(
             profileImageRes = R.drawable.ic_profile,
             name = "브로콜리",
             message = "[커미션 완료] 일러스트 타입",
             time = "2일 전",
-            isNew = false
+            isNew = false,
+            title = "일러스트 타입 커미션"
         )
     )
 

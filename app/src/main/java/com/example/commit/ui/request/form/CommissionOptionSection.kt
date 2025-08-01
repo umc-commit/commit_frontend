@@ -6,9 +6,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.commit.ui.Theme.CommitTheme
+import android.util.Log
 
 @Composable
 fun CommissionOptionSection(
@@ -26,30 +30,36 @@ fun CommissionOptionSection(
         isRequired = true
     ) {
         if (options.size == 1) {
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = 4.dp)
             ) {
                 RadioButton(
                     selected = selectedOption == options[0],
-                    onClick = { onOptionSelected(options[0]) },
+                    onClick = { 
+                        Log.d("FormDebug", "라디오 버튼 클릭됨 - $title: ${options[0]}")
+                        onOptionSelected(options[0]) 
+                    },
                     colors = RadioButtonDefaults.colors(
                         selectedColor = primaryColor,
                         unselectedColor = Color.LightGray
-                    )
+                    ),
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = options[0],
-                    style = MaterialTheme.typography.bodyMedium
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Default
+                    )
                 )
             }
         } else {
-            // ✅ 라디오버튼 (2개 이상 옵션일 경우 - 가로 정렬)
+            // 라디오버튼 (2개 이상 옵션일 경우 - 가로 정렬)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 options.forEach { option ->
@@ -58,17 +68,26 @@ fun CommissionOptionSection(
                     ) {
                         RadioButton(
                             selected = selectedOption == option,
-                            onClick = { onOptionSelected(option) },
+                            onClick = { 
+                                Log.d("FormDebug", "라디오 버튼 클릭됨 - $title: $option")
+                                onOptionSelected(option) 
+                            },
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = primaryColor,
                                 unselectedColor = Color.LightGray
-                            )
+                            ),
+                            modifier = Modifier.size(16.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = option,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                fontFamily = androidx.compose.ui.text.font.FontFamily.Default
+                            )
                         )
+                        Spacer(modifier = Modifier.width(16.dp))
                     }
                 }
             }

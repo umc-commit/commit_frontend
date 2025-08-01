@@ -11,13 +11,15 @@ import com.example.commit.data.model.MessageType
 fun ChatBubble(
     message: ChatMessage,
     onPayClick: () -> Unit,
+    onFormCheckClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (message.type) {
         MessageType.TEXT -> TextMessageBubble(message = message, modifier = modifier)
         MessageType.COMMISSION_REQUEST -> CommissionRequestBubble(
             requestedAt = message.content,
-            onConfirmClick = { /* TODO */ }
+            onConfirmClick = { /* TODO */ },
+            onFormCheckClick = onFormCheckClick
         )
         MessageType.COMMISSION_ACCEPTED -> CommissionAcceptedBubble(
             typeName = message.content
@@ -50,7 +52,7 @@ fun PreviewChatBubble() {
             ChatMessage("8", "artist", "25.06.02 17:50", System.currentTimeMillis(), MessageType.COMMISSION_COMPLETE, null)
 
         ).forEach { msg ->
-            MessageWithTimestamp(message = msg, currentUserId = currentUserId, onPayClick = {})
+            MessageWithTimestamp(message = msg, currentUserId = currentUserId, onPayClick = {}, onFormCheckClick = {})
         }
     }
 }

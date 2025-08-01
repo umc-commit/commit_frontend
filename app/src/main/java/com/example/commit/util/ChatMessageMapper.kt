@@ -9,14 +9,16 @@ fun chatMessageToChatItem(
     lastMessage: ChatMessage,
     profileImageRes: Int,
     name: String,
-    isNew: Boolean
+    isNew: Boolean,
+    title: String = ""
 ): ChatItem {
     return ChatItem(
         profileImageRes = profileImageRes,
         name = name,
         message = lastMessage.content,
         time = formatRelativeTime(lastMessage.timestamp),
-        isNew = isNew
+        isNew = isNew,
+        title = title
     )
 }
 

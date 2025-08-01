@@ -16,5 +16,6 @@ data class RequestItem(
     val title: String,
     val price: Int,
     val thumbnailImage: String,
-    val artist: Artist
+    val artist: Artist,
+    val createdAt: String = ""
 ) : Parcelable

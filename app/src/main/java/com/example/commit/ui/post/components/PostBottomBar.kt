@@ -92,8 +92,9 @@ fun PostBottomBar(
                         color = if (isRecruiting) Color(0xFF333333) else Color(0xFFE0E0E0),
                         shape = RoundedCornerShape(12.dp)
                     )
-                    .clickable(enabled = isRecruiting) { onApplyClick() },
-                contentAlignment = Alignment.Center
+
+                    .clickable { onApplyClick() },
+                    contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(

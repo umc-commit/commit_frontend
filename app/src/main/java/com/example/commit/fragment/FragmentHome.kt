@@ -8,12 +8,14 @@ import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,6 +29,7 @@ import com.example.commit.adapter.home.HomeCardAdapter
 import com.example.commit.adapter.home.ReviewCardAdapter
 import com.example.commit.databinding.BottomSheetHomeBinding
 import com.example.commit.databinding.FragmentHomeBinding
+import com.example.commit.ui.post.PostScreen
 import com.example.commit.ui.post.components.PostHeaderSection
 import com.example.commit.ui.search.FragmentSearch
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -47,6 +50,33 @@ class FragmentHome : Fragment() {
 
         //전체 거래수 api 연동 시 꼭 지우기
         setBannerTransactionCount(4257)
+
+        // arguments 확인하여 PostHeaderSection 표시
+        val showPostDetail = arguments?.getBoolean("show_post_detail", false) ?: false
+        val postTitle = arguments?.getString("post_title", "그림 커미션") ?: "그림 커미션"
+        
+        if (showPostDetail) {
+            // PostHeaderSection 표시
+            val composeView = ComposeView(requireContext()).apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+                setContent {
+                    PostHeaderSection(
+                        title = postTitle,
+                        tags = listOf("그림", "#LD", "#당일마감"),
+                        minPrice = 10000,
+                        summary = "작업 설명입니다"
+                    )
+                }
+            }
+
+            binding.frameComposeContainer.apply {
+                visibility = View.VISIBLE
+                removeAllViews()
+                addView(composeView)
+            }
+
+            (activity as? MainActivity)?.showBottomNav(false)
+        }
 
         binding.ivProfile.setOnClickListener {
             val intent = Intent(requireContext(), ProfileActivity::class.java)
@@ -91,15 +121,14 @@ class FragmentHome : Fragment() {
         }
 
         val homeReviewClick: (String) -> Unit = { title ->
+            Log.d("FragmentHome", "=== homeReviewClick 호출됨 ===")
+            Log.d("FragmentHome", "title: $title")
 
             val composeView = ComposeView(requireContext()).apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
-                    PostHeaderSection(
-                        title = "그림 커미션",
-                        tags = listOf("그림", "#LD", "#당일마감"),
-                        minPrice = 10000,
-                        summary = "작업 설명입니다"
-                    )
+                    Log.d("FragmentHome", "PostScreen 호출됨")
+                    PostScreen()
                 }
             }
 

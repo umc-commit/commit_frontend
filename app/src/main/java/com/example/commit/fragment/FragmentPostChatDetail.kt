@@ -1,6 +1,7 @@
 package com.example.commit.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,19 +13,23 @@ import androidx.fragment.app.Fragment
 import com.example.commit.R
 import com.example.commit.activity.MainActivity
 import com.example.commit.ui.Theme.CommitTheme
-import com.example.commit.ui.chatlist.ChatDeleteFragment
-import com.example.commit.ui.chatlist.DeleteOptionBottomSheet
 import com.example.commit.ui.chatroom.ChatOptionDialog
 import com.example.commit.ui.chatroom.ChatRoomScreen
-import com.example.commit.ui.FormCheck.FormCheckBottomSheet
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.data.model.FormItem
 import com.example.commit.data.model.RequestItem
 
-class FragmentChatDetail : Fragment() {
+class FragmentPostChatDetail : Fragment() {
+    private var _binding: View? = null
+    
     override fun onResume() {
         super.onResume()
         (activity as? MainActivity)?.showBottomNav(false)
+    }
+    
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onCreateView(
@@ -34,42 +39,10 @@ class FragmentChatDetail : Fragment() {
         val authorName = arguments?.getString("authorName") ?: "익명"
 
         return ComposeView(requireContext()).apply {
+            _binding = this
             setContent {
                 CommitTheme {
                     val showBottomSheet = remember { mutableStateOf(false) }
-                    val showFormCheckSheet = remember { mutableStateOf(false) }
-                    
-                    // FormCheck 데이터 준비
-                    val requestItem = RequestItem(
-                        requestId = 1,
-                        status = "신청완료",
-                        title = chatName,
-                        price = 10000,
-                        thumbnailImage = "",
-                        artist = com.example.commit.data.model.Artist(1, authorName),
-                        createdAt = "2024.06.02"
-                    )
-                    
-                    val formSchema = listOf(
-                        FormItem(
-                            label = "신청 내용",
-                            type = "text",
-                            options = emptyList()
-                        )
-                    )
-                    
-                    val formAnswer = mapOf(
-                        "신청 내용" to "빠르게 작업해주세요!"
-                    )
-                    
-                    val chatItem = ChatItem(
-                        profileImageRes = R.drawable.ic_profile,
-                        name = authorName,
-                        message = "",
-                        title = chatName,
-                        time = "",
-                        isNew = false
-                    )
                     
                     ChatRoomScreen(
                         commissionTitle = chatName,
@@ -80,11 +53,40 @@ class FragmentChatDetail : Fragment() {
                             }
                         },
                         onFormCheckClick = {
-                            showFormCheckSheet.value = true
+                            // Post 채팅방에서는 신청서 확인 기능 비활성화
+                            android.widget.Toast.makeText(
+                                requireContext(),
+                                "신청서 확인 기능은 신청 후에 사용할 수 있습니다",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
                         },
                         onBackClick = {
-                            // 채팅리스트로 돌아가기
-                            if (isAdded && !isDetached) {
+                            // PostHeaderSection으로 돌아가기
+                            Log.d("FragmentPostChatDetail", "뒤로가기 클릭됨")
+                            
+                            android.widget.Toast.makeText(
+                                requireContext(),
+                                "이전 화면으로 돌아갑니다",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                            
+                            try {
+                                // PostHeaderSection을 포함하는 Fragment로 전환
+                                val fragment = com.example.commit.fragment.FragmentHome().apply {
+                                    arguments = Bundle().apply {
+                                        putBoolean("show_post_detail", true)
+                                        putString("post_title", chatName)
+                                    }
+                                }
+                                
+                                if (isAdded && !isDetached) {
+                                    parentFragmentManager.beginTransaction()
+                                        .replace(com.example.commit.R.id.Nav_Frame, fragment)
+                                        .addToBackStack(null)
+                                        .commit()
+                                }
+                            } catch (e: Exception) {
+                                Log.e("FragmentPostChatDetail", "화면 전환 실패", e)
                                 parentFragmentManager.popBackStack()
                             }
                         },
@@ -101,18 +103,8 @@ class FragmentChatDetail : Fragment() {
                             )
                         }
                     }
-                    
-                    if (showFormCheckSheet.value) {
-                        FormCheckBottomSheet(
-                            chatItem = chatItem,
-                            requestItem = requestItem,
-                            formSchema = formSchema,
-                            formAnswer = formAnswer,
-                            onDismiss = { showFormCheckSheet.value = false }
-                        )
-                    }
                 }
             }
         }
     }
-}
+} 
