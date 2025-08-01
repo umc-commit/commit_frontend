@@ -230,10 +230,7 @@ fun RequestDetailItem(
                                     it.clickable {
                                         when (label) {
                                             "후기작성" -> {
-                                                val intent = Intent(context, ReviewWriteActivity::class.java)
-                                                intent.putExtra("requestId", item.requestId)
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                context.startActivity(intent)
+
                                             }
                                             "거래완료" -> {
                                                 // TODO: 거래완료 처리

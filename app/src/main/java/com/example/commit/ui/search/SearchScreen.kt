@@ -44,8 +44,12 @@ fun SearchScreen(
             onClearClick = { searchQuery = "" },
             onHomeClick = {},
             onFilterClick = {},
-            onFollowToggle = {}
+            onFollowToggle = {},
+            onCommissionClick = { commission ->
+                {}
+            }
         )
+
     } else {
         Column(
             modifier = Modifier

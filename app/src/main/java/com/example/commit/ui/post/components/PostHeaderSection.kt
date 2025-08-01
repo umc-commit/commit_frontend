@@ -53,29 +53,34 @@ fun PostHeaderSection(
                     .background(Color.White)
             ) {
                 val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
                 Image(
                     painter = painterResource(id = R.drawable.ic_left_vector),
                     contentDescription = "뒤로가기",
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .padding(start = 16.dp)
+                        .padding(start = 20.dp)
+                        .offset(y = 12.dp)
                         .size(24.dp)
                         .clickable {
                             backDispatcher?.onBackPressed()
                         }
                 )
 
+                // 텍스트도 약간 아래로
                 Text(
                     text = title,
                     style = CommitTypography.headlineSmall,
                     color = Color.Black,
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .offset(y = 12.dp)
                 )
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 썸네일 (임시 박스)
+            // 썸네일
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

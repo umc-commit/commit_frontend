@@ -15,23 +15,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTypography
 import com.example.commit.ui.search.components.Tag
+import java.io.Serializable
+
 
 data class Commission(
     val nickname: String,
     val title: String,
     val tags: List<String>
-)
+): Serializable
 
 @Composable
-fun CommissionCard(commission: Commission) {
+fun CommissionCard(
+    commission: Commission,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .width(160.dp)
             .height(180.dp),
         shape = RoundedCornerShape(12.dp),
@@ -110,14 +114,3 @@ fun CommissionCard(commission: Commission) {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
-@Composable
-fun CommissionCardPreview() {
-    CommissionCard(
-        Commission(
-            nickname = "키르",
-            title = "낙서 타임 커미션",
-            tags = listOf("그림", "#LD", "#커플")
-        )
-    )
-}

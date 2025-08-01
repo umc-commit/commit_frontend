@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ButtonDefaults.outlinedButtonBorder
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,8 +20,10 @@ import androidx.compose.ui.unit.dp
 import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTypography
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterBottomSheet(
+    onDismiss: () -> Unit,
     selectedSort: String,
     onSortChange: (String) -> Unit,
     minPrice: String,
@@ -29,19 +33,19 @@ fun FilterBottomSheet(
     selectedDeadline: String,
     onDeadlineChange: (String) -> Unit,
     onReset: () -> Unit,
-    onApply: () -> Unit
+    onApply: () -> Unit,
 ) {
-    Surface(
-        shape = RoundedCornerShape(topStart = 0.dp, topEnd = 20.dp),
-        tonalElevation = 0.dp,
-        color = Color.White,
-        modifier = Modifier.fillMaxWidth()
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        tonalElevation = 0.dp
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp)
-                .background(Color.White)
+                .heightIn(min = 800.dp)
+                .padding(vertical = 32.dp, horizontal = 24.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -160,7 +164,7 @@ fun FilterBottomSheet(
                         containerColor = Color.White,
                         contentColor = Color(0xFF333333)
                     ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
+                    border = outlinedButtonBorder.copy(
                         brush = androidx.compose.ui.graphics.SolidColor(Color(0xFFE0E0E0))
                     )
                 ) {
