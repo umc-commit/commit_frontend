@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -24,20 +25,31 @@ fun ChatMessageList(
     messages: List<ChatMessage>,
     currentUserId: String,
     onPayClick: () -> Unit,
+    onFormCheckClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
 
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) {
-            listState.scrollToItem(messages.size - 1)
+    // 메시지 개수 제한으로 메모리 사용량 최적화
+    val limitedMessages = remember(messages) {
+        messages.takeLast(50) // 최근 50개 메시지만 표시
+    }
+
+    LaunchedEffect(limitedMessages.size) {
+        if (limitedMessages.isNotEmpty()) {
+            try {
+                listState.scrollToItem(limitedMessages.size - 1)
+            } catch (e: Exception) {
+                // 스크롤 실패 시 안전하게 처리
+            }
         }
     }
+    
     LazyColumn(state = listState,modifier = modifier.background(color = Color(0xFFF5F5F5))
         .imePadding()) {
         val itemsWithDate = buildList<Any> {
             var lastDate: String? = null
-            for (message in messages) {
+            for (message in limitedMessages) {
                 val currentDate = formatDateHeader(message.timestamp)
                 if (lastDate != currentDate) {
                     lastDate = currentDate
@@ -71,7 +83,8 @@ fun ChatMessageList(
                     MessageWithTimestamp(
                         message = item,
                         currentUserId = currentUserId,
-                        onPayClick = onPayClick
+                        onPayClick = onPayClick,
+                        onFormCheckClick = onFormCheckClick
                     )
 
                     lastMessage = item

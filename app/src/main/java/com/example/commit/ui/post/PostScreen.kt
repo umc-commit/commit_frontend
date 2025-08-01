@@ -1,5 +1,8 @@
 package com.example.commit.ui.post
 
+import android.content.Intent
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,12 +21,18 @@ import com.example.commit.ui.post.components.PostBottomBar
 import com.example.commit.ui.post.components.PostHeaderSection
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.zIndex
+import com.example.commit.activity.CommissionFormActivity
 
 
 @Composable
 fun PostScreen() {
+    Log.d("PostScreen", "=== PostScreen 시작됨 ===")
+    
+    val context = LocalContext.current
     var isSheetVisible by remember { mutableStateOf(false) }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -46,7 +55,12 @@ fun PostScreen() {
         PostBottomBar(
             isRecruiting = true,
             remainingSlots = 11,
-            onApplyClick = { /* 신청 클릭 처리 */ },
+            onApplyClick = {
+                    val intent = Intent(context, CommissionFormActivity::class.java)
+                    Log.d("PostScreen", "Intent 생성됨: $intent")
+                    context.startActivity(intent)
+                    Log.d("PostScreen", "startActivity 호출됨")
+            },
             onChatClick = { isSheetVisible = true },
             modifier = Modifier
                 .align(Alignment.BottomCenter)

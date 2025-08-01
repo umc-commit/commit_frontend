@@ -19,14 +19,14 @@ import com.example.commit.ui.Theme.CommitTheme
 fun CommissionTopBar(onBackClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
-            .width(400.dp)
+            .fillMaxWidth()
             .height(100.dp)
             .background(MaterialTheme.colorScheme.primary)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 28.dp, top = 50.dp), // Figma 기준 위치
+                .padding(start = 28.dp, top = 50.dp, bottom = 28.dp), // Figma 기준 위치
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
@@ -40,7 +40,7 @@ fun CommissionTopBar(onBackClick: () -> Unit = {}) {
                 )
             }
 
-            Spacer(modifier = Modifier.width(104.dp)) // 156dp - 28dp - 24dp
+            Spacer(modifier = Modifier.width(105.dp))
 
             Text(
                 text = "커미션 신청",

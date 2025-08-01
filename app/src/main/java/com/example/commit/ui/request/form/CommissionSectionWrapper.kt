@@ -5,8 +5,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun CommissionSectionWrapper(
@@ -23,8 +25,10 @@ fun CommissionSectionWrapper(
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             Text(
                 text = "$index. $title",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Default
                 )
             )
             if (isRequired) {
@@ -32,7 +36,11 @@ fun CommissionSectionWrapper(
                 Text(
                     text = "*",
                     color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.titleMedium
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Default
+                    )
                 )
             }
         }

@@ -14,7 +14,7 @@ class ChatViewModel : ViewModel() {
     var message by mutableStateOf("")
         private set
 
-    // 채팅 메시지 리스트
+    // 채팅 메시지 리스트 - 최대 100개로 제한
     var chatMessages by mutableStateOf(listOf<ChatMessage>())
         private set
 
@@ -34,12 +34,14 @@ class ChatViewModel : ViewModel() {
             amount = null
         )
 
-        chatMessages = chatMessages + newChat
-        println("보낸 메시지: $message")
+        // 메시지 개수 제한 (메모리 누수 방지)
+        val updatedMessages = (chatMessages + newChat).takeLast(100)
+        chatMessages = updatedMessages
         message = ""
     }
 
     init {
+        // 초기 메시지 설정
         chatMessages = listOf(
             ChatMessage("1", "me", "안녕하세요", System.currentTimeMillis(), MessageType.TEXT, null),
             ChatMessage("2", "artist", "반가워요!", System.currentTimeMillis(), MessageType.TEXT, null),
@@ -52,5 +54,10 @@ class ChatViewModel : ViewModel() {
         )
     }
 
-
+    override fun onCleared() {
+        super.onCleared()
+        // ViewModel 정리 시 메모리 해제
+        chatMessages = emptyList()
+        message = ""
+    }
 }

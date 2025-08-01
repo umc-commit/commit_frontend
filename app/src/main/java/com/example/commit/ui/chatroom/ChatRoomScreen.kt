@@ -25,11 +25,17 @@ fun ChatRoomScreen(
     commissionTitle: String,
     authorName: String,
     onPayClick: () -> Unit,
+    onFormCheckClick: () -> Unit,
     onBackClick: () -> Unit,
     onSettingClick: () -> Unit,
     viewModel: ChatViewModel = viewModel()
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
+
+    // 메시지 목록을 안전하게 관리
+    val messages by remember(viewModel.chatMessages) {
+        mutableStateOf(viewModel.chatMessages)
+    }
 
     Column(
         modifier = Modifier
@@ -53,9 +59,10 @@ fun ChatRoomScreen(
 
         // 메시지 목록
         ChatMessageList(
-            messages = viewModel.chatMessages,
+            messages = messages,
             currentUserId = viewModel.currentUserId,
             onPayClick = onPayClick,
+            onFormCheckClick = onFormCheckClick,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
@@ -114,6 +121,7 @@ fun PreviewChatRoomScreen() {
                 messages = dummyMessages,
                 currentUserId = "me",
                 onPayClick = { println("결제 클릭") },
+                onFormCheckClick = { println("신청서 확인하기 클릭") },
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()

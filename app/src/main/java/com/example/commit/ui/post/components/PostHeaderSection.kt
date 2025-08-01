@@ -1,5 +1,7 @@
 package com.example.commit.ui.post.components
 
+import android.content.Intent
+import android.util.Log
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,11 +16,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.commit.R
+import com.example.commit.activity.CommissionFormActivity
+import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.ui.Theme.CommitTypography
+import android.os.Bundle
 
 @Composable
 fun PostHeaderSection(
@@ -29,6 +35,8 @@ fun PostHeaderSection(
     imageCount: Int = 3,
     currentIndex: Int = 0
 ) {
+    val context = LocalContext.current
+
     Box(modifier = Modifier.fillMaxSize()) {
 
         Column(
@@ -180,8 +188,47 @@ fun PostHeaderSection(
         PostBottomBar(
             isRecruiting = true,
             remainingSlots = 11,
-            onApplyClick = { /* TODO */ },
-            onChatClick = { /* TODO */ },
+            onApplyClick = { 
+                val intent = Intent(context, CommissionFormActivity::class.java)
+                Log.d("PostScreen", "Intent 생성됨: $intent")
+                context.startActivity(intent)
+                Log.d("PostScreen", "startActivity 호출됨") 
+            },
+            onChatClick = { 
+                // 채팅방으로 전환 (안전한 방법)
+                Log.d("PostScreen", "채팅 버튼 클릭됨")
+                
+                // Toast 메시지로 피드백 제공
+                android.widget.Toast.makeText(
+                    context,
+                    "채팅방으로 이동합니다",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+                
+                // Fragment 전환 (안전하게)
+                try {
+                    val fragment = FragmentPostChatDetail().apply {
+                        arguments = Bundle().apply {
+                            putString("chatName", title)
+                            putString("authorName", "키르")
+                        }
+                    }
+                    
+                    if (context is androidx.fragment.app.FragmentActivity) {
+                        context.supportFragmentManager.beginTransaction()
+                            .replace(com.example.commit.R.id.Nav_Frame, fragment)
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                } catch (e: Exception) {
+                    Log.e("PostScreen", "채팅방 전환 실패", e)
+                    android.widget.Toast.makeText(
+                        context,
+                        "채팅방 전환에 실패했습니다",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
