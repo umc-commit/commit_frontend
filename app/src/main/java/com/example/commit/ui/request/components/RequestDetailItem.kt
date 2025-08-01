@@ -29,7 +29,8 @@ import com.example.commit.ui.Theme.CommitTypography
 fun RequestDetailItem(
     item: RequestItem,
     onFormAnswerClick: () -> Unit = {}
-) {
+)
+{
     val context = LocalContext.current
     val isPending = item.status == "PENDING"
     val isInProgress = item.status == "IN_PROGRESS" || item.status == "ACCEPTED"
@@ -47,7 +48,8 @@ fun RequestDetailItem(
 
     val statusColor = when {
         isInProgress -> Color(0xFF17D5C6)
-        isCancel || isReject -> Color(0xFFFF4D4D)
+        isCancel -> Color(0xFFFF4D4D)
+        isReject -> Color(0xFFFF4D4D)
         else -> Color.Black
     }
 
@@ -91,7 +93,7 @@ fun RequestDetailItem(
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
-                    text = item.artist.nickname,
+                    text = "${item.artist.nickname}",
                     style = CommitTypography.labelSmall,
                     color = Color.Gray
                 )
@@ -110,125 +112,148 @@ fun RequestDetailItem(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        when {
-            isPending -> {
-                // 신청서 보기
-                ActionButton(
-                    label = "신청서 보기",
-                    backgroundColor = Color(0xFF4D4D4D),
-                    textColor = Color.White
-                ) {
-                    // TODO: 신청서 보기
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // 하단 버튼 2개
-                ActionButtonRow(
-                    buttons = listOf("신청 취소", "문의하기"),
-                    disableFirst = true
-                ) { label ->
-                    when (label) {
-                        "문의하기" -> { /* TODO */ }
-                    }
-                }
+        if (isPending) {
+            // 신청서 보기 버튼
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFF4D4D4D))
+                    .clickable {
+                        // TODO: 신청서 보기 동작
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "신청서 보기",
+                    style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White
+                )
             }
-            isCancel || isReject -> {
-                ActionButton(
-                    label = "신청서 보기",
-                    backgroundColor = Color(0xFF4D4D4D),
-                    textColor = Color.White
-                ) {
-                    onFormAnswerClick()
-                }
-            }
-            else -> {
-                // 작업물 확인
-                ActionButton(
-                    label = "작업물 확인",
-                    backgroundColor = Color(0xFF4D4D4D),
-                    textColor = Color.White
-                ) {
-                    // TODO: 작업물 확인
-                }
-                Spacer(modifier = Modifier.height(12.dp))
 
-                // 하단 버튼 3개
-                ActionButtonRow(
-                    buttons = listOf("거래완료", "후기작성", "문의하기"),
-                    disableFirst = !isInProgress
-                ) { label ->
-                    when (label) {
-                        "후기작성" -> {
-                            val intent = Intent(context, ReviewWriteActivity::class.java)
-                            intent.putExtra("requestId", item.requestId)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            context.startActivity(intent)
-                        }
-                        "거래완료" -> { /* TODO */ }
-                        "문의하기" -> { /* TODO */ }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // 신청 취소 / 문의하기
+            Row(modifier = Modifier.fillMaxWidth()) {
+                listOf("신청 취소", "문의하기").forEachIndexed { index, label ->
+                    val isCancel = label == "신청 취소"
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp)
+                            .padding(horizontal = 4.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFF0F0F0))
+                            .clickable {
+                                // TODO: 클릭 동작
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = label,
+                            style = CommitTypography.labelSmall,
+                            color = if (isCancel) Color(0xFFFF4D4D) else Color.Black
+                        )
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun ActionButton(
-    label: String,
-    backgroundColor: Color,
-    textColor: Color,
-    onClick: (() -> Unit)? = null
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(backgroundColor)
-            .let { if (onClick != null) it.clickable { onClick() } else it },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-            color = textColor
-        )
-    }
-}
-
-@Composable
-fun ActionButtonRow(
-    buttons: List<String>,
-    disableFirst: Boolean = false,
-    onClick: (String) -> Unit
-) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        buttons.forEachIndexed { index, label ->
-            val isDisabled = index == 0 && disableFirst
-            val isCancelBtn = label.contains("취소")
-            val backgroundColor = if (isDisabled) Color(0xFFEDEDED) else Color(0xFFF0F0F0)
-            val textColor = when {
-                isDisabled -> Color(0xFFB0B0B0)
-                isCancelBtn -> Color(0xFFFF4D4D)
-                else -> Color.Black
-            }
-
+        else if(isCancel || isReject){
+            // 신청서 보기 버튼
             Box(
                 modifier = Modifier
-                    .weight(1f)
-                    .height(36.dp)
-                    .padding(horizontal = 4.dp)
+                    .fillMaxWidth()
+                    .height(40.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(backgroundColor)
-                    .let { if (!isDisabled) it.clickable { onClick(label) } else it },
+                    .background(Color(0xFF4D4D4D))
+                    .clickable {
+                        onFormAnswerClick()
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = label,
-                    style = CommitTypography.labelSmall,
-                    color = textColor
+                    text = "신청서 보기",
+                    style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White
                 )
+            }
+        }
+
+        else {
+            // 작업물 확인 버튼
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFF4D4D4D))
+                    .clickable {
+
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "작업물 확인",
+                    style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            // 기존 하단 버튼 3개 (거래완료 / 후기작성 / 문의하기)
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                listOf("거래완료", "후기작성", "문의하기").forEachIndexed { index, label ->
+                    val isFirst = index == 0
+                    val disableFirst = isFirst && !isInProgress
+
+                    val buttonBackground = if (disableFirst) Color(0xFFEDEDED) else Color(0xFFF0F0F0)
+
+                    val textColor = when {
+                        label == "후기작성" && isDone -> Color(0xFF0DD3BF)
+                        disableFirst -> Color(0xFFB0B0B0)
+                        else -> Color.Black
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp)
+                            .padding(horizontal = 4.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(buttonBackground)
+                            .let {
+                                if (!disableFirst) {
+                                    it.clickable {
+                                        when (label) {
+                                            "후기작성" -> {
+                                                val intent = Intent(context, ReviewWriteActivity::class.java)
+                                                intent.putExtra("requestId", item.requestId)
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                context.startActivity(intent)
+                                            }
+                                            "거래완료" -> {
+                                                // TODO: 거래완료 처리
+                                            }
+                                            "문의하기" -> {
+                                                // TODO: 문의하기 처리
+                                            }
+                                        }
+                                    }
+                                } else it
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = label,
+                            style = CommitTypography.labelSmall,
+                            color = textColor
+                        )
+                    }
+                }
             }
         }
     }

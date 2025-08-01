@@ -107,6 +107,9 @@ class FragmentBookmark : Fragment() {
                 isEditMode = false
                 binding.bookmarkDeletebar.visibility = View.GONE
                 binding.btnEdit.setImageResource(R.drawable.ic_bm_pencil)
+
+                // 하단바 다시 보이게
+                (requireActivity() as MainActivity).showBottomNav(true)
                 applyFilterAndSort()
             }
         }

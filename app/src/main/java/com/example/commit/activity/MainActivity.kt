@@ -24,22 +24,35 @@ class MainActivity : AppCompatActivity() {
 
         // Intent에서 show_signup_bottom_sheet 값 가져오기
         val showSignupBottomSheet = intent.getBooleanExtra("show_signup_bottom_sheet", false)
+        val openFragment = intent.getStringExtra("openFragment")
 
         // 액티비티가 처음 생성될 때만 초기 프래그먼트를 로드하고 바텀 시트 인자를 전달
         if (savedInstanceState == null) {
-            val initialFragment = FragmentHome().apply {
-                arguments = Bundle().apply {
-                    putBoolean("show_signup_bottom_sheet", showSignupBottomSheet)
-                }
-            }
-            supportFragmentManager
-                .beginTransaction()
-                .replace(binding.NavFrame.id, initialFragment)
-                .commitAllowingStateLoss()
+            if (openFragment == "chat") {
+                // 채팅 프래그먼트 바로 열기
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(binding.NavFrame.id, FragmentChat())
+                    .commitAllowingStateLoss()
 
-            // 바텀 시트가 한 번 띄워진 후에는 Intent에서 해당 값 제거
-            if (showSignupBottomSheet) {
-                intent.removeExtra("show_signup_bottom_sheet")
+                // 하단 네비게이션 채팅 탭 선택
+                binding.BottomNavi.selectedItemId = R.id.nav_chat
+
+            } else {
+                // 기본 홈 프래그먼트 로드
+                val initialFragment = FragmentHome().apply {
+                    arguments = Bundle().apply {
+                        putBoolean("show_signup_bottom_sheet", showSignupBottomSheet)
+                    }
+                }
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(binding.NavFrame.id, initialFragment)
+                    .commitAllowingStateLoss()
+
+                if (showSignupBottomSheet) {
+                    intent.removeExtra("show_signup_bottom_sheet")
+                }
             }
         }
 
