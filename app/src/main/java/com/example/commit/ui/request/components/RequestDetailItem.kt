@@ -1,5 +1,6 @@
 package com.example.commit.ui.request.components
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -23,9 +25,6 @@ import com.example.commit.data.model.RequestItem
 import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
-<<<<<<< Updated upstream
-fun RequestDetailItem(item: RequestItem) {
-=======
 fun RequestDetailItem(
     item: RequestItem,
     onFormAnswerClick: () -> Unit = {}
@@ -33,7 +32,6 @@ fun RequestDetailItem(
  {
     val context = LocalContext.current
     val isPending = item.status == "PENDING"
->>>>>>> Stashed changes
     val isInProgress = item.status == "IN_PROGRESS" || item.status == "ACCEPTED"
     val isDone = item.status == "DONE"
     val isCancel = item.status == "CANCEL"
@@ -140,29 +138,6 @@ fun RequestDetailItem(
                 listOf("신청 취소", "문의하기").forEachIndexed { index, label ->
                     val isCancel = label == "신청 취소"
 
-<<<<<<< Updated upstream
-                val buttonBackground = if (disableFirst) Color(0xFFEDEDED) else Color(0xFFF0F0F0)
-                val textColor = if (disableFirst) Color(0xFFB0B0B0) else Color.Black
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(36.dp)
-                        .padding(horizontal = 4.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(buttonBackground)
-                        .then(if (!disableFirst) Modifier.clickable { /* TODO */ } else Modifier),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = label,
-                        style = CommitTypography.labelSmall,
-                        color = textColor
-                    )
-                }
-            }
-        }
-=======
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -254,10 +229,7 @@ fun RequestDetailItem(
                                     it.clickable {
                                         when (label) {
                                             "후기작성" -> {
-                                                val intent = Intent(context, ReviewWriteActivity::class.java)
-                                                intent.putExtra("requestId", item.requestId)
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                context.startActivity(intent)
+
                                             }
                                             "거래완료" -> {
                                                 // TODO: 거래완료 처리
@@ -280,7 +252,6 @@ fun RequestDetailItem(
                 }
             }
         }
->>>>>>> Stashed changes
     }
 }
 

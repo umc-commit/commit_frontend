@@ -4,10 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -15,16 +12,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.commit.ui.request.components.Commission
 import com.example.commit.ui.request.components.CommissionCard
-import com.example.commit.ui.search.components.FilterButtonRow
+import com.example.commit.ui.search.components.*
 import com.example.commit.ui.search.components.FilterBottomSheet
-import com.example.commit.ui.search.components.SearchInputBar
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,7 +32,8 @@ fun SearchResultScreen(
     onBackClick: () -> Unit = {},
     onClearClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
-    onFilterClick: (String) -> Unit = {}
+    onFilterClick: (String) -> Unit = {},
+    onCommissionClick: (Commission) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -63,6 +58,7 @@ fun SearchResultScreen(
             item(span = { GridItemSpan(2) }) {
                 Column {
                     Spacer(modifier = Modifier.height(20.dp))
+
                     SearchInputBar(
                         query = query,
                         onQueryChange = { query = it },
@@ -123,37 +119,43 @@ fun SearchResultScreen(
             }
 
             items(commissions) { commission ->
-                CommissionCard(commission = commission)
-            }
-        }
-
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showBottomSheet = false },
-                sheetState = bottomSheetState,
-                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
-            ) {
-                FilterBottomSheet(
-                    selectedSort = selectedSort,
-                    onSortChange = { selectedSort = it },
-                    minPrice = minPrice,
-                    maxPrice = maxPrice,
-                    onMinPriceChange = { minPrice = it },
-                    onMaxPriceChange = { maxPrice = it },
-                    selectedDeadline = selectedDeadline,
-                    onDeadlineChange = { selectedDeadline = it },
-                    onReset = {
-                        selectedSort = "최신순"
-                        minPrice = ""
-                        maxPrice = ""
-                        selectedDeadline = "전체보기"
-                    },
-                    onApply = {
-                        showBottomSheet = false
-                        // TODO: 필터 적용 로직 처리
+                CommissionCard(
+                    commission = commission,
+                    modifier = Modifier.clickable {
+                        onCommissionClick(commission) // 👉 외부 콜백 호출
                     }
                 )
             }
+        }
+    }
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = bottomSheetState,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+        ) {
+            FilterBottomSheet(
+                onDismiss = { showBottomSheet = false },
+                selectedSort = selectedSort,
+                onSortChange = { selectedSort = it },
+                minPrice = minPrice,
+                maxPrice = maxPrice,
+                onMinPriceChange = { minPrice = it },
+                onMaxPriceChange = { maxPrice = it },
+                selectedDeadline = selectedDeadline,
+                onDeadlineChange = { selectedDeadline = it },
+                onReset = {
+                    selectedSort = "최신순"
+                    minPrice = ""
+                    maxPrice = ""
+                    selectedDeadline = "전체보기"
+                },
+                onApply = {
+                    showBottomSheet = false
+                    // TODO: 필터 적용
+                }
+            )
         }
     }
 }
@@ -192,34 +194,4 @@ fun FollowOnlyToggle(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SearchResultScreenPreview() {
-    var selectedFilters by remember { mutableStateOf(setOf("카테고리")) }
-    var checked by remember { mutableStateOf(true) }
-
-    val dummyCommissions = List(10) {
-        Commission(
-            nickname = "작가$it",
-            title = "테스트 커미션 $it",
-            tags = listOf("그림", "#예시", "#귀엽음")
-        )
-    }
-
-    SearchResultScreen(
-        keyword = "커미션",
-        commissions = dummyCommissions,
-        selectedFilters = selectedFilters,
-        showFollowOnly = checked,
-        onFilterClick = { label ->
-            selectedFilters = if (selectedFilters.contains(label)) {
-                selectedFilters - label
-            } else {
-                selectedFilters + label
-            }
-        },
-        onFollowToggle = { checked = it }
-    )
 }

@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.commit.ui.Theme.CommitTypography
 
 enum class TabType {
@@ -72,14 +73,16 @@ fun PostDetailTabSection(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
+                        .padding(horizontal = 20.dp, vertical = 16.dp)
                 ) {
+                    Spacer(modifier = Modifier.height(25.dp))
                     Text(
                         text = "당일 내로 작업 가능합니다!\n" +
                                 "빠르게 받아보시고 싶은 분들은 편하게 문의 주세요 :)\n\n" +
                                 "신청 시에 캐릭터 참고 이미지 첨부해 주시면 되고,\n" +
                                 "추가로 원하시는 포즈나 표정 함께 말씀해 주세요!",
                         style = CommitTypography.bodyMedium,
+                        fontSize = 12.sp,
                         color = Color(0xFF333333)
                     )
                 }
