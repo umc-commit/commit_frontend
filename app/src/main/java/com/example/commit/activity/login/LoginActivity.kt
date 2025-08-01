@@ -14,7 +14,7 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.kakaoLoginButton.setOnClickListener {
+        binding.googleLogin.setOnClickListener {
             val intent = Intent(this, AgreeFirstActivity::class.java)
             startActivity(intent)
         }
