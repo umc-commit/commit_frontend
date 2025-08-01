@@ -11,7 +11,7 @@
 
  ## 화면 구현방식(Compose+XML)
  - Jetpack Compose : 채팅, 결제, 신청함, 신청서, 후기, 게시글, 포인트충전, 검색화면
- - XML(ConstraintLayout) : 홈화면, 마이페이지, 로그인, 북마크, 알림화면
+ - XML(ConstraintLayout) : 홈화면, 마이페이지, 로그인, 북마크, 알림화면, 작가_프로필
 
 ## 🧑‍💻 Git 브랜치 전략
 - 기능 단위 브랜치로 분리
