@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:text="커미션 리포트"
+        android:textColor="@color/black1"
+        android:textSize="18dp"
+        android:includeFontPadding="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 뒤로가기 -->
+    <ImageView
+        android:id="@+id/iv_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="29dp"
+        android:src="@drawable/ic_back"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tv_title" />
+
+    <View
+        android:id="@+id/bg_mint_area"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/mint3"
+        app:layout_constraintTop_toBottomOf="@id/tv_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="24dp" />
+
+    <!-- 서브 텍스트 -->
+    <TextView
+        android:id="@+id/tv_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="로지님의 6월 리포트예요!"
+        android:textSize="18sp"
+        android:fontFamily="@font/notosanskr_bold"
+        android:textColor="@color/black"
+        android:includeFontPadding="false"
+        android:layout_marginTop="43dp"
+        android:layout_marginStart="28dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_title"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 설명 -->
+    <TextView
+        android:id="@+id/tv_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="리포트는 매월 1일 갱신돼요"
+        android:textSize="10sp"
+        android:includeFontPadding="false"
+        android:fontFamily="@font/notosanskr_regular"
+        android:textColor="@color/black2"
+        android:layout_marginTop="3dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_subtitle"
+        app:layout_constraintStart_toStartOf="@id/tv_subtitle" />
+
+    <!-- 캐릭터 이미지 -->
+    <ImageView
+        android:id="@+id/iv_character"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:src="@drawable/report_cat_1"
+        app:layout_constraintTop_toBottomOf="@id/tv_description"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 배지 -->
+    <TextView
+        android:id="@+id/tv_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="커미션계의 VIP"
+        android:textSize="12sp"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:textColor="@color/white"
+        android:background="@drawable/bg_report_black"
+        android:includeFontPadding="false"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/iv_character"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_question"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_question"
+        android:layout_marginStart="5dp"
+        app:layout_constraintTop_toTopOf="@id/tv_badge"
+        app:layout_constraintBottom_toBottomOf="@id/tv_badge"
+        app:layout_constraintStart_toEndOf="@id/tv_badge"/>
+
+    <!-- 인용 문구 -->
+    <TextView
+        android:id="@+id/tv_quote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="“작가님, 이번 커미션 최고였어요!”\n정성 가득한 피드백으로 건강한 커미션 문화를 만들어요."
+        android:textSize="12sp"
+        android:fontFamily="@font/notosanskr_regular"
+        android:textColor="@color/black"
+        android:includeFontPadding="false"
+        android:layout_marginTop="13dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/tv_badge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 2x2 통계 카드 -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/statistics_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="55dp"
+        android:layout_marginEnd="55dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_quote"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- 카드 1: 주 신청 카테고리 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/card_category"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/card_author"
+            android:layout_marginEnd="18dp">
+
+            <TextView
+                android:id="@+id/label_category"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="주 신청 카테고리"
+                android:textSize="12sp"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textColor="@color/black"
+                android:includeFontPadding="false"
+                android:drawableEnd="@drawable/ic_post"
+                android:drawablePadding="4dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <ImageView
+                android:id="@+id/bg_category"
+                android:layout_width="0dp"
+                android:layout_height="75dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/bg_report_white"
+                app:layout_constraintTop_toBottomOf="@id/label_category"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_category"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="그림 (10건)"
+                android:textSize="12sp"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textColor="@color/black"
+                android:includeFontPadding="false"
+                android:layout_marginStart="6dp"
+                app:layout_constraintTop_toTopOf="@id/bg_category"
+                app:layout_constraintBottom_toBottomOf="@id/bg_category"
+                app:layout_constraintStart_toStartOf="@id/bg_category"
+                app:layout_constraintEnd_toEndOf="@id/bg_category"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 카드 2: 단골 작가 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/card_author"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/card_category"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/label_author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="단골 작가"
+                android:textSize="12sp"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textColor="@color/black"
+                android:includeFontPadding="false"
+                android:drawableEnd="@drawable/ic_gift"
+                android:drawablePadding="4dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <ImageView
+                android:id="@+id/bg_author"
+                android:layout_width="0dp"
+                android:layout_height="75dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/bg_report_white"
+                app:layout_constraintTop_toBottomOf="@id/label_author"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/iv_profile"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="30dp"
+                android:src="@drawable/ic_pf_charac2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/bg_author"
+                app:layout_constraintBottom_toBottomOf="@id/bg_author"/>
+
+            <TextView
+                android:id="@+id/tv_author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="키르"
+                android:textSize="12sp"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textColor="@color/black"
+                android:includeFontPadding="false"
+                android:layout_marginStart="6dp"
+                app:layout_constraintTop_toTopOf="@id/bg_author"
+                app:layout_constraintBottom_toBottomOf="@id/bg_author"
+                app:layout_constraintStart_toEndOf="@id/iv_profile"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 카드 3: 사용 포인트 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/card_point"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            app:layout_constraintTop_toBottomOf="@id/card_category"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/card_review"
+            android:layout_marginEnd="18dp">
+
+            <TextView
+                android:id="@+id/label_point"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="사용 포인트"
+                android:textSize="12sp"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textColor="@color/black"
+                android:includeFontPadding="false"
+                android:drawableEnd="@drawable/ic_money"
+                android:drawablePadding="4dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <ImageView
+                android:id="@+id/bg_point"
+                android:layout_width="0dp"
+                android:layout_height="75dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/bg_report_white"
+                app:layout_constraintTop_toBottomOf="@id/label_point"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_point"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="177,000P"
+                android:textSize="12sp"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textColor="@color/black"
+                android:includeFontPadding="false"
+                android:layout_marginStart="6dp"
+                app:layout_constraintTop_toTopOf="@id/bg_point"
+                app:layout_constraintBottom_toBottomOf="@id/bg_point"
+                app:layout_constraintStart_toStartOf="@id/bg_point"
+                app:layout_constraintEnd_toEndOf="@id/bg_point"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 카드 4: 후기 작성률 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/card_review"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginStart="18dp"
+            app:layout_constraintTop_toBottomOf="@id/card_author"
+            app:layout_constraintStart_toEndOf="@id/card_point"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/label_review"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="후기 작성률"
+                android:textSize="12sp"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textColor="@color/black"
+                android:includeFontPadding="false"
+                android:drawableEnd="@drawable/ic_pencil"
+                android:drawablePadding="4dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <ImageView
+                android:id="@+id/bg_review"
+                android:layout_width="0dp"
+                android:layout_height="75dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/bg_report_white"
+                app:layout_constraintTop_toBottomOf="@id/label_review"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_review"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="77.7%"
+                android:textSize="12sp"
+                android:fontFamily="@font/notosanskr_semibold"
+                android:textColor="@color/black"
+                android:includeFontPadding="false"
+                android:layout_marginStart="6dp"
+                app:layout_constraintTop_toTopOf="@id/bg_review"
+                app:layout_constraintBottom_toBottomOf="@id/bg_review"
+                app:layout_constraintStart_toStartOf="@id/bg_review"
+                app:layout_constraintEnd_toEndOf="@id/bg_review"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/tv_save_tip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="리포트를 저장해서 친구에게 자랑해보세요!"
+        android:textSize="14sp"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:textColor="@color/black"
+        android:includeFontPadding="false"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/statistics_container"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 저장하기 버튼 -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_save"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginEnd="28dp"
+        android:layout_marginBottom="20dp"
+        android:text="저장하기"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:fontFamily="@font/notosanskr_semibold"
+        android:background="@drawable/btn_report_black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

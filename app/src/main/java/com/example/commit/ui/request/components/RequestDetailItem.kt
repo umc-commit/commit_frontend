@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.commit.R
+import com.example.commit.activity.ReviewWriteActivity
 import com.example.commit.data.model.Artist
 import com.example.commit.data.model.RequestItem
 import com.example.commit.ui.Theme.CommitTypography
@@ -29,7 +30,7 @@ fun RequestDetailItem(
     item: RequestItem,
     onFormAnswerClick: () -> Unit = {}
 )
- {
+{
     val context = LocalContext.current
     val isPending = item.status == "PENDING"
     val isInProgress = item.status == "IN_PROGRESS" || item.status == "ACCEPTED"

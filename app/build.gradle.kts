@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
+    id("com.google.gms.google-services")
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -69,6 +71,8 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.compose.runtime.livedata)
     debugImplementation(libs.compose.ui.tooling)
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.7.7")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.7.7")
 
 
     // 테스트
@@ -77,4 +81,13 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation("de.hdodenhof:circleimageview:3.1.0")
+
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
+
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
+    
+    // Gson for JSON serialization
+    implementation("com.google.code.gson:gson:2.10.1")
 }

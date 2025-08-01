@@ -1,0 +1,144 @@
+
+package com.example.commit.ui.chatroom
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.commit.data.model.ChatMessage
+import com.example.commit.data.model.MessageType
+import com.example.commit.ui.Theme.CommitTheme
+import com.example.commit.ui.chatroom.ChatMessageList
+import com.example.commit.viewmodel.ChatViewModel
+import androidx.compose.foundation.layout.imePadding
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.commit.ui.chatroom.ChatroomTopBar
+
+
+@Composable
+fun ChatRoomScreen(
+    commissionTitle: String,
+    authorName: String,
+    onPayClick: () -> Unit,
+    onFormCheckClick: () -> Unit,
+    onBackClick: () -> Unit,
+    onSettingClick: () -> Unit,
+    viewModel: ChatViewModel = viewModel()
+) {
+    var isMenuOpen by remember { mutableStateOf(false) }
+
+    // 메시지 목록을 안전하게 관리
+    val messages by remember(viewModel.chatMessages) {
+        mutableStateOf(viewModel.chatMessages)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .imePadding()
+    ) {
+        Spacer(modifier = Modifier.height(22.dp))
+
+        ChatroomTopBar(
+            Name = authorName,
+            averageResponseTime = "평균 30분 이내 응답",
+            onProfileClick = {},
+            onBackClick = onBackClick,
+            onSettingClick = onSettingClick
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        CommissionInfoCard(title = commissionTitle)
+
+        // 메시지 목록
+        ChatMessageList(
+            messages = messages,
+            currentUserId = viewModel.currentUserId,
+            onPayClick = onPayClick,
+            onFormCheckClick = onFormCheckClick,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        )
+
+        // 입력창
+        ChatBottomSection(
+            message = viewModel.message,
+            onMessageChange = viewModel::onMessageChange,
+            onSendMessage = viewModel::sendMessage,
+            isMenuOpen = isMenuOpen,
+            onToggleMenu = { isMenuOpen = !isMenuOpen }
+        )
+        Spacer(modifier = Modifier.height(69.dp))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewChatRoomScreen() {
+    var dummyMessage by remember { mutableStateOf("") }
+    var dummyMenuOpen by remember { mutableStateOf(false) }
+
+    val dummyMessages = listOf(
+        ChatMessage("1", "me", "안녕하세요", System.currentTimeMillis(), MessageType.TEXT, null),
+        ChatMessage("2", "artist", "반가워요!", System.currentTimeMillis(), MessageType.TEXT, null),
+        ChatMessage("3", "me", "25.06.02 17:50", System.currentTimeMillis(), MessageType.COMMISSION_REQUEST, null),
+        ChatMessage("4", "artist", "낙서 타임 커미션", System.currentTimeMillis(), MessageType.COMMISSION_ACCEPTED, null),
+        ChatMessage("5", "artist", "", System.currentTimeMillis(), MessageType.PAYMENT, 50000),
+        ChatMessage("6", "me", "", System.currentTimeMillis(), MessageType.PAYMENT_COMPLETE, null),
+        ChatMessage("7", "artist", "", System.currentTimeMillis(), MessageType.COMMISSION_START, null),
+        ChatMessage("8", "artist", "25.06.02 17:50", System.currentTimeMillis(), MessageType.COMMISSION_COMPLETE, null)
+    )
+
+    CommitTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .imePadding()
+        ) {
+            Spacer(modifier = Modifier.height(22.dp))
+
+            ChatroomTopBar(
+                averageResponseTime = "평균 30분 이내 응답",
+                onProfileClick = {},
+                onBackClick = {},
+                onSettingClick = {}
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            CommissionInfoCard(title = "낙서 타임 커미션")
+
+            ChatMessageList(
+                messages = dummyMessages,
+                currentUserId = "me",
+                onPayClick = { println("결제 클릭") },
+                onFormCheckClick = { println("신청서 확인하기 클릭") },
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            )
+
+            ChatBottomSection(
+                message = dummyMessage,
+                onMessageChange = { dummyMessage = it },
+                onSendMessage = {
+                    println("보낸 메시지: $dummyMessage")
+                    dummyMessage = ""
+                },
+                isMenuOpen = dummyMenuOpen,
+                onToggleMenu = { dummyMenuOpen = !dummyMenuOpen }
+            )
+            Spacer(modifier = Modifier.height(69.dp))
+
+        }
+    }
+}
