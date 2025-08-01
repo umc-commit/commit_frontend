@@ -18,7 +18,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.commit.R
 import com.example.commit.activity.ReviewWriteActivity
@@ -31,10 +30,9 @@ fun RequestDetailItem(
     item: RequestItem,
     onFormAnswerClick: () -> Unit = {}
 )
- {
+{
     val context = LocalContext.current
     val isPending = item.status == "PENDING"
-    val context = LocalContext.current
     val isInProgress = item.status == "IN_PROGRESS" || item.status == "ACCEPTED"
     val isDone = item.status == "DONE"
     val isCancel = item.status == "CANCEL"
@@ -140,48 +138,6 @@ fun RequestDetailItem(
             Row(modifier = Modifier.fillMaxWidth()) {
                 listOf("신청 취소", "문의하기").forEachIndexed { index, label ->
                     val isCancel = label == "신청 취소"
-
-
-                val buttonBackground = if (disableFirst) Color(0xFFEDEDED) else Color(0xFFF0F0F0)
-                val textColor = if (disableFirst) Color(0xFFB0B0B0) else Color.Black
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(36.dp)
-                        .padding(horizontal = 4.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(buttonBackground)
-                        .let {
-                            if (!disableFirst) {
-                                it.clickable {
-                                    when (label) {
-                                        "후기작성" -> {
-                                            val intent = Intent(context, ReviewWriteActivity::class.java)
-                                            intent.putExtra("requestId", item.requestId)
-                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                            context.startActivity(intent)
-                                        }
-                                        "거래완료" -> {
-                                            // TODO: 거래완료 처리
-                                        }
-                                        "문의하기" -> {
-                                            // TODO: 문의하기 처리
-                                        }
-                                    }
-                                }
-                            } else it
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = label,
-                        style = CommitTypography.labelSmall,
-                        color = textColor
-                    )
-                }
-            }
-        }
 
                     Box(
                         modifier = Modifier
