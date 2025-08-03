@@ -20,12 +20,12 @@ enum class TabType {
 
 @Composable
 fun PostDetailTabSection(
-    modifier: Modifier = Modifier,
-    onTabSelected: (TabType) -> Unit
+    onTabSelected: (TabType) -> Unit,
+    onReviewListClick: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(TabType.DETAIL) }
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         // 탭 헤더
         Row(
             modifier = Modifier
@@ -96,7 +96,8 @@ fun PostDetailTabSection(
                     rating = 4.8f,
                     recommendRate = 96,
                     reviewCount = 43,
-                    onFollowClick = { /* 팔로우 버튼 클릭 시 처리 */ }
+                    onFollowClick = { /* 팔로우 버튼 클릭 시 처리 */ },
+                    onReviewListClick = onReviewListClick
                 )
             }
         }
@@ -124,5 +125,5 @@ fun TabItem(title: String, selected: Boolean, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewPostDetailTabSection() {
-    PostDetailTabSection(onTabSelected = {})
+    PostDetailTabSection(onTabSelected = {}, onReviewListClick = {})
 }

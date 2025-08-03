@@ -1,5 +1,6 @@
 package com.example.commit.ui.post
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.example.commit.activity.MainActivity
+import com.example.commit.activity.WrittenReviewsActivity
 import com.example.commit.ui.post.components.PostHeaderSection
 import com.example.commit.ui.request.components.Commission
 import java.io.Serializable
@@ -44,7 +46,11 @@ class FragmentPostScreen : Fragment() {
                     title = commission?.title ?: "제목 없음",
                     tags = commission?.tags ?: emptyList(),
                     minPrice = 30000,
-                    summary = "이 커미션은 작가가 직접 운영하는 커미션입니다."
+                    summary = "이 커미션은 작가가 직접 운영하는 커미션입니다.",
+                    onReviewListClick = {
+                        val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
+                        startActivity(intent)
+                    }
                 )
             }
         }

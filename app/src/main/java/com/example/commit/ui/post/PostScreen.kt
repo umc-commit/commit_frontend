@@ -1,5 +1,8 @@
 package com.example.commit.ui.post
 
+import android.content.Intent
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,12 +21,19 @@ import com.example.commit.ui.post.components.PostBottomBar
 import com.example.commit.ui.post.components.PostHeaderSection
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.zIndex
+import com.example.commit.activity.CommissionFormActivity
+import com.example.commit.activity.WrittenReviewsActivity
+import com.example.commit.data.model.entities.Review
 
 
 @Composable
-fun PostScreen() {
+fun PostScreen(
+    onReviewListClick: () -> Unit = {}
+) {
     var isSheetVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -38,7 +48,8 @@ fun PostScreen() {
                 title = "그림 커미션",
                 tags = listOf("그림", "#LD", "#당일마감"),
                 minPrice = 10000,
-                summary = "빠르게 작업해드립니다!"
+                summary = "빠르게 작업해드립니다!",
+                onReviewListClick = onReviewListClick
             )
         }
 
@@ -46,7 +57,12 @@ fun PostScreen() {
         PostBottomBar(
             isRecruiting = true,
             remainingSlots = 11,
-            onApplyClick = { /* 신청 클릭 처리 */ },
+            onApplyClick = {
+                Toast.makeText(context, "클릭됨", Toast.LENGTH_SHORT).show()
+                Log.d("PostScreen", "신청하기 클릭됨")
+                val intent = Intent(context, CommissionFormActivity::class.java)
+                context.startActivity(intent)
+            },
             onChatClick = { isSheetVisible = true },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
