@@ -62,7 +62,8 @@ fun ArtistInfoSection(
     rating: Float,
     recommendRate: Int,
     reviewCount: Int,
-    onFollowClick: () -> Unit
+    onFollowClick: () -> Unit,
+    onReviewListClick: () -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -223,7 +224,13 @@ fun ArtistInfoSection(
         ExpandableItem(
             title = "전체 후기 보기",
             expanded = isExpanded,
-            onToggle = { isExpanded = !isExpanded }
+            onToggle = { 
+                if (!isExpanded) {
+                    // 펼칠 때만 ReviewListScreen으로 이동
+                    onReviewListClick()
+                }
+                isExpanded = !isExpanded 
+            }
         ) {
             if (reviewCount == 0) {
                 Column(
@@ -275,6 +282,7 @@ fun PreviewArtistInfoSection() {
         rating = 5.0f,
         recommendRate = 100,
         reviewCount = 0,
-        onFollowClick = { }
+        onFollowClick = { },
+        onReviewListClick = { }
     )
 }

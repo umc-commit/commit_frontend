@@ -23,6 +23,7 @@ import com.example.commit.R
 import com.example.commit.activity.alarm.AlarmActivity
 import com.example.commit.activity.MainActivity
 import com.example.commit.activity.mypage.ProfileActivity
+import com.example.commit.activity.WrittenReviewsActivity
 import com.example.commit.adapter.home.AuthorCardAdapter
 import com.example.commit.adapter.home.FollowingPostAdapter
 import com.example.commit.adapter.home.HomeCardAdapter
@@ -64,7 +65,11 @@ class FragmentHome : Fragment() {
                         title = postTitle,
                         tags = listOf("그림", "#LD", "#당일마감"),
                         minPrice = 10000,
-                        summary = "작업 설명입니다"
+                        summary = "작업 설명입니다",
+                        onReviewListClick = {
+                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
+                            startActivity(intent)
+                        }
                     )
                 }
             }
@@ -106,7 +111,11 @@ class FragmentHome : Fragment() {
                         title = "그림 커미션",
                         tags = listOf("그림", "#LD", "#당일마감"),
                         minPrice = 10000,
-                        summary = "작업 설명입니다"
+                        summary = "작업 설명입니다",
+                        onReviewListClick = {
+                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
+                            startActivity(intent)
+                        }
                     )
                 }
             }
@@ -128,7 +137,12 @@ class FragmentHome : Fragment() {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
                     Log.d("FragmentHome", "PostScreen 호출됨")
-                    PostScreen()
+                    PostScreen(
+                        onReviewListClick = {
+                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
+                            startActivity(intent)
+                        }
+                    )
                 }
             }
 

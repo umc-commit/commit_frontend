@@ -33,7 +33,8 @@ fun PostHeaderSection(
     minPrice: Int,
     summary: String,
     imageCount: Int = 3,
-    currentIndex: Int = 0
+    currentIndex: Int = 0,
+    onReviewListClick: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -185,7 +186,10 @@ fun PostHeaderSection(
             }
 
             Spacer(modifier = Modifier.height(5.dp))
-            PostDetailTabSection(onTabSelected = {})
+            PostDetailTabSection(
+                onTabSelected = {},
+                onReviewListClick = onReviewListClick
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -200,17 +204,8 @@ fun PostHeaderSection(
                 Log.d("PostScreen", "startActivity 호출됨") 
             },
             onChatClick = { 
-                // 채팅방으로 전환 (안전한 방법)
-                Log.d("PostScreen", "채팅 버튼 클릭됨")
-                
-                // Toast 메시지로 피드백 제공
-                android.widget.Toast.makeText(
-                    context,
-                    "채팅방으로 이동합니다",
-                    android.widget.Toast.LENGTH_SHORT
-                ).show()
-                
-                // Fragment 전환 (안전하게)
+
+                // Fragment 전환
                 try {
                     val fragment = FragmentPostChatDetail().apply {
                         arguments = Bundle().apply {
