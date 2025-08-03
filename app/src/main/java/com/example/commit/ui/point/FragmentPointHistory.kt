@@ -4,9 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.example.commit.R
@@ -32,17 +29,6 @@ class FragmentPointHistory : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val navigateToMyPage = remember { mutableStateOf(false) }
-
-                LaunchedEffect(navigateToMyPage.value) {
-                    if (navigateToMyPage.value) {
-                        parentFragmentManager.beginTransaction()
-                            .replace(R.id.Nav_Frame, FragmentMypage())
-                            .addToBackStack(null)
-                            .commit()
-                    }
-                }
-
                 val dummyList = listOf(
                     PointHistoryItem(
                         transactionId = 1,
@@ -61,7 +47,10 @@ class FragmentPointHistory : Fragment() {
                 PointHistoryScreen(
                     pointList = dummyList,
                     onBackClick = {
-                        navigateToMyPage.value = true
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.Nav_Frame, FragmentMypage())
+                            .addToBackStack(null)
+                            .commit()
                     }
                 )
             }

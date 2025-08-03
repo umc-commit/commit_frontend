@@ -9,9 +9,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.example.commit.activity.MainActivity
 import com.example.commit.activity.WrittenReviewsActivity
-import com.example.commit.ui.post.components.PostHeaderSection
 import com.example.commit.ui.request.components.Commission
-import java.io.Serializable
 
 class FragmentPostScreen : Fragment() {
 
