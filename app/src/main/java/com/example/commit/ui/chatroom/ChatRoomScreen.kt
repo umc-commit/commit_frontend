@@ -28,6 +28,7 @@ fun ChatRoomScreen(
     onFormCheckClick: () -> Unit,
     onBackClick: () -> Unit,
     onSettingClick: () -> Unit,
+    onProfileClick: () -> Unit,
     viewModel: ChatViewModel = viewModel()
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
@@ -48,7 +49,7 @@ fun ChatRoomScreen(
         ChatroomTopBar(
             Name = authorName,
             averageResponseTime = "평균 30분 이내 응답",
-            onProfileClick = {},
+            onProfileClick = onProfileClick,
             onBackClick = onBackClick,
             onSettingClick = onSettingClick
         )

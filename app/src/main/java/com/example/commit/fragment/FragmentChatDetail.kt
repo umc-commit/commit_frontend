@@ -1,5 +1,6 @@
 package com.example.commit.fragment
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.example.commit.R
 import com.example.commit.activity.MainActivity
+import com.example.commit.activity.author.AuthorProfileActivity
 import com.example.commit.ui.Theme.CommitTheme
 import com.example.commit.ui.chatlist.ChatDeleteFragment
 import com.example.commit.ui.chatlist.DeleteOptionBottomSheet
@@ -90,6 +92,11 @@ class FragmentChatDetail : Fragment() {
                         },
                         onSettingClick = {
                             showBottomSheet.value = true
+                        },
+                        onProfileClick = {
+                            // AuthorProfileActivity로 이동
+                            val intent = Intent(requireContext(), AuthorProfileActivity::class.java)
+                            startActivity(intent)
                         }
                     )
                     

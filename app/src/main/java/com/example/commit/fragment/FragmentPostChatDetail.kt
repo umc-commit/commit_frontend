@@ -1,5 +1,6 @@
 package com.example.commit.fragment
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,6 +13,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.example.commit.R
 import com.example.commit.activity.MainActivity
+import com.example.commit.activity.author.AuthorProfileActivity
 import com.example.commit.ui.Theme.CommitTheme
 import com.example.commit.ui.chatroom.ChatOptionDialog
 import com.example.commit.ui.chatroom.ChatRoomScreen
@@ -92,6 +94,11 @@ class FragmentPostChatDetail : Fragment() {
                         },
                         onSettingClick = {
                             showBottomSheet.value = true
+                        },
+                        onProfileClick = {
+                            // AuthorProfileActivity로 이동
+                            val intent = Intent(requireContext(), AuthorProfileActivity::class.java)
+                            startActivity(intent)
                         }
                     )
                     
