@@ -23,10 +23,16 @@ data class PointHistoryItem(
     val amount: Int,
     val created_at: String
 )
-
 @Composable
-fun PointHistoryScreen(pointList: List<PointHistoryItem>, onBackClick: () -> Unit) {
-    Column(modifier = Modifier.fillMaxSize()) {
+fun PointHistoryScreen(
+    pointList: List<PointHistoryItem>,
+    onBackClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 20.dp)
+    ) {
         // 상단 헤더
         Box(
             modifier = Modifier
@@ -58,5 +64,3 @@ fun PointHistoryScreen(pointList: List<PointHistoryItem>, onBackClick: () -> Uni
         }
     }
 }
-
-

@@ -2,130 +2,239 @@ package com.example.commit.ui.post
 
 import android.content.Intent
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.*
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.commit.ui.post.components.PostBottomBar
-import com.example.commit.ui.post.components.PostHeaderSection
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.zIndex
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.example.commit.R
 import com.example.commit.activity.CommissionFormActivity
-import com.example.commit.activity.WrittenReviewsActivity
-import com.example.commit.data.model.entities.Review
-
+import com.example.commit.fragment.FragmentPostChatDetail
+import com.example.commit.ui.Theme.CommitTypography
+import android.os.Bundle
+import android.widget.Toast
+import androidx.fragment.app.FragmentActivity
+import com.example.commit.ui.post.components.PostBottomBar
+import com.example.commit.ui.post.components.PostDetailTabSection
 
 @Composable
-fun PostScreen(
-    onReviewListClick: () -> Unit = {}
+fun PostHeaderSection(
+    title: String,
+    tags: List<String>,
+    minPrice: Int,
+    summary: String,
+    imageCount: Int = 3,
+    currentIndex: Int = 0,
+    onReviewListClick: () -> Unit
 ) {
-    var isSheetVisible by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // 본문
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 90.dp)
         ) {
-            PostHeaderSection(
-                title = "그림 커미션",
-                tags = listOf("그림", "#LD", "#당일마감"),
-                minPrice = 10000,
-                summary = "빠르게 작업해드립니다!",
+            // 상단 바
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(85.dp)
+                    .background(Color.White)
+            ) {
+                val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
+                Image(
+                    painter = painterResource(id = R.drawable.ic_left_vector),
+                    contentDescription = "뒤로가기",
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = 20.dp)
+                        .offset(y = 12.dp)
+                        .size(24.dp)
+                        .clickable {
+                            backDispatcher?.onBackPressed()
+                        }
+                )
+
+                // 텍스트도 약간 아래로
+                Text(
+                    text = title,
+                    style = CommitTypography.headlineSmall,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .offset(y = 12.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // 썸네일
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(233.dp)
+                    .background(Color(0xFFE0E0E0))
+            )
+
+            // 인디케이터
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                repeat(imageCount) { index ->
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 2.dp)
+                            .size(8.dp)
+                            .background(
+                                color = if (index == currentIndex) Color.Black else Color.LightGray,
+                                shape = RoundedCornerShape(50)
+                            )
+                    )
+                }
+            }
+
+            // 본문 영역
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = title,
+                        style = CommitTypography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        color = Color.Black,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_unselect_bookmarket),
+                        contentDescription = "북마크",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 태그 영역
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    tags.forEachIndexed { index, tag ->
+                        val isCategory = index == 0
+                        Box(
+                            modifier = Modifier
+                                .height(28.dp)
+                                .wrapContentWidth()
+                                .background(
+                                    color = if (isCategory) Color(0xFFE6FFFB) else Color(0xFFF2F2F2),
+                                    shape = RoundedCornerShape(50)
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = if (isCategory) Color(0xFF17D5C6) else Color(0xFFE0E0E0),
+                                    shape = RoundedCornerShape(50)
+                                )
+                                .padding(horizontal = 12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = tag,
+                                style = CommitTypography.labelSmall,
+                                color = if (isCategory) Color(0xFF17D5C6) else Color(0xFFB0B0B0)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = String.format("%,dP~", minPrice),
+                    style = CommitTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = summary,
+                    style = CommitTypography.bodyMedium,
+                    color = Color(0xFF333333)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(5.dp))
+            PostDetailTabSection(
+                onTabSelected = {},
                 onReviewListClick = onReviewListClick
             )
         }
 
-        // 하단 고정 바
+        Spacer(modifier = Modifier.height(24.dp))
+
         PostBottomBar(
             isRecruiting = true,
             remainingSlots = 11,
             onApplyClick = {
-                Toast.makeText(context, "클릭됨", Toast.LENGTH_SHORT).show()
-                Log.d("PostScreen", "신청하기 클릭됨")
                 val intent = Intent(context, CommissionFormActivity::class.java)
+                Log.d("PostScreen", "Intent 생성됨: $intent")
                 context.startActivity(intent)
+                Log.d("PostScreen", "startActivity 호출됨")
             },
-            onChatClick = { isSheetVisible = true },
+            onChatClick = {
+                // Fragment 전환
+                try {
+                    val fragment = FragmentPostChatDetail().apply {
+                        arguments = Bundle().apply {
+                            putString("chatName", title)
+                            putString("authorName", "키르")
+                        }
+                    }
+
+                    if (context is FragmentActivity) {
+                        context.supportFragmentManager.beginTransaction()
+                            .replace(R.id.Nav_Frame, fragment)
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                } catch (e: Exception) {
+                    Log.e("PostScreen", "채팅방 전환 실패", e)
+                    Toast.makeText(
+                        context,
+                        "채팅방 전환에 실패했습니다",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
         )
-
-        // 하단 시트 모달
-        if (isSheetVisible) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0x99000000))
-                    .clickable { isSheetVisible = false }
-                    .zIndex(1f)
-            )
-
-            // 바텀시트 내용
-            AnimatedVisibility(
-                visible = isSheetVisible,
-                modifier = Modifier.align(Alignment.BottomCenter)
-                    .align(Alignment.BottomCenter)
-                    .zIndex(2f)
-            ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(12.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color.White,
-                    elevation = 8.dp
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp)
-                    ) {
-                        Text(
-                            text = "카카오톡으로 공유하기",
-                            fontSize = 16.sp,
-                            color = Color.Black,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "신고하기",
-                            fontSize = 16.sp,
-                            color = Color.Red,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp)
-                        )
-                    }
-                }
-            }
-        }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewPostScreen() {
-    PostScreen()
 }

@@ -30,8 +30,7 @@ import com.example.commit.adapter.home.HomeCardAdapter
 import com.example.commit.adapter.home.ReviewCardAdapter
 import com.example.commit.databinding.BottomSheetHomeBinding
 import com.example.commit.databinding.FragmentHomeBinding
-import com.example.commit.ui.post.PostScreen
-import com.example.commit.ui.post.components.PostHeaderSection
+import com.example.commit.ui.post.PostHeaderSection
 import com.example.commit.ui.search.FragmentSearch
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
@@ -136,8 +135,13 @@ class FragmentHome : Fragment() {
             val composeView = ComposeView(requireContext()).apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
+                    //PostHeaderSection
                     Log.d("FragmentHome", "PostScreen 호출됨")
-                    PostScreen(
+                    PostHeaderSection(
+                        title = "그림 커미션",
+                        tags = listOf("그림", "#LD", "#당일마감"),
+                        minPrice = 10000,
+                        summary = "작업 설명입니다",
                         onReviewListClick = {
                             val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
                             startActivity(intent)
