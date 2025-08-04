@@ -4,12 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.commit.R
 import com.example.commit.activity.MainActivity
+import com.example.commit.connection.RetrofitClient
+import com.example.commit.connection.RetrofitObject
 import com.example.commit.databinding.ActivityLoginNicknameBinding
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class NicknameActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginNicknameBinding
@@ -41,22 +48,32 @@ class NicknameActivity : AppCompatActivity() {
             }
         })
 
-        // '다음' 버튼 클릭 리스너 설정
+        // 다음 버튼 클릭 → 회원가입 API 호출
         binding.nextButton.setOnClickListener {
             if (binding.nextButton.isEnabled) {
-                //val nickname = binding.inputNickname.text.toString()
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("start_fragment", R.id.nav_home)
-                intent.putExtra("show_signup_bottom_sheet", true)
-                startActivity(intent)
-                finish()
+                val nickname = binding.inputNickname.text.toString()
+
+                // 이전 Activity에서 전달받은 값들
+                val token = intent.getStringExtra("token") ?: ""
+                val role = intent.getStringExtra("role") ?: "client"
+                val categories = intent.getIntegerArrayListExtra("categories") ?: arrayListOf()
+                val agreements = intent.getIntegerArrayListExtra("agreements") ?: arrayListOf()
+
+                // API 요청 객체 생성
+                val request = RetrofitClient.RequestSignUp(
+                    token = token,
+                    nickname = nickname,
+                    role = role,
+                    categories = categories,
+                    agreements = agreements
+                )
+
+                signUp(request)
             }
         }
 
-        // 뒤로가기 버튼 클릭 리스너 (XML에 back_button ID가 있다고 가정)
-        binding.backButton.setOnClickListener {
-            finish() // 이전 화면으로 돌아가기
-        }
+        // 뒤로가기 버튼
+        binding.backButton.setOnClickListener { finish() }
     }
 
     /**
@@ -90,5 +107,51 @@ class NicknameActivity : AppCompatActivity() {
             ContextCompat.getColor(this, R.color.gray2) // 비활성화 시 gray2
         }
         binding.nextButton.setTextColor(textColor)
+    }
+
+    private fun signUp(request: RetrofitClient.RequestSignUp) {
+        val api = RetrofitObject.getRetrofitService(this)
+
+        Log.d("SignUpAPI", "Request Data: $request")
+        api.signUp(request).enqueue(object : Callback<RetrofitClient.ResponseSignUp> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ResponseSignUp>,
+                response: Response<RetrofitClient.ResponseSignUp>
+            ) {
+                Log.d("SignUpAPI", "HTTP Code: ${response.code()}")
+                Log.d("SignUpAPI", "Error Body: ${response.errorBody()?.string()}")
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body?.resultType == "SUCCESS") {
+                        // 회원가입 성공 시 닉네임 저장
+                        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+                        prefs.edit()
+                            .putString("nickname", body.success?.user?.nickname ?: "")
+                            .apply()
+
+                        // 메인 화면 이동
+                        val intent = Intent(this@NicknameActivity, MainActivity::class.java)
+                        intent.putExtra("start_fragment", R.id.nav_home)
+                        intent.putExtra("show_signup_bottom_sheet", true)
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        // 회원가입 실패 시 서버 사유 표시
+                        Toast.makeText(
+                            this@NicknameActivity,
+                            body?.error?.reason ?: "회원가입 실패",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    Toast.makeText(this@NicknameActivity, "서버 오류", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<RetrofitClient.ResponseSignUp>, t: Throwable) {
+                Toast.makeText(this@NicknameActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

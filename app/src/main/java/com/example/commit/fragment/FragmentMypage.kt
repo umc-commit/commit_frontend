@@ -96,7 +96,7 @@ class FragmentMypage : Fragment() {
         }
 
         // MyPage의 닉네임, 이미지와 동일하게 설정
-        val prefs = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+        val prefs = requireContext().getSharedPreferences("auth", AppCompatActivity.MODE_PRIVATE)
         val nickname = prefs.getString("nickname", "로지")
         val imageUriString = prefs.getString("imageUri", null)
 
@@ -118,7 +118,7 @@ class FragmentMypage : Fragment() {
 
     //닉네임 반영
     private fun updateNicknameFromPrefs() {
-        val prefs = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+        val prefs = requireContext().getSharedPreferences("auth", AppCompatActivity.MODE_PRIVATE)
         val nickname = prefs.getString("nickname", "로지")
         val imageUriString = prefs.getString("imageUri", null)
         Log.d("ProfileImage", "Loaded URI: $imageUriString")

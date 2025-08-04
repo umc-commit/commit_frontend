@@ -36,8 +36,12 @@ class AgreeFirstActivity : AppCompatActivity() {
         binding.nextButton.setOnClickListener {
             // 버튼이 활성화된 상태에서만 클릭 동작 수행
             if (binding.nextButton.isEnabled) {
+                val agreements = arrayListOf(1, 2, 3) // 실제 체크박스 상태에 맞게 구성
+                val token = intent.getStringExtra("token") ?: "" // 소셜 로그인 후 받은 토큰 전달
                 // LoginRoleActivity로 화면 전환 Intent 생성
                 val intent = Intent(this, LoginRoleActivity::class.java)
+                intent.putIntegerArrayListExtra("agreements", agreements)
+                intent.putExtra("token", token)
                 startActivity(intent)
             }
         }

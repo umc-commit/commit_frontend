@@ -39,11 +39,19 @@ class LoginRoleActivity : AppCompatActivity() {
         // '다음' 버튼 클릭 리스너 설정
         binding.nextButton.setOnClickListener {
             if (binding.nextButton.isEnabled) {
-                // LoginOnboardingActivity로 화면 전환 Intent 생성
+                val token = intent.getStringExtra("token") ?: ""
+                val agreements = intent.getIntegerArrayListExtra("agreements") ?: arrayListOf()
+
+                val roleValue = if (selectedRole == "creator") "artist" else "client"
+
                 val intent = Intent(this, OnboardingActivity::class.java)
+                intent.putExtra("token", token)
+                intent.putIntegerArrayListExtra("agreements", agreements)
+                intent.putExtra("role", roleValue)
                 startActivity(intent)
             }
         }
+
 
         // 뒤로가기 버튼 클릭 리스너
         binding.backButton.setOnClickListener {
