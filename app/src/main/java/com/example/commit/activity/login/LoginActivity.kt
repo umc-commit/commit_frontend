@@ -43,9 +43,15 @@ class LoginActivity : AppCompatActivity() {
                 val prefs = getSharedPreferences("auth", MODE_PRIVATE)
                 prefs.edit().putString("accessToken", token).apply()
 
+                // 저장된 토큰 확인 (로그 출력)
+                val savedToken = prefs.getString("accessToken", null)
+                android.util.Log.d("LoginActivity", "저장된 토큰: $savedToken")
+
                 if (signupRequired) {
                     // 회원가입 페이지
-                    startActivity(Intent(this, AgreeFirstActivity::class.java))
+                    val signUpIntent = Intent(this, AgreeFirstActivity::class.java)
+                    signUpIntent.putExtra("token", token)
+                    startActivity(signUpIntent)
                 } else {
                     // 메인화면
                     startActivity(Intent(this, MainActivity::class.java))

@@ -58,10 +58,30 @@ class OnboardingActivity : AppCompatActivity() {
         // '다음' 버튼 클릭 리스너 설정
         binding.nextButton.setOnClickListener {
             if (binding.nextButton.isEnabled) {
+                val token = intent.getStringExtra("token") ?: ""
+                val agreements = intent.getIntegerArrayListExtra("agreements") ?: arrayListOf()
+                val role = intent.getStringExtra("role") ?: "client"
+
+                val categories = arrayListOf<Int>()
+                if (binding.itemText.isSelected) categories.add(1)
+                if (binding.itemDrawing.isSelected) categories.add(2)
+                if (binding.itemVideo.isSelected) categories.add(3)
+                if (binding.itemDesign.isSelected) categories.add(4)
+                if (binding.itemGoods.isSelected) categories.add(5)
+                if (binding.itemFortune.isSelected) categories.add(6)
+                if (binding.itemSound.isSelected) categories.add(7)
+                if (binding.itemMotion.isSelected) categories.add(8)
+                if (binding.itemOutsource.isSelected) categories.add(9)
+
                 val intent = Intent(this, NicknameActivity::class.java)
+                intent.putExtra("token", token)
+                intent.putIntegerArrayListExtra("agreements", agreements)
+                intent.putExtra("role", role)
+                intent.putIntegerArrayListExtra("categories", categories)
                 startActivity(intent)
             }
         }
+
 
         // 뒤로가기 버튼 클릭
         binding.backButton.setOnClickListener {

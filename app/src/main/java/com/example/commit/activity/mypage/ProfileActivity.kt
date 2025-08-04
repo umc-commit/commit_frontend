@@ -46,7 +46,7 @@ class ProfileActivity : AppCompatActivity() {
                 val nickname = result.data?.getStringExtra("nickname")
                 val imageUriString = result.data?.getStringExtra("imageUri")
                 val intro = result.data?.getStringExtra("intro")
-                val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                val prefs = getSharedPreferences("auth", MODE_PRIVATE)
 
                 prefs.edit().apply {
                     if (!nickname.isNullOrEmpty()) putString("nickname", nickname)
@@ -102,7 +102,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun updateProfileUI() {
-        val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
+        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
         val nickname = prefs.getString("nickname", "로지")
         val imageUriString = prefs.getString("imageUri", null)
         val intro = prefs.getString("intro", "입력된 소개가 없습니다.")
