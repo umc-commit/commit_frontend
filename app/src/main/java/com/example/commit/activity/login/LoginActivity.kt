@@ -1,8 +1,10 @@
 package com.example.commit.activity.login
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.commit.activity.MainActivity
 import com.example.commit.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
@@ -14,10 +16,42 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 구글 로그인 버튼 클릭 시
         binding.googleLogin.setOnClickListener {
-            val intent = Intent(this, AgreeFirstActivity::class.java)
+            val googleLoginUrl = "https://commit.n-e.kr/api/users/oauth2/login/google"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleLoginUrl))
             startActivity(intent)
         }
 
+        // 앱이 딥링크로 호출된 경우 토큰 처리
+        handleDeepLink(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleDeepLink(intent)
+    }
+
+    private fun handleDeepLink(intent: Intent) {
+        val data: Uri? = intent.data
+        if (data != null && data.scheme == "commit") { // manifest에 등록한 scheme과 동일해야 함
+            val token = data.getQueryParameter("token")
+            val signupRequired = data.getQueryParameter("signupRequired")?.toBoolean() ?: false
+
+            if (!token.isNullOrEmpty()) {
+                // 토큰 저장
+                val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+                prefs.edit().putString("accessToken", token).apply()
+
+                if (signupRequired) {
+                    // 회원가입 페이지
+                    startActivity(Intent(this, AgreeFirstActivity::class.java))
+                } else {
+                    // 메인화면
+                    startActivity(Intent(this, MainActivity::class.java))
+                }
+                finish()
+            }
+        }
     }
 }
