@@ -33,6 +33,9 @@ import com.example.commit.databinding.FragmentHomeBinding
 import com.example.commit.ui.search.FragmentSearch
 import com.example.commit.ui.post.PostScreen
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import androidx.compose.ui.platform.LocalContext
+import com.example.commit.ui.post.FragmentPostScreen
+
 
 
 class FragmentHome : Fragment() {
@@ -60,18 +63,23 @@ class FragmentHome : Fragment() {
             val composeView = ComposeView(requireContext()).apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
+                    val context = LocalContext.current
                     PostScreen(
                         title = postTitle,
                         tags = listOf("그림", "#LD", "#당일마감"),
                         minPrice = 10000,
                         summary = "작업 설명입니다",
+                        content = "본문 내용",
+                        images = listOf("https://example.com/image1.jpg"),
+                        isBookmarked = false,
                         onReviewListClick = {
-                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
-                            startActivity(intent)
+                            val intent = Intent(context, WrittenReviewsActivity::class.java)
+                            context.startActivity(intent)
                         }
                     )
                 }
             }
+
 
             binding.frameComposeContainer.apply {
                 visibility = View.VISIBLE
@@ -102,30 +110,12 @@ class FragmentHome : Fragment() {
         }
 
         // 카드 클릭 시 PostHeaderSection 띄우기 + 바텀바 숨기기
-        val homeCardClick: (String) -> Unit = { title ->
-
-            val composeView = ComposeView(requireContext()).apply {
-                setContent {
-                    PostScreen(
-                        title = "그림 커미션",
-                        tags = listOf("그림", "#LD", "#당일마감"),
-                        minPrice = 10000,
-                        summary = "작업 설명입니다",
-                        onReviewListClick = {
-                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
-                            startActivity(intent)
-                        }
-                    )
-                }
-            }
-
-            binding.frameComposeContainer.apply {
-                visibility = View.VISIBLE
-                removeAllViews()
-                addView(composeView)
-            }
-
-            (activity as? MainActivity)?.showBottomNav(false)
+        val homeCardClick: (Int) -> Unit = { commissionId ->
+            Log.d("FragmentHome", "카드 클릭됨: $commissionId")
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.Nav_Frame, FragmentPostScreen.newInstance(commissionId))
+                .addToBackStack(null)
+                .commit()
         }
 
         val homeReviewClick: (String) -> Unit = { title ->
@@ -135,20 +125,23 @@ class FragmentHome : Fragment() {
             val composeView = ComposeView(requireContext()).apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
-                    //PostHeaderSection
-                    Log.d("FragmentHome", "PostScreen 호출됨")
+                    val context = LocalContext.current
                     PostScreen(
                         title = "그림 커미션",
                         tags = listOf("그림", "#LD", "#당일마감"),
                         minPrice = 10000,
                         summary = "작업 설명입니다",
+                        content = "본문 내용",
+                        images = listOf("https://example.com/image1.jpg"),
+                        isBookmarked = false,
                         onReviewListClick = {
-                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
-                            startActivity(intent)
+                            val intent = Intent(context, WrittenReviewsActivity::class.java)
+                            context.startActivity(intent)
                         }
                     )
                 }
             }
+
 
             binding.frameComposeContainer.apply {
                 visibility = View.VISIBLE
@@ -174,22 +167,22 @@ class FragmentHome : Fragment() {
 
         // RecyclerView 설정
         binding.rvTodayRecommendations.apply {
-            adapter = HomeCardAdapter(listOf("추천1", "추천2", "추천3", "추천4"), homeCardClick)
+            adapter = HomeCardAdapter(listOf(1, 1, 1, 1), homeCardClick)
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
         binding.rvNewRegistrations.apply {
-            adapter = HomeCardAdapter(listOf("추천5", "추천6", "추천7", "추천8"), homeCardClick)
+            adapter = HomeCardAdapter(listOf(1, 1, 1, 1), homeCardClick)
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
         binding.rvHotContent.apply {
-            adapter = HomeCardAdapter(listOf("추천9", "추천10", "추천11", "추천12"), homeCardClick)
+            adapter = HomeCardAdapter(listOf(1, 1, 1, 1), homeCardClick)
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
         binding.rvDeadlineContent.apply {
-            adapter = HomeCardAdapter(listOf("추천13", "추천14", "추천15", "추천16"), homeCardClick)
+            adapter = HomeCardAdapter(listOf(1, 1, 1, 1), homeCardClick)
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 

@@ -1,7 +1,9 @@
 package com.example.commit.ui.post
 
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,13 +22,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
+import coil.compose.rememberAsyncImagePainter
 import com.example.commit.R
 import com.example.commit.activity.CommissionFormActivity
 import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.ui.Theme.CommitTypography
-import android.os.Bundle
-import android.widget.Toast
-import androidx.fragment.app.FragmentActivity
 import com.example.commit.ui.post.components.PostBottomBar
 import com.example.commit.ui.post.components.PostDetailTabSection
 
@@ -36,14 +37,18 @@ fun PostScreen(
     tags: List<String>,
     minPrice: Int,
     summary: String,
-    imageCount: Int = 3,
+    content: String,
+    images: List<String>,
+    isBookmarked: Boolean,
+    imageCount: Int = images.size,
     currentIndex: Int = 0,
     onReviewListClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    val painter = rememberAsyncImagePainter(images.getOrNull(0))
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -57,8 +62,6 @@ fun PostScreen(
                     .height(85.dp)
                     .background(Color.White)
             ) {
-                val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-
                 Image(
                     painter = painterResource(id = R.drawable.ic_left_vector),
                     contentDescription = "뒤로가기",
@@ -67,12 +70,9 @@ fun PostScreen(
                         .padding(start = 20.dp)
                         .offset(y = 12.dp)
                         .size(24.dp)
-                        .clickable {
-                            backDispatcher?.onBackPressed()
-                        }
+                        .clickable { backDispatcher?.onBackPressed() }
                 )
 
-                // 텍스트도 약간 아래로
                 Text(
                     text = title,
                     style = CommitTypography.headlineSmall,
@@ -85,12 +85,13 @@ fun PostScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 썸네일
-            Box(
+            // 썸네일 이미지
+            Image(
+                painter = painter,
+                contentDescription = "썸네일 이미지",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(233.dp)
-                    .background(Color(0xFFE0E0E0))
             )
 
             // 인디케이터
@@ -113,7 +114,7 @@ fun PostScreen(
                 }
             }
 
-            // 본문 영역
+            // 본문
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -130,8 +131,14 @@ fun PostScreen(
                         modifier = Modifier.weight(1f)
                     )
 
+                    val bookmarkIcon = if (isBookmarked) {
+                        R.drawable.ic_select_bookmarket
+                    } else {
+                        R.drawable.ic_unselect_bookmarket
+                    }
+
                     Image(
-                        painter = painterResource(id = R.drawable.ic_unselect_bookmarket),
+                        painter = painterResource(id = bookmarkIcon),
                         contentDescription = "북마크",
                         modifier = Modifier.size(24.dp)
                     )
@@ -187,17 +194,26 @@ fun PostScreen(
                     style = CommitTypography.bodyMedium,
                     color = Color(0xFF333333)
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 커미션 설명
+                Text(
+                    text = content,
+                    style = CommitTypography.bodyMedium,
+                    color = Color(0xFF444444)
+                )
             }
 
             Spacer(modifier = Modifier.height(5.dp))
+
             PostDetailTabSection(
                 onTabSelected = {},
                 onReviewListClick = onReviewListClick
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
+        // 하단 버튼
         PostBottomBar(
             isRecruiting = true,
             remainingSlots = 11,
@@ -205,10 +221,8 @@ fun PostScreen(
                 val intent = Intent(context, CommissionFormActivity::class.java)
                 Log.d("PostScreen", "Intent 생성됨: $intent")
                 context.startActivity(intent)
-                Log.d("PostScreen", "startActivity 호출됨")
             },
             onChatClick = {
-                // Fragment 전환
                 try {
                     val fragment = FragmentPostChatDetail().apply {
                         arguments = Bundle().apply {

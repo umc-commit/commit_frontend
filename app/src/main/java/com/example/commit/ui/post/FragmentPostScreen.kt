@@ -2,36 +2,48 @@ package com.example.commit.ui.post
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.example.commit.activity.MainActivity
 import com.example.commit.activity.WrittenReviewsActivity
-import com.example.commit.ui.request.components.Commission
+import com.example.commit.viewmodel.PostViewModel
 
 class FragmentPostScreen : Fragment() {
 
     companion object {
-        private const val ARG_COMMISSION = "commission"
+        private const val ARG_COMMISSION_ID = "commission_id"
 
-        fun newInstance(commission: Commission): FragmentPostScreen {
+        fun newInstance(commissionId: Int): FragmentPostScreen {
             return FragmentPostScreen().apply {
                 arguments = Bundle().apply {
-                    putSerializable(ARG_COMMISSION, commission)
+                    putInt(ARG_COMMISSION_ID, commissionId)
                     putBoolean("hideBottomBar", true)
                 }
             }
         }
     }
 
+    private val viewModel: PostViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val commission = arguments?.getSerializable(ARG_COMMISSION) as? Commission
+        val commissionId = arguments?.getInt(ARG_COMMISSION_ID) ?: -1
+
+        Log.d("FragmentPostScreen", "넘겨받은 commissionId: $commissionId")
+
+        viewModel.loadCommissionDetail(requireContext(), commissionId)
 
         return ComposeView(requireContext()).apply {
             layoutParams = ViewGroup.LayoutParams(
@@ -40,16 +52,30 @@ class FragmentPostScreen : Fragment() {
             )
 
             setContent {
-                PostScreen(
-                    title = commission?.title ?: "제목 없음",
-                    tags = commission?.tags ?: emptyList(),
-                    minPrice = 30000,
-                    summary = "이 커미션은 작가가 직접 운영하는 커미션입니다.",
-                    onReviewListClick = {
-                        val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
-                        startActivity(intent)
-                    }
-                )
+                val commission by viewModel.commissionDetail.collectAsState()
+
+                LaunchedEffect(commission) {
+                    Log.d("FragmentPostScreen", "commission 데이터 변경됨: $commission")
+                }
+
+                commission?.let {
+                    val context = LocalContext.current
+                    PostScreen(
+                        title = it.title,
+                        tags = listOf(it.category) + it.tags,
+                        minPrice = it.minPrice,
+                        summary = it.summary,
+                        content = it.content,
+                        images = it.images.map { image -> image.imageUrl },
+                        isBookmarked = it.isBookmarked,
+                        imageCount = it.images.size,
+                        currentIndex = 0,
+                        onReviewListClick = {
+                            val intent = Intent(context, WrittenReviewsActivity::class.java)
+                            context.startActivity(intent)
+                        }
+                    )
+                }
             }
         }
     }

@@ -23,6 +23,7 @@ fun SearchScreen(
 
     val dummyCommissions = List(10) {
         Commission(
+            id=1,
             nickname = "작가$it",
             title = "테스트 커미션 $it",
             tags = listOf("그림", "#예시", "#귀엽음")

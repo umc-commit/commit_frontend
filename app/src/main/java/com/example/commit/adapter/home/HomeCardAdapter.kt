@@ -6,14 +6,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.commit.databinding.ItemHomeCardBinding
 
 class HomeCardAdapter(
-    private val itemList: List<String>,
-    private val onItemClick: (String) -> Unit
+    private val itemList: List<Int>,
+    private val onItemClick: (Int) -> Unit
 ) : RecyclerView.Adapter<HomeCardAdapter.HomeCardViewHolder>() {
 
     inner class HomeCardViewHolder(val binding: ItemHomeCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: String) {
-            binding.tvCourseTitle.text = item
+        fun bind(item: Int) {
+            binding.tvCourseTitle.text = item.toString()
             binding.root.setOnClickListener {
                 onItemClick(item)
             }

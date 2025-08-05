@@ -47,6 +47,7 @@ class FragmentSearchResult : Fragment() {
 
                 val dummyCommissions = List(10) {
                     Commission(
+                        id=1,
                         nickname = "작가$it",
                         title = "테스트 커미션 $it",
                         tags = listOf("그림", "#예시", "#귀여움")
@@ -79,7 +80,7 @@ class FragmentSearchResult : Fragment() {
 
     private fun navigateToPostDetail(commission: Commission) {
         parentFragmentManager.beginTransaction()
-            .replace(R.id.Nav_Frame, FragmentPostScreen.newInstance(commission))
+            .replace(R.id.Nav_Frame, FragmentPostScreen.newInstance(commission.id))
             .addToBackStack(null)
             .commit()
     }

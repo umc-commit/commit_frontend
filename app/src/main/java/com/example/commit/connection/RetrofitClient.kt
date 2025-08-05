@@ -3,7 +3,6 @@ package com.example.commit.connection
 import com.google.gson.annotations.SerializedName
 
 class RetrofitClient {
-
     // 회원가입 요청 DTO
     data class RequestSignUp(
         @SerializedName("token")

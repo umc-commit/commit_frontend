@@ -24,6 +24,7 @@ import java.io.Serializable
 
 
 data class Commission(
+    val id: Int,
     val nickname: String,
     val title: String,
     val tags: List<String>
