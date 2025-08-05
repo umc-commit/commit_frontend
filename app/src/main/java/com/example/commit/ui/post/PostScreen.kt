@@ -31,7 +31,7 @@ import com.example.commit.ui.post.components.PostBottomBar
 import com.example.commit.ui.post.components.PostDetailTabSection
 
 @Composable
-fun PostHeaderSection(
+fun PostScreen(
     title: String,
     tags: List<String>,
     minPrice: Int,
