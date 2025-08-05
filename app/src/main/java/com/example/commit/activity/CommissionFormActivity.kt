@@ -9,10 +9,18 @@ import com.example.commit.ui.request.form.CommissionFormScreen
 class CommissionFormActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Intent에서 commissionId를 가져오거나 기본값 사용
+        val commissionId = intent.getStringExtra("commissionId") ?: "1"
+        
+
+        
         setContent {
             CommitTheme {
-                CommissionFormScreen()
+                CommissionFormScreen(commissionId = commissionId)
             }
         }
     }
+    
+
 }

@@ -13,12 +13,24 @@ class SplashActivity: AppCompatActivity() {
         binding = SplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Thread를 사용하여 1초 대기 후에 LoginActivity로 이동
+        // Thread를 사용하여 1초 대기 후에 로그인 상태에 따라 이동
         val thread = object : Thread() {
             override fun run() {
                 try {
                     sleep(1000) // 1초 대기
-                    val intent = Intent(this@SplashActivity, LoginActivity::class.java)
+                    
+                    // 토큰 확인
+                    val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+                    val token = prefs.getString("accessToken", null)
+                    
+                    val intent = if (token.isNullOrEmpty()) {
+                        // 토큰이 없으면 로그인 화면으로
+                        Intent(this@SplashActivity, LoginActivity::class.java)
+                    } else {
+                        // 토큰이 있으면 메인 화면으로
+                        Intent(this@SplashActivity, MainActivity::class.java)
+                    }
+                    
                     startActivity(intent)
                     finish() // 현재 액티비티를 종료
                 } catch (e: InterruptedException) {

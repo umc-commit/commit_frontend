@@ -203,6 +203,7 @@ fun PostScreen(
             remainingSlots = 11,
             onApplyClick = {
                 val intent = Intent(context, CommissionFormActivity::class.java)
+                intent.putExtra("commissionId", "1") // 실제 commissionId로 변경 필요
                 Log.d("PostScreen", "Intent 생성됨: $intent")
                 context.startActivity(intent)
                 Log.d("PostScreen", "startActivity 호출됨")

@@ -16,7 +16,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.commit.ui.Theme.CommitTheme
 
 @Composable
-fun CommissionHeader() {
+fun CommissionHeader(
+    artistName: String = "키르",
+    commissionTitle: String = "낙서 타입 커미션"
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -37,7 +40,7 @@ fun CommissionHeader() {
 
         Column {
             Text(
-                text = "키르님의",
+                text = "${artistName}님의",
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -45,7 +48,7 @@ fun CommissionHeader() {
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "낙서 타임 커미션",
+                    text = commissionTitle,
                     style = MaterialTheme.typography.headlineSmall.copy(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold

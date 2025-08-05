@@ -1,10 +1,19 @@
 package com.example.commit.connection
 
+import com.example.commit.data.model.CommissionFormResponse
+import com.example.commit.data.model.ImageUploadResponse
+import com.example.commit.data.model.CommissionRequestSubmit
+import com.example.commit.data.model.CommissionRequestResponse
+import okhttp3.MultipartBody
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Header
 
 interface RetrofitAPI {
     // 회원가입 (토큰 불필요)
@@ -34,4 +43,21 @@ interface RetrofitAPI {
     fun getAuthorProfile(
         @Path("artistId") artistId: Int
     ): Call<RetrofitClient.AuthorProfileResponse>
+
+    @GET("/api/commissions/{commissionId}/forms")
+    suspend fun getCommissionForm(
+        @Path("commissionId") commissionId: String
+    ): Response<CommissionFormResponse>
+
+    @Multipart
+    @POST("/api/commissions/request-images/upload")
+    suspend fun uploadImage(
+        @Part image: MultipartBody.Part
+    ): Response<ImageUploadResponse>
+
+    @POST("/api/commissions/{commissionId}/requests")
+    suspend fun submitCommissionRequest(
+        @Path("commissionId") commissionId: String,
+        @Body request: CommissionRequestSubmit
+    ): Response<CommissionRequestResponse>
 }

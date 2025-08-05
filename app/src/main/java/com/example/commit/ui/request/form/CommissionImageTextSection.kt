@@ -40,7 +40,8 @@ fun CommissionImageTextSection(
     onTextChange: (String) -> Unit,
     images: List<Bitmap>,
     onAddClick: () -> Unit,
-    onRemoveClick: (Int) -> Unit
+    onRemoveClick: (Int) -> Unit,
+    onImageUpload: (Uri) -> Unit = {}
 ) {
     val context = LocalContext.current
     
@@ -53,7 +54,8 @@ fun CommissionImageTextSection(
                 val inputStream = context.contentResolver.openInputStream(selectedUri)
                 val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
                 inputStream?.close()
-                // 이미지 추가 로직 (실제로는 images 리스트에 추가해야 함)
+                // 이미지 업로드 호출
+                onImageUpload(selectedUri)
                 onAddClick()
             } catch (e: Exception) {
                 // 에러 처리

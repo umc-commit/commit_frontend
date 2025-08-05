@@ -19,19 +19,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.commit.R
 import com.example.commit.data.model.*
 import com.example.commit.fragment.FragmentFormCheckScreen
 import com.example.commit.ui.Theme.CommitTheme
+import com.example.commit.viewmodel.CommissionFormState
+import com.example.commit.viewmodel.CommissionFormViewModel
+import com.example.commit.viewmodel.ImageUploadState
+import com.example.commit.viewmodel.SubmitState
 import com.google.gson.Gson
 
 @Composable
-fun CommissionFormScreen() {
+fun CommissionFormScreen(commissionId: String = "1") {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
-
-    // FormItem 구조에 맞춰 label, type, options 순으로 정의
-    val formSchema = listOf(
+    val viewModel: CommissionFormViewModel = viewModel()
+    
+    // API 호출
+    LaunchedEffect(commissionId) {
+        viewModel.getCommissionForm(commissionId, context)
+    }
+    
+    val commissionFormState by viewModel.commissionFormState.collectAsState()
+    val imageUploadState by viewModel.imageUploadState.collectAsState()
+    val submitState by viewModel.submitState.collectAsState()
+    
+    // 기본 폼 스키마 (API 응답이 없을 때 사용)
+    val defaultFormSchema = listOf(
         FormItem(
             label = "당일마감 옵션",
             type = "radio",
@@ -52,6 +67,15 @@ fun CommissionFormScreen() {
             type = "image"
         )
     )
+    
+    // API 응답에서 폼 스키마를 가져오거나 기본값 사용
+    val formSchema = when (commissionFormState) {
+        is CommissionFormState.Success -> {
+            val response = (commissionFormState as CommissionFormState.Success).data
+            response.success?.formSchema ?: defaultFormSchema
+        }
+        else -> defaultFormSchema
+    }
 
     val formAnswer = remember { mutableStateMapOf<String, Any>() }
     val images = remember { mutableStateListOf<Bitmap>() }
@@ -78,32 +102,83 @@ fun CommissionFormScreen() {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-    ) {
-        CommissionTopBar(
-            onBackClick = {
-                // 뒤로가기 기능
-                Log.d("FormDebug", "뒤로가기 버튼 클릭됨")
-                if (context is FragmentActivity) {
-                    Log.d("FormDebug", "context가 FragmentActivity입니다. popBackStack 호출")
-                    context.supportFragmentManager.popBackStack()
-                } else {
-                    Log.d("FormDebug", "context가 FragmentActivity가 아닙니다: ${context.javaClass.simpleName}")
-                    // CommissionFormActivity의 경우 finish() 호출
-                    if (context is androidx.activity.ComponentActivity) {
-                        Log.d("FormDebug", "ComponentActivity의 finish() 호출")
-                        context.finish()
+    when (commissionFormState) {
+        is CommissionFormState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        is CommissionFormState.Error -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "오류가 발생했습니다",
+                        fontSize = 16.sp,
+                        color = Color.Red
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = (commissionFormState as CommissionFormState.Error).message,
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { viewModel.getCommissionForm(commissionId, context) }
+                    ) {
+                        Text("다시 시도")
                     }
                 }
             }
-        )
-        CommissionHeader()
-        Spacer(modifier = Modifier.height(20.dp))
-        Divider(thickness = 8.dp, color = Color(0xFFD9D9D9))
-        Spacer(modifier = Modifier.height(20.dp))
+        }
+        else -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+            ) {
+                CommissionTopBar(
+                    onBackClick = {
+                        // 뒤로가기 기능
+                        Log.d("FormDebug", "뒤로가기 버튼 클릭됨")
+                        if (context is FragmentActivity) {
+                            Log.d("FormDebug", "context가 FragmentActivity입니다. popBackStack 호출")
+                            context.supportFragmentManager.popBackStack()
+                        } else {
+                            Log.d("FormDebug", "context가 FragmentActivity가 아닙니다: ${context.javaClass.simpleName}")
+                            // CommissionFormActivity의 경우 finish() 호출
+                            if (context is androidx.activity.ComponentActivity) {
+                                Log.d("FormDebug", "ComponentActivity의 finish() 호출")
+                                context.finish()
+                            }
+                        }
+                    }
+                )
+                
+                // API 응답에서 커미션 정보 가져오기
+                val commissionInfo = when (commissionFormState) {
+                    is CommissionFormState.Success -> {
+                        val response = (commissionFormState as CommissionFormState.Success).data
+                        response.success?.commission
+                    }
+                    else -> null
+                }
+                
+                CommissionHeader(
+                    artistName = commissionInfo?.artist?.nickname ?: "키르",
+                    commissionTitle = commissionInfo?.title ?: "낙서 타입 커미션"
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Divider(thickness = 8.dp, color = Color(0xFFD9D9D9))
+                Spacer(modifier = Modifier.height(20.dp))
 
         // 폼 내용을 감싸는 Column (패딩 적용)
         Column(
@@ -129,6 +204,33 @@ fun CommissionFormScreen() {
                         )
                     }
                     "image" -> {
+                        // 이미지 업로드 상태 처리
+                        when (imageUploadState) {
+                            is ImageUploadState.Loading -> {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+                            is ImageUploadState.Error -> {
+                                Text(
+                                    text = (imageUploadState as ImageUploadState.Error).message,
+                                    color = Color.Red,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            is ImageUploadState.Success -> {
+                                Text(
+                                    text = "이미지 업로드 성공: ${(imageUploadState as ImageUploadState.Success).data.success?.image_url}",
+                                    color = Color.Green,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            else -> {}
+                        }
+                        
                         CommissionImageTextSection(
                             text = formAnswer["신청 내용"] as? String ?: "",
                             onTextChange = { 
@@ -137,7 +239,10 @@ fun CommissionFormScreen() {
                             },
                             images = images,
                             onAddClick = { /* TODO */ },
-                            onRemoveClick = { index -> images.removeAt(index) }
+                            onRemoveClick = { index -> images.removeAt(index) },
+                            onImageUpload = { uri ->
+                                viewModel.uploadImage(uri, context)
+                            }
                         )
                     }
                 }
@@ -145,11 +250,52 @@ fun CommissionFormScreen() {
 
             Spacer(modifier = Modifier.height(20.dp))
             
+            // 제출 상태 처리
+            when (submitState) {
+                is SubmitState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                is SubmitState.Error -> {
+                    Text(
+                        text = (submitState as SubmitState.Error).message,
+                        color = Color.Red,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(horizontal = 20.dp)
+                    )
+                }
+                is SubmitState.Success -> {
+                    Text(
+                        text = "신청이 성공적으로 제출되었습니다!",
+                        color = Color.Green,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(horizontal = 20.dp)
+                    )
+                }
+                else -> {}
+            }
+            
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
                 onClick = {
                     if (isFormComplete) {
+                        // 제출 로직
+                        val imageUrls = mutableListOf<String>()
+                        // TODO: 업로드된 이미지 URL들을 imageUrls에 추가
+                        
+                        viewModel.submitCommissionRequest(
+                            commissionId = commissionId,
+                            formAnswers = formAnswer,
+                            imageUrls = imageUrls,
+                            context = context
+                        )
+                        
+                        // 기존 로직 (임시로 유지)
                         val gson = Gson()
                         val schemaJson = gson.toJson(formSchema)
                         val answerJson = gson.toJson(formAnswer)
@@ -198,6 +344,8 @@ fun CommissionFormScreen() {
             }
 
             Spacer(modifier = Modifier.height(30.dp))
+        }
+    }
         }
     }
 }
