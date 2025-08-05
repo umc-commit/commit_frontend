@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
@@ -28,11 +29,16 @@ import com.example.commit.adapter.home.AuthorCardAdapter
 import com.example.commit.adapter.home.FollowingPostAdapter
 import com.example.commit.adapter.home.HomeCardAdapter
 import com.example.commit.adapter.home.ReviewCardAdapter
+import com.example.commit.connection.RetrofitClient
+import com.example.commit.connection.RetrofitObject
 import com.example.commit.databinding.BottomSheetHomeBinding
 import com.example.commit.databinding.FragmentHomeBinding
 import com.example.commit.ui.post.PostHeaderSection
 import com.example.commit.ui.search.FragmentSearch
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 class FragmentHome : Fragment() {
@@ -50,6 +56,8 @@ class FragmentHome : Fragment() {
 
         //전체 거래수 api 연동 시 꼭 지우기
         setBannerTransactionCount(4257)
+
+        fetchHomeData()
 
         // arguments 확인하여 PostHeaderSection 표시
         val showPostDetail = arguments?.getBoolean("show_post_detail", false) ?: false
@@ -129,9 +137,6 @@ class FragmentHome : Fragment() {
         }
 
         val homeReviewClick: (String) -> Unit = { title ->
-            Log.d("FragmentHome", "=== homeReviewClick 호출됨 ===")
-            Log.d("FragmentHome", "title: $title")
-
             val composeView = ComposeView(requireContext()).apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
@@ -171,37 +176,6 @@ class FragmentHome : Fragment() {
                 }
             }
         })
-
-        // RecyclerView 설정
-        binding.rvTodayRecommendations.apply {
-            adapter = HomeCardAdapter(listOf("추천1", "추천2", "추천3", "추천4"), homeCardClick)
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        }
-
-        binding.rvNewRegistrations.apply {
-            adapter = HomeCardAdapter(listOf("추천5", "추천6", "추천7", "추천8"), homeCardClick)
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        }
-
-        binding.rvHotContent.apply {
-            adapter = HomeCardAdapter(listOf("추천9", "추천10", "추천11", "추천12"), homeCardClick)
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        }
-
-        binding.rvDeadlineContent.apply {
-            adapter = HomeCardAdapter(listOf("추천13", "추천14", "추천15", "추천16"), homeCardClick)
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        }
-
-        binding.rvReviewContent.apply {
-            adapter = ReviewCardAdapter(listOf("리뷰1", "리뷰2", "리뷰3", "리뷰4"), homeReviewClick)
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        }
-
-        binding.rvNewAuthorContent.apply {
-            adapter = AuthorCardAdapter(listOf("작가1", "작가2", "작가3", "작가4"))
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        }
 
         binding.tvFollowing.setOnClickListener {
             // 팔로우 탭 UI 표시
@@ -299,6 +273,70 @@ class FragmentHome : Fragment() {
             .append("건의 거래가 완료됐어요.")
 
         binding.root.findViewById<TextView>(R.id.tv_banner_text).text = builder
+    }
+
+    private fun fetchHomeData() {
+        val prefs = requireContext().getSharedPreferences("auth", AppCompatActivity.MODE_PRIVATE)
+        val token = prefs.getString("accessToken", null)
+
+        if (token.isNullOrEmpty()) {
+            Log.e("HomeAPI", "로그인이 필요합니다.")
+            return
+        }
+
+        val api = RetrofitObject.getRetrofitService(requireContext())
+        api.getHomeData("Bearer $token").enqueue(object :
+            Callback<RetrofitClient.ApiResponse<RetrofitClient.HomeResponseData>> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.HomeResponseData>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.HomeResponseData>>
+            ) {
+                if (response.isSuccessful) {
+                    val data = response.body()?.success
+                    if (data != null) {
+                        setupHomeAdapters(data)
+                    } else {
+                        Log.e("HomeAPI", "success 데이터가 없음")
+                    }
+                } else {
+                    Log.e("HomeAPI", "API 실패: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.HomeResponseData>>,
+                t: Throwable
+            ) {
+                Log.e("HomeAPI", "네트워크 오류", t)
+            }
+        })
+    }
+
+    private fun setupHomeAdapters(data: RetrofitClient.HomeResponseData) {
+        binding.rvTodayRecommendations.apply {
+            adapter = HomeCardAdapter(data.section1) { /* 클릭 처리 */ }
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
+        binding.rvNewRegistrations.apply {
+            adapter = HomeCardAdapter(data.section2) { /* 클릭 처리 */ }
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
+        binding.rvHotContent.apply {
+            adapter = HomeCardAdapter(data.section3) { /* 클릭 처리 */ }
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
+        binding.rvDeadlineContent.apply {
+            adapter = HomeCardAdapter(data.section4) { /* 클릭 처리 */ }
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
+        binding.rvReviewContent.apply {
+            adapter = ReviewCardAdapter(data.newReview) { /* 클릭 처리 */ }
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
+        binding.rvNewAuthorContent.apply {
+            adapter = AuthorCardAdapter(data.newArtist)
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
     }
 
     override fun onDestroyView() {

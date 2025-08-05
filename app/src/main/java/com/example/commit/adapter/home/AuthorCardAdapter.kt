@@ -4,14 +4,35 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.commit.R
 import com.example.commit.activity.author.AuthorProfileActivity
+import com.example.commit.connection.RetrofitClient
 import com.example.commit.databinding.ItemAuthorProfileBinding
 
 class AuthorCardAdapter(
-    private val itemList: List<String>
+    private val itemList: List<RetrofitClient.HomeAuthorItem>
 ) : RecyclerView.Adapter<AuthorCardAdapter.AuthorCardViewHolder>() {
 
-    inner class AuthorCardViewHolder(val binding: ItemAuthorProfileBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class AuthorCardViewHolder(val binding: ItemAuthorProfileBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: RetrofitClient.HomeAuthorItem) {
+            binding.tvAuthorNickname.text = item.nickname
+
+            Glide.with(binding.root.context)
+                .load(item.profileImageUrl)
+                .placeholder(R.drawable.ic_profile)
+                .error(R.drawable.ic_profile)
+                .into(binding.ivAuthorProfile)
+
+            itemView.setOnClickListener {
+                val context = binding.root.context
+                val intent = Intent(context, AuthorProfileActivity::class.java)
+                context.startActivity(intent)
+            }
+        }
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AuthorCardViewHolder {
         val binding = ItemAuthorProfileBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -19,14 +40,7 @@ class AuthorCardAdapter(
     }
 
     override fun onBindViewHolder(holder: AuthorCardViewHolder, position: Int) {
-        val item = itemList[position]
-        holder.binding.tvAuthorNickname.text = item
-
-        holder.itemView.setOnClickListener {
-            val context = holder.itemView.context
-            val intent = Intent(context, AuthorProfileActivity::class.java)
-            context.startActivity(intent)
-        }
+        holder.bind(itemList[position])
     }
 
     override fun getItemCount(): Int = minOf(itemList.size, 6)

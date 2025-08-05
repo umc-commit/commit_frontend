@@ -7,12 +7,20 @@ import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.example.commit.R
+import com.example.commit.connection.RetrofitClient
+import com.example.commit.connection.RetrofitObject
 import com.example.commit.databinding.ActivityCommissionReportBinding
-import com.example.commit.data.model.entities.ReportProfile
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.text.NumberFormat
+import java.util.Locale
 
 class ReportActivity : AppCompatActivity() {
 
@@ -22,12 +30,6 @@ class ReportActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityCommissionReportBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // 테스트용 리포트 타입 (API 연결 전 수동 지정)
-        val reportType = ReportType.GEM_HUNTER
-
-        // UI 적용
-        applyReportTypeUI(reportType)
 
         // 뒤로가기 버튼
         binding.ivBack.setOnClickListener {
@@ -39,30 +41,43 @@ class ReportActivity : AppCompatActivity() {
             saveReportImage()
         }
 
-        // 필요시 데이터 바인딩 예시
-        val nickname = "로지" // <- 나중에 서버에서 받아올 값
-        val monthText = "6월" // <- 강조할 대상
-        val color = ContextCompat.getColor(this, R.color.mint2)
-
-        val builder = SpannableStringBuilder()
-            .append("${nickname}님의 ".toString())
-            .append(SpannableString(monthText).apply {
-                setSpan(
-                    ForegroundColorSpan(color),
-                    0,
-                    length,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            })
-            .append(" 리포트예요!")
-
-        binding.tvSubtitle.text = builder
-
-        binding.tvCategory.text = "그림 (10건)"
-        binding.tvAuthor.text = "키르"
-        binding.tvPoint.text = "177,000P"
-        binding.tvReview.text = "77.7%"
+        fetchReportData()
     }
+
+
+    private fun fetchReportData() {
+        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+        val token = prefs.getString("accessToken", null)
+        if (token.isNullOrEmpty()) {
+            Log.e("ReportAPI", "로그인이 필요합니다.")
+            return
+        }
+
+        val service = RetrofitObject.getRetrofitService(this)
+        service.getCommissionReport("Bearer $token").enqueue(object :
+            Callback<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>>
+            ) {
+                if (response.isSuccessful) {
+                    val report = response.body()?.success
+                    if (report != null) {
+                        bindReportUI(report)
+                    } else {
+                        Log.e("ReportAPI", "success 데이터가 없음")
+                    }
+                } else {
+                    Log.e("ReportAPI", "API 실패: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>>, t: Throwable) {
+                Log.e("ReportAPI", "네트워크 오류", t)
+            }
+        })
+    }
+
 
     private fun saveReportImage() {
         // tv_description만 잠깐 숨겼다가 다시 보이게
@@ -122,48 +137,33 @@ class ReportActivity : AppCompatActivity() {
         }
     }
 
-    enum class ReportType {
-        VIP,             // 커미션계의 VIP
-        FAN_APPLY,       // 작가 덕후 신청자
-        CURIOUS_APPLY,   // 호기심 대장 신청자
-        GEM_HUNTER,      // 숨겨진 보석 발굴가
-        FAST_FEEDBACK    // 빠른 피드백러
+    private fun bindReportUI(report: RetrofitClient.ReportResponseData) {
+        val monthText = "${report.reportInfo.month}월"
+        val color = ContextCompat.getColor(this, R.color.mint2)
+        val builder = SpannableStringBuilder()
+            .append("${report.reportInfo.userNickname}님의 ")
+            .append(SpannableString(monthText).apply {
+                setSpan(
+                    ForegroundColorSpan(color),
+                    0,
+                    length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            })
+            .append(" 리포트예요!")
+        binding.tvSubtitle.text = builder
+
+        Glide.with(this).load(report.characterImage).placeholder(R.drawable.ic_profile) // 로딩 중 표시
+            .error(R.drawable.ic_profile).into(binding.ivCharacter)
+        binding.tvBadge.text = report.quote.title
+        binding.tvQuote.text = report.quote.description
+        binding.tvCategory.text = "${report.statistics.mainCategory.name} (${report.statistics.mainCategory.count}건)"
+        Glide.with(this).load(report.statistics.favoriteArtist.profileImage).placeholder(R.drawable.ic_profile)
+            .error(R.drawable.ic_profile).into(binding.ivProfile)
+        binding.tvAuthor.text = report.statistics.favoriteArtist.nickname
+        binding.tvPoint.text = "${NumberFormat.getNumberInstance(Locale.KOREA).format(report.statistics.pointsUsed)}P"
+        binding.tvReview.text = "${(report.statistics.reviewRate * 100).toInt()}%"
     }
 
-    private val reportProfiles = mapOf(
-        ReportType.VIP to ReportProfile(
-            imageResId = R.drawable.report_cat_1,
-            badgeText = "커미션계의 VIP",
-            quoteText = "“커미션계의 큰 손 등장!”\n덕분에 작가님들의 창작활동이 풍요로워졌어요."
-        ),
-        ReportType.FAN_APPLY to ReportProfile(
-            imageResId = R.drawable.report_cat_2,
-            badgeText = "작가 덕후 신청자",
-            quoteText = "“이 작가님만큼은 믿고 맡긴다!”\n단골의 미덕을 지닌 당신, 작가님도 감동했을 거예요."
-        ),
-        ReportType.CURIOUS_APPLY to ReportProfile(
-            imageResId = R.drawable.report_cat_3,
-            badgeText = "호기심 대장 신청자",
-            quoteText = "“다양한 스타일을 사랑하는 탐험가!”\n호기심이 가득해서, 언제나 새로운 작가를 탐색해요."
-        ),
-        ReportType.GEM_HUNTER to ReportProfile(
-            imageResId = R.drawable.report_cat_4,
-            badgeText = "숨겨진 보석 발굴가",
-            quoteText = "“빛나는 원석을 내가 발견했다!”\n성장하는 작가님들의 첫걸음을 함께한 당신, 멋져요."
-        ),
-        ReportType.FAST_FEEDBACK to ReportProfile(
-            imageResId = R.drawable.report_cat_5,
-            badgeText = "빠른 피드백러",
-            quoteText = "“작가님, 이번 커미션 최고였어요!”\n정성 가득한 피드백으로 건강한 커미션 문화를 만들어가요."
-        )
-    )
-
-    private fun applyReportTypeUI(reportType: ReportType) {
-        val profile = reportProfiles[reportType] ?: return
-
-        binding.ivCharacter.setImageResource(profile.imageResId)
-        binding.tvBadge.text = profile.badgeText
-        binding.tvQuote.text = profile.quoteText
-    }
 
 }

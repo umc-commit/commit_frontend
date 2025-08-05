@@ -5,11 +5,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.commit.R
 
 class BadgeAdapter(
-    private val badgeList: List<Int>, // drawable id 목록
-    private val onClick: (Int) -> Unit // 클릭 시 동작
+    private val badgeList: List<String>, // URL 목록
+    private val onClick: (String) -> Unit // 클릭 시 동작
 ) : RecyclerView.Adapter<BadgeAdapter.BadgeViewHolder>() {
 
     inner class BadgeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -22,11 +23,17 @@ class BadgeAdapter(
     }
 
     override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
-        val badgeResId = badgeList[position]
-        holder.ivBadge.setImageResource(badgeResId)
+        val badgeUrl = badgeList[position]
+
+        // URL 이미지를 Glide로 로드
+        Glide.with(holder.itemView.context)
+            .load(badgeUrl)
+            .placeholder(R.drawable.ic_profile) // 로딩 중 기본 이미지
+            .error(R.drawable.ic_profile) // 실패 시 기본 이미지
+            .into(holder.ivBadge)
 
         holder.ivBadge.setOnClickListener {
-            onClick(badgeResId)
+            onClick(badgeUrl)
         }
     }
 
