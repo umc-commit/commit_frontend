@@ -10,19 +10,23 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.commit.R
 import com.example.commit.activity.MainActivity
 import com.example.commit.adapter.author.AuthorCommissionAdapter
 import com.example.commit.adapter.author.AuthorReviewAdapter
 import com.example.commit.adapter.mypage.BadgeAdapter
-import com.example.commit.data.model.entities.AuthorCommission
-import com.example.commit.data.model.entities.AuthorReview
+import com.example.commit.connection.RetrofitClient
+import com.example.commit.connection.RetrofitObject
 import com.example.commit.databinding.ActivityAuthorProfileBinding
 import com.example.commit.databinding.BottomSheetCommissionBinding
 import com.example.commit.databinding.BottomSheetHomeBinding
 import com.example.commit.databinding.BottomSheetPostMoreBinding
 import com.example.commit.fragment.FragmentChat
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class AuthorProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAuthorProfileBinding
@@ -33,7 +37,11 @@ class AuthorProfileActivity : AppCompatActivity() {
         binding = ActivityAuthorProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        updateSlots(remainingSlots = 2, totalSlots = 4)
+        val artistId = intent.getIntExtra("artistId", -1)
+        if (artistId != -1) {
+            loadAuthorProfile(artistId)
+        }
+
 
         binding.ivBack.setOnClickListener { finish() }
         binding.ivMore.setOnClickListener { showSortBottomSheet() }
@@ -80,91 +88,33 @@ class AuthorProfileActivity : AppCompatActivity() {
             startActivity(intent)
             finish() // 프로필 화면 닫기 (원하면 유지 가능)
         }
-
-        //배지 리사이클러뷰
-        val badgeList = listOf(
-            R.drawable.badge_author_1,
-            R.drawable.badge_author_5,
-            R.drawable.badge_author_15,
-            R.drawable.badge_author_50
-        )
-        val badgeAdapter = BadgeAdapter(badgeList) { showBadgePopup(it) }
-        binding.recyclerBadges.apply {
-            adapter = badgeAdapter
-            layoutManager = LinearLayoutManager(this@AuthorProfileActivity, LinearLayoutManager.HORIZONTAL, false)
-        }
-
-        // 커미션 타입 리사이클러뷰
-        val commissionList = mutableListOf(
-            AuthorCommission(
-                R.drawable.image_placeholder, // 썸네일
-                "캐릭터 커미션",               // 제목
-                "캐릭터를 원하는 스타일로 제작해드립니다.", // 설명
-                false,                         // 북마크 여부
-                "그림",                        // 태그1
-                "#LD",                         // 태그2
-                "#커플"                        // 태그3
-            ),
-            AuthorCommission(
-                R.drawable.image_placeholder,
-                "배경 일러스트",
-                "섬세한 배경 일러스트를 그려드립니다.",
-                false,
-                "그림",
-                "#배경",
-                "#풍경"
-            ),
-            AuthorCommission(
-                R.drawable.image_placeholder,
-                "아이콘 커미션",
-                "아기자기한 아이콘을 제작해드립니다.",
-                false,
-                "그림",
-                "#아이콘",
-                "#캐릭터"
-            )
-        )
-
-        val commissionAdapter = AuthorCommissionAdapter(commissionList)
-        binding.recyclerCard.apply {
-            adapter = commissionAdapter
-            layoutManager = LinearLayoutManager(this@AuthorProfileActivity)
-        }
-
-
-        // 후기 리사이클러뷰 (AuthorReviewAdapter 사용)
-        val reviewList = listOf(
-            AuthorReview(5.0, "낙서 타임 커미션", "친절하게 응대해주셨습니다. 감사해요!", "위시", "2일 전", "12시간"),
-            AuthorReview(4.5, "아이콘 커미션", "퀄리티가 너무 좋아요!", "미루", "5일 전", "1일"),
-            AuthorReview(4.8, "배경 일러스트", "정말 만족스러운 결과물이에요.", "하루", "1주 전", "3일")
-        )
-        val reviewAdapter = AuthorReviewAdapter(reviewList)
-        binding.recyclerReviews.apply {
-            adapter = reviewAdapter
-            layoutManager = LinearLayoutManager(this@AuthorProfileActivity)
-        }
     }
 
-    private fun showBadgePopup(badgeResId: Int) {
-        val badgeCount = when (badgeResId) {
-            R.drawable.badge_author_50 -> 50
-            R.drawable.badge_author_15 -> 15
-            R.drawable.badge_author_5 -> 5
-            else -> 1
-        }
-
+    private fun showBadgePopup(badgeUrl: String, badgeThreshold: Int) {
+        // threshold 값으로 배지 등급 계산
         val badgeLevel = when {
-            badgeCount >= 50 -> "다이아"
-            badgeCount >= 15 -> "금"
-            badgeCount >= 5 -> "은"
+            badgeThreshold >= 50 -> "다이아"
+            badgeThreshold >= 15 -> "금"
+            badgeThreshold >= 5 -> "은"
             else -> "동"
         }
 
         val popupView = layoutInflater.inflate(R.layout.badge_popup, null)
-        popupView.findViewById<TextView>(R.id.tv_badge_popup_text).text = "커미션 완료 배지 ($badgeLevel)"
-        popupView.findViewById<TextView>(R.id.tv_badge_popup_text2).text = "조건 : 커미션 완료 ${badgeCount}회 달성"
-        popupView.findViewById<ImageView>(R.id.iv_badge_popup).setImageResource(badgeResId)
 
+        // 텍스트 세팅
+        popupView.findViewById<TextView>(R.id.tv_badge_popup_text)
+            .text = "커미션 완료 배지 ($badgeLevel)"
+        popupView.findViewById<TextView>(R.id.tv_badge_popup_text2)
+            .text = "조건 : 커미션 완료 ${badgeThreshold}회 달성"
+
+        // URL 이미지 Glide로 로드
+        Glide.with(this)
+            .load(badgeUrl)
+            .placeholder(R.drawable.ic_profile) // 로딩 중 기본 이미지
+            .error(R.drawable.ic_profile) // 실패 시 기본 이미지
+            .into(popupView.findViewById(R.id.iv_badge_popup))
+
+        // 팝업 다이얼로그 생성
         val dialog = Dialog(this).apply {
             setContentView(popupView)
             window?.apply {
@@ -240,5 +190,55 @@ class AuthorProfileActivity : AppCompatActivity() {
                 }
                 .start()
         }
+    }
+
+    private fun loadAuthorProfile(artistId: Int) {
+        val service = RetrofitObject.getRetrofitService(this)
+        val token = getSharedPreferences("auth", MODE_PRIVATE)
+            .getString("accessToken", null) ?: return
+
+        service.getAuthorProfile("Bearer $token", artistId)
+            .enqueue(object : Callback<RetrofitClient.AuthorProfileResponse> {
+                override fun onResponse(
+                    call: Call<RetrofitClient.AuthorProfileResponse>,
+                    response: Response<RetrofitClient.AuthorProfileResponse>
+                ) {
+                    if (!response.isSuccessful) return
+                    val data = response.body()?.success ?: return
+
+                    // 프로필
+                    binding.tvUsername.text = data.nickname
+                    binding.tvIntroContent.text = data.description
+                    Glide.with(this@AuthorProfileActivity)
+                        .load(data.profileImage)
+                        .placeholder(R.drawable.ic_profile)
+                        .into(binding.ivProfile)
+                    updateSlots(data.slot)
+
+                    // 배지
+                    binding.recyclerBadges.layoutManager =
+                        LinearLayoutManager(this@AuthorProfileActivity, LinearLayoutManager.HORIZONTAL, false)
+                    val badgeList = data.badges
+                    binding.recyclerBadges.adapter =
+                        BadgeAdapter(badgeList.map { it.badge.badgeImage }) { url ->
+                            val badgeData = badgeList.firstOrNull { it.badge.badgeImage == url }
+                            showBadgePopup(url, badgeData?.badge?.threshold ?: 1)
+                        }
+
+                    // 커미션
+                    binding.recyclerCard.layoutManager = LinearLayoutManager(this@AuthorProfileActivity)
+                    binding.recyclerCard.adapter =
+                        AuthorCommissionAdapter(data.commissions.toMutableList())
+
+                    // 리뷰
+                    binding.recyclerReviews.layoutManager = LinearLayoutManager(this@AuthorProfileActivity)
+                    binding.recyclerReviews.adapter =
+                        AuthorReviewAdapter(data.reviews)
+                }
+
+                override fun onFailure(call: Call<RetrofitClient.AuthorProfileResponse>, t: Throwable) {
+                    t.printStackTrace()
+                }
+            })
     }
 }

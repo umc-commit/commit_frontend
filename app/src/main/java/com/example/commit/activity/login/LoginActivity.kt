@@ -27,6 +27,16 @@ class LoginActivity : AppCompatActivity() {
             customTabsIntent.launchUrl(this, Uri.parse(googleLoginUrl))
         }
 
+        // 카카오 로그인 버튼 클릭 시
+        binding.kakaoLoginButton.setOnClickListener {
+            val kakaoLoginUrl = "https://commit.n-e.kr/api/users/oauth2/login/kakao"
+            val customTabsIntent = CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .setInstantAppsEnabled(false)
+                .build()
+            customTabsIntent.launchUrl(this, Uri.parse(kakaoLoginUrl))
+        }
+
         // 앱이 딥링크로 호출된 경우 토큰 처리
         handleDeepLink(intent)
     }

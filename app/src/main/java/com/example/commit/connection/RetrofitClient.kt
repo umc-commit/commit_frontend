@@ -259,6 +259,61 @@ class RetrofitClient {
         @SerializedName("profileImageUrl") val profileImageUrl: String?
     )
 
+    // 작가 프로필 응답 DTO
+    data class AuthorProfileResponse(
+        @SerializedName("resultType") val resultType: String,
+        @SerializedName("error") val error: ErrorData?,
+        @SerializedName("success") val success: AuthorProfileData?
+    )
+
+    data class AuthorProfileData(
+        val nickname: String,
+        val description: String,
+        val profileImage: String?,
+        val slot: Int,
+        val reviews: List<AuthorReviewItem>,
+        val commissions: List<AuthorCommissionItem>,
+        val badges: List<AuthorBadgeItem>
+    )
+
+    data class AuthorReviewItem(
+        val id: String,
+        val rate: Double,
+        val content: String,
+        val createdAt: String,
+        val commissionTitle: String,
+        val workingTime: String?,
+        val writer: Writer
+    )
+
+    data class Writer(
+        val nickname: String
+    )
+
+    data class AuthorCommissionItem(
+        val id: String,
+        val title: String,
+        val summary: String,
+        val minPrice: Int,
+        val category: String,
+        val tags: List<String>
+    )
+
+    data class AuthorBadgeItem(
+        val id: String,
+        val earnedAt: String,
+        val badge: BadgeInfo
+    )
+
+    data class BadgeInfo(
+        val id: String,
+        val type: String,
+        val threshold: Int,
+        val name: String,
+        val badgeImage: String
+    )
+
+
 
 
 }

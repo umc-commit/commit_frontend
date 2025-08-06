@@ -6,10 +6,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.commit.R
-import com.example.commit.data.model.entities.AuthorReview
+import com.example.commit.connection.RetrofitClient
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
 class AuthorReviewAdapter(
-    private val items: List<AuthorReview>
+    private val items: List<RetrofitClient.AuthorReviewItem>
 ) : RecyclerView.Adapter<AuthorReviewAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -30,24 +33,29 @@ class AuthorReviewAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
 
-        // 별점
-        holder.tvRating.text = String.format("%.1f", item.rating)
-
-        // 커미션명
-        holder.tvCommissionName.text = item.commissionName
-
-        // 리뷰 내용
+        holder.tvRating.text = String.format("%.1f", item.rate)
+        holder.tvCommissionName.text = item.commissionTitle
         holder.tvReviewContent.text = item.content
-
-        // 작성자
-        holder.tvReviewer.text = item.reviewer
-
-        // 작성 시간
-        holder.tvTime.text = item.time
-
-        // 작업기간
-        holder.tvWorkPeriod.text = "작업기간 : ${item.workPeriod}"
+        holder.tvReviewer.text = item.writer.nickname
+        holder.tvTime.text = formatTimeAgo(item.createdAt)
+        holder.tvWorkPeriod.text = "작업기간 : ${item.workingTime ?: "-"}"
     }
 
-    override fun getItemCount(): Int = minOf(items.size, 4)
+    private fun formatTimeAgo(isoDate: String): String {
+        return try {
+            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            sdf.timeZone = TimeZone.getTimeZone("UTC")
+            val date = sdf.parse(isoDate)
+            val diff = System.currentTimeMillis() - (date?.time ?: 0L)
+            val days = diff / (1000 * 60 * 60 * 24)
+            when {
+                days > 0 -> "${days}일 전"
+                else -> "오늘"
+            }
+        } catch (e: Exception) {
+            isoDate
+        }
+    }
+
+    override fun getItemCount(): Int = minOf(items.size, 6)
 }

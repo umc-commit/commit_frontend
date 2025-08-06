@@ -5,6 +5,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface RetrofitAPI {
     // 회원가입
@@ -36,4 +37,11 @@ interface RetrofitAPI {
     fun getHomeData(
         @Header("Authorization") token: String
     ): Call<RetrofitClient.ApiResponse<RetrofitClient.HomeResponseData>>
+
+    //작가 프로필 조회
+    @GET("/api/artists/{artistId}")
+    fun getAuthorProfile(
+        @Header("Authorization") token: String,
+        @Path("artistId") artistId: Int
+    ): Call<RetrofitClient.AuthorProfileResponse>
 }
