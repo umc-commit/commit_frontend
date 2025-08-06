@@ -1,6 +1,7 @@
 package com.example.commit.ui.post.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
@@ -12,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.commit.data.model.ArtistSuccessData
 import com.example.commit.ui.Theme.CommitTypography
 
 enum class TabType {
@@ -20,6 +22,7 @@ enum class TabType {
 
 @Composable
 fun PostDetailTabSection(
+    artistInfo: ArtistSuccessData?,
     onTabSelected: (TabType) -> Unit,
     onReviewListClick: () -> Unit
 ) {
@@ -89,16 +92,27 @@ fun PostDetailTabSection(
             }
 
             TabType.ARTIST -> {
-                ArtistInfoSection(
-                    artistName = "위시",
-                    followerCount = 1200,
-                    workCount = 35,
-                    rating = 4.8f,
-                    recommendRate = 96,
-                    reviewCount = 43,
-                    onFollowClick = { /* 팔로우 버튼 클릭 시 처리 */ },
-                    onReviewListClick = onReviewListClick
-                )
+                if (artistInfo == null) {
+                    Text(
+                        text = "작가 정보를 불러오는 중입니다...",
+                        style = CommitTypography.bodyMedium,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(20.dp)
+                    )
+                } else {
+                    ArtistInfoSection(
+                        artistName = artistInfo.artist.nickname,
+                        profileImageUrl = artistInfo.artist.profileImageUrl,
+                        followerCount = artistInfo.artist.follower,
+                        workCount = artistInfo.artist.completedworks,
+                        rating = artistInfo.reviewStatistics.averageRate.toFloat(),
+                        recommendRate = artistInfo.reviewStatistics.recommendationRate,
+                        reviewCount = artistInfo.reviewStatistics.totalReviews,
+                        isFollowing = artistInfo.isFollowing,
+                        onFollowClick = { /* TODO */ },
+                        onReviewListClick = onReviewListClick
+                    )
+                }
             }
         }
     }
@@ -125,5 +139,5 @@ fun TabItem(title: String, selected: Boolean, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewPostDetailTabSection() {
-    PostDetailTabSection(onTabSelected = {}, onReviewListClick = {})
+    PostDetailTabSection(artistInfo = null, onTabSelected = {}, onReviewListClick = {})
 }

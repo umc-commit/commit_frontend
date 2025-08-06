@@ -57,7 +57,7 @@ class FragmentHome : Fragment() {
         // arguments 확인하여 PostHeaderSection 표시
         val showPostDetail = arguments?.getBoolean("show_post_detail", false) ?: false
         val postTitle = arguments?.getString("post_title", "그림 커미션") ?: "그림 커미션"
-        
+
         if (showPostDetail) {
             // PostHeaderSection 표시
             val composeView = ComposeView(requireContext()).apply {
@@ -73,8 +73,8 @@ class FragmentHome : Fragment() {
                         images = listOf("https://example.com/image1.jpg"),
                         isBookmarked = false,
                         onReviewListClick = {
-                            val intent = Intent(context, WrittenReviewsActivity::class.java)
-                            context.startActivity(intent)
+                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
+                            startActivity(intent)
                         }
                     )
                 }
@@ -118,38 +118,14 @@ class FragmentHome : Fragment() {
                 .commit()
         }
 
-        val homeReviewClick: (String) -> Unit = { title ->
+        val homeReviewClick: (Int) -> Unit = { commissionId ->
             Log.d("FragmentHome", "=== homeReviewClick 호출됨 ===")
-            Log.d("FragmentHome", "title: $title")
+            Log.d("FragmentHome", "commissionId: $commissionId")
 
-            val composeView = ComposeView(requireContext()).apply {
-                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-                setContent {
-                    val context = LocalContext.current
-                    PostScreen(
-                        title = "그림 커미션",
-                        tags = listOf("그림", "#LD", "#당일마감"),
-                        minPrice = 10000,
-                        summary = "작업 설명입니다",
-                        content = "본문 내용",
-                        images = listOf("https://example.com/image1.jpg"),
-                        isBookmarked = false,
-                        onReviewListClick = {
-                            val intent = Intent(context, WrittenReviewsActivity::class.java)
-                            context.startActivity(intent)
-                        }
-                    )
-                }
-            }
-
-
-            binding.frameComposeContainer.apply {
-                visibility = View.VISIBLE
-                removeAllViews()
-                addView(composeView)
-            }
-
-            (activity as? MainActivity)?.showBottomNav(false)
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.Nav_Frame, FragmentPostScreen.newInstance(commissionId))
+                .addToBackStack(null)
+                .commit()
         }
 
         // 뒤로가기 누르면 바텀바 다시 보이기
@@ -187,7 +163,7 @@ class FragmentHome : Fragment() {
         }
 
         binding.rvReviewContent.apply {
-            adapter = ReviewCardAdapter(listOf("리뷰1", "리뷰2", "리뷰3", "리뷰4"), homeReviewClick)
+            adapter = ReviewCardAdapter(listOf(1, 1, 1, 1), homeReviewClick)
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
@@ -268,7 +244,7 @@ class FragmentHome : Fragment() {
             (activity as? MainActivity)?.showBottomNav(true)
         }
 
-        // 바텀 시트 윈도우 설정 (투명도 60% 효과)
+        // 바텀 시트 윈도우 설정
         bottomSheetDialog.window?.apply {
             setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
             setDimAmount(0.6f) // 투명도 60% (0.0f는 완전 투명, 1.0f는 완전 불투명)

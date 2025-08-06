@@ -13,10 +13,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTypography
+import androidx.compose.foundation.Image
+import androidx.compose.ui.draw.clip
+import coil.compose.rememberAsyncImagePainter
+
 
 @Composable
 fun ExpandableItem(
@@ -57,26 +60,31 @@ fun ExpandableItem(
 @Composable
 fun ArtistInfoSection(
     artistName: String,
+    profileImageUrl: String,
     followerCount: Int,
     workCount: Int,
     rating: Float,
     recommendRate: Int,
     reviewCount: Int,
+    isFollowing: Boolean,
     onFollowClick: () -> Unit,
     onReviewListClick: () -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    var followingState by remember { mutableStateOf(isFollowing) }
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
-
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Box(
+            // 1. 프로필 이미지 표시 (Coil 사용)
+            Image(
+                painter = rememberAsyncImagePainter(model = profileImageUrl),
+                contentDescription = null,
                 modifier = Modifier
                     .size(48.dp)
-                    .background(Color.Gray, CircleShape)
+                    .clip(CircleShape)
                     .border(1.dp, Color.LightGray, CircleShape)
             )
 
@@ -111,16 +119,28 @@ fun ArtistInfoSection(
                 }
             }
 
+            //2. 팔로우 상태에 따라 버튼 스타일 변경
             Box(
                 modifier = Modifier
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(20.dp))
-                    .clickable { onFollowClick() }
+                    .background(
+                        color = if (followingState) Color.White else Color.Black,
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = Color.LightGray,
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .clickable {
+                        onFollowClick()
+                        followingState = !followingState
+                    }
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "팔로우",
+                    text = if (followingState) "팔로잉" else "팔로우",
                     style = CommitTypography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
-                    color = Color.Black
+                    color = if (followingState) Color.Black else Color.White
                 )
             }
         }
@@ -224,12 +244,12 @@ fun ArtistInfoSection(
         ExpandableItem(
             title = "전체 후기 보기",
             expanded = isExpanded,
-            onToggle = { 
+            onToggle = {
                 if (!isExpanded) {
                     // 펼칠 때만 ReviewListScreen으로 이동
                     onReviewListClick()
                 }
-                isExpanded = !isExpanded 
+                isExpanded = !isExpanded
             }
         ) {
             if (reviewCount == 0) {
@@ -272,17 +292,4 @@ fun ArtistInfoSection(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewArtistInfoSection() {
-    ArtistInfoSection(
-        artistName = "키르",
-        followerCount = 32,
-        workCount = 11,
-        rating = 5.0f,
-        recommendRate = 100,
-        reviewCount = 0,
-        onFollowClick = { },
-        onReviewListClick = { }
-    )
-}
+

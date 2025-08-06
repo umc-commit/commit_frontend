@@ -53,4 +53,5 @@ class RetrofitClient {
         @SerializedName("createdAt")
         val createdAt: String
     )
+
 }

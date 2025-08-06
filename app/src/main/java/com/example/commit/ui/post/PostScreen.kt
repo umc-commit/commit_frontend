@@ -15,6 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,10 +28,12 @@ import androidx.fragment.app.FragmentActivity
 import coil.compose.rememberAsyncImagePainter
 import com.example.commit.R
 import com.example.commit.activity.CommissionFormActivity
+import com.example.commit.data.model.ArtistSuccessData
 import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.ui.Theme.CommitTypography
 import com.example.commit.ui.post.components.PostBottomBar
 import com.example.commit.ui.post.components.PostDetailTabSection
+import com.example.commit.viewmodel.ArtistViewModel
 
 @Composable
 fun PostScreen(
@@ -40,6 +44,7 @@ fun PostScreen(
     content: String,
     images: List<String>,
     isBookmarked: Boolean,
+    viewModel: ArtistViewModel,
     imageCount: Int = images.size,
     currentIndex: Int = 0,
     onReviewListClick: () -> Unit
@@ -47,6 +52,7 @@ fun PostScreen(
     val context = LocalContext.current
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val painter = rememberAsyncImagePainter(images.getOrNull(0))
+    val artistInfo by viewModel.artistInfo.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -208,6 +214,7 @@ fun PostScreen(
             Spacer(modifier = Modifier.height(5.dp))
 
             PostDetailTabSection(
+                artistInfo = artistInfo,
                 onTabSelected = {},
                 onReviewListClick = onReviewListClick
             )
