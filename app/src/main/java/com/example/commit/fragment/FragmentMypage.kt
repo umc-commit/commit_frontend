@@ -7,6 +7,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import androidx.fragment.app.Fragment
@@ -85,59 +87,48 @@ class FragmentMypage : Fragment() {
     }
 
     private fun showProfileBottomSheet() {
-        val bottomSheetDialog = BottomSheetDialog(requireContext())
-        val sheetBinding = BottomSheetProfileBinding.inflate(layoutInflater)
-        bottomSheetDialog.setContentView(sheetBinding.root)
-
-        // 배경 투명 & 그림자 효과
-        bottomSheetDialog.window?.apply {
-            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
-            setDimAmount(0.6f)
-        }
-
-        // MyPage의 닉네임, 이미지와 동일하게 설정
         val prefs = requireContext().getSharedPreferences("auth", AppCompatActivity.MODE_PRIVATE)
         val nickname = prefs.getString("nickname", "로지")
-        val imageUriString = prefs.getString("imageUri", null)
+        val imageUrl = prefs.getString("imageUri", null)
 
-        sheetBinding.profileName.text = nickname
-
-        if (!imageUriString.isNullOrEmpty()) {
-            val imageUri = Uri.parse(imageUriString)
-            Glide.with(requireContext())
-                .load(imageUri)
-                .placeholder(R.drawable.ic_profile)
-                .error(R.drawable.ic_profile)
-                .into(sheetBinding.profileImage)
-        } else {
-            sheetBinding.profileImage.setImageResource(R.drawable.ic_profile)
+        val sheetBinding = BottomSheetProfileBinding.inflate(layoutInflater)
+        bottomSheetDialog = BottomSheetDialog(requireContext()).apply {
+            setContentView(sheetBinding.root)
+            window?.apply {
+                setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+                setDimAmount(0.6f)
+            }
         }
 
-        bottomSheetDialog.show()
+        // 공통 메서드로 닉네임/이미지 세팅
+        loadProfileIntoViews(nickname, imageUrl, sheetBinding.profileName, sheetBinding.profileImage)
+
+        bottomSheetDialog?.show()
     }
 
     //닉네임 반영
     private fun updateNicknameFromPrefs() {
         val prefs = requireContext().getSharedPreferences("auth", AppCompatActivity.MODE_PRIVATE)
         val nickname = prefs.getString("nickname", "로지")
-        val imageUriString = prefs.getString("imageUri", null)
-        Log.d("ProfileImage", "Loaded URI: $imageUriString")
-        binding.userName.text = nickname
-        binding.userName2.text = nickname
-        if (!imageUriString.isNullOrEmpty()) {
-            val imageUri = Uri.parse(imageUriString)
-            binding.userProfile.post {
-                Glide.with(requireContext())
-                    .load(imageUri)
-                    .placeholder(R.drawable.ic_profile)
-                    .error(R.drawable.ic_profile)
-                    .into(binding.userProfile)
-            }
-        } else {
-            binding.userProfile.setImageResource(R.drawable.ic_profile)
-        }
+        val imageUrl = prefs.getString("imageUri", null)
 
+        binding.userName2.text = nickname
+        loadProfileIntoViews(nickname, imageUrl, binding.userName, binding.userProfile)
     }
+
+    private fun loadProfileIntoViews(nickname: String?, imageUrl: String?, nameView: TextView, imageView: ImageView) {
+        nameView.text = nickname
+        if (!imageUrl.isNullOrEmpty()) {
+            Glide.with(requireContext())
+                .load(imageUrl)
+                .placeholder(R.drawable.ic_profile)
+                .error(R.drawable.ic_profile)
+                .into(imageView)
+        } else {
+            imageView.setImageResource(R.drawable.ic_profile)
+        }
+    }
+
 
     //닉네임을 바꾸고 돌아왔을 때 최신 닉네임 반영
     override fun onResume() {

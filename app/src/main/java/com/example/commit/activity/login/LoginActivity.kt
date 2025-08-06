@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.commit.activity.MainActivity
 import com.example.commit.databinding.ActivityLoginBinding
+import androidx.browser.customtabs.CustomTabsIntent
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -19,8 +20,21 @@ class LoginActivity : AppCompatActivity() {
         // 구글 로그인 버튼 클릭 시
         binding.googleLogin.setOnClickListener {
             val googleLoginUrl = "https://commit.n-e.kr/api/users/oauth2/login/google"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleLoginUrl))
-            startActivity(intent)
+            val customTabsIntent = CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .setInstantAppsEnabled(false)
+                .build()
+            customTabsIntent.launchUrl(this, Uri.parse(googleLoginUrl))
+        }
+
+        // 카카오 로그인 버튼 클릭 시
+        binding.kakaoLoginButton.setOnClickListener {
+            val kakaoLoginUrl = "https://commit.n-e.kr/api/users/oauth2/login/kakao"
+            val customTabsIntent = CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .setInstantAppsEnabled(false)
+                .build()
+            customTabsIntent.launchUrl(this, Uri.parse(kakaoLoginUrl))
         }
 
         // 앱이 딥링크로 호출된 경우 토큰 처리
@@ -54,7 +68,9 @@ class LoginActivity : AppCompatActivity() {
                     startActivity(signUpIntent)
                 } else {
                     // 메인화면
-                    startActivity(Intent(this, MainActivity::class.java))
+                    val mainIntent = Intent(this, MainActivity::class.java)
+                    mainIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(mainIntent)
                 }
                 finish()
             }

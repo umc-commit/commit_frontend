@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -11,8 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.commit.adapter.alarm.AlarmAdapter
-import com.example.commit.data.model.entities.AlarmItem
 import com.example.commit.R
+import com.example.commit.connection.RetrofitClient
+import com.example.commit.connection.RetrofitObject
+import retrofit2.Call
+import retrofit2.Response
 
 class AlarmActivity : AppCompatActivity() {
 
@@ -23,7 +27,7 @@ class AlarmActivity : AppCompatActivity() {
     private lateinit var alarmDialog: Dialog
     private lateinit var deleteAllDialog: Dialog
 
-    private val alarmList = mutableListOf<AlarmItem>()
+    private val alarmList = mutableListOf<RetrofitClient.NotificationItem>()
     private lateinit var alarmAdapter: AlarmAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,13 +49,6 @@ class AlarmActivity : AppCompatActivity() {
             }
         }
 
-
-        alarmList.addAll(listOf(
-            AlarmItem(1, "payment_request", "결제 요청이 도착했어요", "작가님이 결제를 요청했어요.", "방금", false),
-            AlarmItem(2, "commission_approved", "커미션 신청서가 수락됐어요", "신청하신 커미션이 수락됐어요.", "5분 전", false),
-            AlarmItem(3, "commission_submitted", "커미션 신청 완료!", "커미션 신청이 정상 접수되었습니다.", "10분 전", false)
-        ))
-
         alarmAdapter = AlarmAdapter(alarmList) { position ->
             alarmList.removeAt(position)
             alarmAdapter.notifyItemRemoved(position)
@@ -61,6 +58,48 @@ class AlarmActivity : AppCompatActivity() {
         recyclerView.adapter = alarmAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
+        // API 호출
+        loadNotifications()
+
+    }
+
+    private fun loadNotifications() {
+        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+        val token = prefs.getString("accessToken", null)
+
+        if (token.isNullOrEmpty()) {
+            Log.d("AlarmAPI", "로그인이 필요합니다.")
+            return
+        }
+
+        val api = RetrofitObject.getRetrofitService(this)
+        api.getNotifications("Bearer $token") // page/limit 안 쓰면 기본값 적용
+            .enqueue(object : retrofit2.Callback<RetrofitClient.ApiResponse<RetrofitClient.NotificationResponseData>> {
+                override fun onResponse(
+                    call: Call<RetrofitClient.ApiResponse<RetrofitClient.NotificationResponseData>>,
+                    response: Response<RetrofitClient.ApiResponse<RetrofitClient.NotificationResponseData>>
+                ) {
+                    if (response.isSuccessful) {
+                        val body = response.body()
+                        if (body?.resultType == "SUCCESS") {
+                            alarmList.clear()
+                            alarmList.addAll(body.success?.items ?: emptyList())
+                            alarmAdapter.notifyDataSetChanged()
+                        } else {
+                            Log.d("AlarmAPI", body?.error?.reason ?: "알림 불러오기 실패")
+                        }
+                    } else {
+                        Log.d("AlarmAPI", "서버 오류: ${response.code()}")
+                    }
+                }
+
+                override fun onFailure(
+                    call: Call<RetrofitClient.ApiResponse<RetrofitClient.NotificationResponseData>>,
+                    t: Throwable
+                ) {
+                    Log.d("AlarmAPI", "네트워크 오류: ${t.message}")
+                }
+            })
     }
 
     private fun showAlarmDialog() {
@@ -80,7 +119,9 @@ class AlarmActivity : AppCompatActivity() {
         }
 
         alarmDialog.findViewById<TextView>(R.id.tv_mark_all_read).setOnClickListener {
-            alarmList.forEach { it.isRead = true }
+            alarmList.forEachIndexed { index, item ->
+                alarmList[index] = item.copy(isRead = true)
+            }
             alarmAdapter.notifyDataSetChanged()
             alarmDialog.dismiss()
         }
@@ -94,11 +135,6 @@ class AlarmActivity : AppCompatActivity() {
         deleteAllDialog.setContentView(R.layout.dialog_alarm_alldelete)
         deleteAllDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         deleteAllDialog.window?.setDimAmount(0.6f)
-
-
-        deleteAllDialog = Dialog(this)
-        deleteAllDialog.setContentView(R.layout.dialog_alarm_alldelete)
-        deleteAllDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         deleteAllDialog.findViewById<Button>(R.id.btn_confirm_delete).setOnClickListener {
             alarmList.clear()

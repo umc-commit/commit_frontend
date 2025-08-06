@@ -113,10 +113,11 @@ class NicknameActivity : AppCompatActivity() {
         val api = RetrofitObject.getRetrofitService(this)
 
         Log.d("SignUpAPI", "Request Data: $request")
-        api.signUp(request).enqueue(object : Callback<RetrofitClient.ResponseSignUp> {
+        api.signUp(request).enqueue(object :
+            Callback<RetrofitClient.ApiResponse<RetrofitClient.SignUpSuccessData>> {
             override fun onResponse(
-                call: Call<RetrofitClient.ResponseSignUp>,
-                response: Response<RetrofitClient.ResponseSignUp>
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.SignUpSuccessData>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.SignUpSuccessData>>
             ) {
                 Log.d("SignUpAPI", "HTTP Code: ${response.code()}")
                 Log.d("SignUpAPI", "Error Body: ${response.errorBody()?.string()}")
@@ -124,7 +125,7 @@ class NicknameActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val body = response.body()
                     if (body?.resultType == "SUCCESS") {
-                        // 회원가입 성공 시 닉네임 저장
+                        // 회원가입 성공 → 닉네임 저장
                         val prefs = getSharedPreferences("auth", MODE_PRIVATE)
                         prefs.edit()
                             .putString("nickname", body.success?.user?.nickname ?: "")
@@ -137,7 +138,7 @@ class NicknameActivity : AppCompatActivity() {
                         startActivity(intent)
                         finish()
                     } else {
-                        // 회원가입 실패 시 서버 사유 표시
+                        // 실패 시 서버에서 내려준 사유 출력
                         Toast.makeText(
                             this@NicknameActivity,
                             body?.error?.reason ?: "회원가입 실패",
@@ -149,7 +150,10 @@ class NicknameActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<RetrofitClient.ResponseSignUp>, t: Throwable) {
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.SignUpSuccessData>>,
+                t: Throwable
+            ) {
                 Toast.makeText(this@NicknameActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
