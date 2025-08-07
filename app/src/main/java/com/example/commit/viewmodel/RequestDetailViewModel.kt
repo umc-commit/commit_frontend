@@ -6,16 +6,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.commit.connection.RetrofitObject
 import com.example.commit.connection.dto.ApiResponse
-import com.example.commit.connection.dto.RequestItem
-import com.example.commit.connection.dto.RequestListResponse
+import com.example.commit.connection.dto.RequestDetailResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class RequestViewModel : ViewModel() {
+class RequestDetailViewModel : ViewModel() {
 
-    private val _requestList = MutableStateFlow<List<RequestItem>>(emptyList())
-    val requestList: StateFlow<List<RequestItem>> = _requestList
+    private val _requestDetail = MutableStateFlow<RequestDetailResponse?>(null)
+    val requestDetail: StateFlow<RequestDetailResponse?> = _requestDetail
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
@@ -25,25 +24,28 @@ class RequestViewModel : ViewModel() {
         return "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwibmlja25hbWUiOiJ1c2VyX29uZSIsImFjY291bnRJZCI6IjEiLCJwcm92aWRlciI6Imtha2FvIiwiaWF0IjoxNzU0NTc0ODgwLCJleHAiOjE3NTQ2NjEyODB9.-a5Ijn-Xr2dZoswxYW2khL56G2y5dKwLcjuEx7SM7-c"
     }
 
-    fun loadRequests(context: Context) {
+    fun loadRequestDetail(context: Context, requestId: Int) {
+        Log.d("RequestDetailVM", "loadRequestDetail 호출됨: requestId=$requestId")
+
         viewModelScope.launch {
             try {
                 val service = RetrofitObject.getRetrofitService(context)
                 val token = getAccessToken()
 
-                val response: ApiResponse<RequestListResponse> = service.getRequestList(token)
+                val response: ApiResponse<RequestDetailResponse> = service.getRequestDetail(token, requestId)
+                Log.d("RequestDetailVM", "response.success = ${response.success}")
 
                 if (response.resultType == "SUCCESS" && response.success != null) {
-                    _requestList.value = response.success.requests
-                    Log.d("RequestViewModel", "신청 목록 ${response.success.requests.size}개 로드됨")
+                    _requestDetail.value = response.success
+                    Log.d("RequestDetailVM", "신청 상세 정보 로드 성공")
                 } else {
                     val error = response.error?.reason ?: "알 수 없는 오류"
-                    Log.e("RequestViewModel", "API 실패: $error")
+                    Log.e("RequestDetailVM", "API 실패: $error")
                     _errorMessage.value = error
                 }
 
             } catch (e: Exception) {
-                Log.e("RequestViewModel", "API 호출 실패", e)
+                Log.e("RequestDetailVM", "API 호출 실패", e)
                 _errorMessage.value = "네트워크 오류: ${e.localizedMessage}"
             }
         }

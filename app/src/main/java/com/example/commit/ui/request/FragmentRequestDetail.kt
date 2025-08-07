@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,51 +21,106 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.example.commit.R
 import com.example.commit.activity.MainActivity
-import com.example.commit.data.model.*
+import com.example.commit.connection.dto.*
+import com.example.commit.ui.Theme.CommitTypography
 import com.example.commit.ui.request.components.RequestDetailItem
 import com.example.commit.ui.request.components.RequestDetailSectionList
-import com.example.commit.ui.Theme.CommitTypography
+import com.example.commit.viewmodel.RequestDetailViewModel
+import android.util.Log
+import androidx.compose.runtime.getValue
 
 class FragmentRequestDetail : Fragment() {
+
+    private val viewModel: RequestDetailViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val requestId = arguments?.getInt("requestId") ?: -1
+        Log.d("FragmentRequestDetail", "받은 requestId: $requestId")
+        if (requestId == -1) {
+            Log.e("FragmentRequestDetail", "requestId 없음!")
+            return ComposeView(requireContext()).apply {
+                setContent {
+                    Text("유효하지 않은 요청 ID입니다.", style = CommitTypography.bodyMedium)
+                }
+            }
+        }
+
+        viewModel.loadRequestDetail(requireContext(), requestId)
+
         return ComposeView(requireContext()).apply {
             setContent {
-                /*val item = arguments?.getParcelable<RequestItem>("requestItem")*/
-                val timeline = arguments?.getParcelableArrayList<TimelineItem>("timeline") ?: emptyList()
-                val paymentInfo = arguments?.getParcelable<PaymentInfo>("paymentInfo")
-                val formSchema = arguments?.getParcelableArrayList<FormItem>("formSchema") ?: emptyList()
-                val formAnswer = arguments?.getSerializable("formAnswer") as? Map<String, Any> ?: emptyMap()
+                val detail by viewModel.requestDetail.collectAsState()
+                val error by viewModel.errorMessage.collectAsState()
 
-                if (/*item != null && */paymentInfo != null) {
-                  /*  RequestDetailScreen(
-                        item = item,
-                        timeline = timeline,
-                        paymentInfo = paymentInfo,
-                        formSchema = formSchema,
-                        formAnswer = formAnswer,
-                        onBackClick = { requireActivity().onBackPressedDispatcher.onBackPressed() }
-                    )*/
-                } else {
-                    Text("데이터를 불러오지 못했습니다.", style = CommitTypography.bodyMedium)
+                when {
+                    detail != null -> {
+                        val request = detail!!.request
+                        val commission = detail!!.commission ?: CommissionItem(
+                            id = -1,
+                            title = "알 수 없음",
+                            thumbnailImageUrl = "",
+                            artist = Artist(id = -1, nickname = "알 수 없음")
+                        )
+                        val timeline = detail!!.timeline ?: emptyList()
+                        val payment = detail!!.payment ?: PaymentInfo(
+                            minPrice = 0,
+                            additionalPrice = 0,
+                            totalPrice = 0,
+                            paidAt = ""
+                        )
+                        val formSchema = detail!!.formData ?: emptyList()
+
+                        // JsonElement → String 변환 처리
+                        val formAnswer = formSchema.associate { item ->
+                            val valueStr = when {
+                                item.value.isJsonPrimitive -> item.value.asString
+                                item.value.isJsonArray -> item.value.asJsonArray.joinToString(", ") { it.asString }
+                                item.value.isJsonObject -> item.value.asJsonObject.toString()
+                                else -> item.value.toString()
+                            }
+                            item.label to valueStr
+                        }
+
+                        RequestDetailScreen(
+                            item = request,
+                            commission = commission,
+                            timeline = timeline,
+                            paymentInfo = payment,
+                            formSchema = formSchema,
+                            formAnswer = formAnswer,
+                            onBackClick = { requireActivity().onBackPressedDispatcher.onBackPressed() }
+                        )
+                    }
+
+                    error != null -> {
+                        Text("오류 발생: $error", style = CommitTypography.bodyMedium)
+                    }
+
+                    else -> {
+                        Text("불러오는 중입니다...", style = CommitTypography.bodyMedium)
+                    }
                 }
             }
         }
     }
 }
 
+
 @Composable
 fun RequestDetailScreen(
     item: RequestItem,
+    commission: CommissionItem,
     timeline: List<TimelineItem>,
     paymentInfo: PaymentInfo,
     formSchema: List<FormItem>,
-    formAnswer: Map<String, Any>,
+    formAnswer: Map<String, String>,
     onBackClick: () -> Unit,
     onFormAnswerClick: () -> Unit = {}
 ) {
@@ -78,15 +131,16 @@ fun RequestDetailScreen(
         (context as? MainActivity)?.showBottomNav(false)
     }
 
-    // 화면 나갈 때 바텀바 다시 보이기
+    // 뒤로 가기 시 바텀바 다시 보이기
     DisposableEffect(Unit) {
         onDispose {
             (context as? MainActivity)?.showBottomNav(true)
         }
     }
 
-    val isCancel = item.status == "CANCEL"
-    val isReject = item.status == "REJECT"
+    val status = item.status.trim()
+    val isCancel = status == "CANCELED"
+    val isReject = status == "REJECTED"
 
     Column(
         modifier = Modifier
@@ -94,14 +148,13 @@ fun RequestDetailScreen(
             .background(Color(0xFFE8E8E8))
             .verticalScroll(rememberScrollState())
     ) {
-        // 상단 타이틀 바
+        // 상단 헤더
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp)
                 .background(Color.White)
         ) {
-            // 왼쪽 아이콘
             Image(
                 painter = painterResource(id = R.drawable.ic_left_vector),
                 contentDescription = "뒤로가기",
@@ -112,7 +165,6 @@ fun RequestDetailScreen(
                     .clickable { onBackClick() }
             )
 
-            // 가운데 텍스트
             Text(
                 text = "상세정보",
                 fontSize = 18.sp,
@@ -127,6 +179,10 @@ fun RequestDetailScreen(
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             RequestDetailItem(
                 item = item,
+                commission = commission,
+                totalPrice = paymentInfo.totalPrice,
+                // 필요 시 활성화
+                /*
                 onFormAnswerClick = {
                     val newFragment = FragmentFormAnswer.newInstance(
                         ArrayList(formSchema),
@@ -137,9 +193,10 @@ fun RequestDetailScreen(
                         .addToBackStack(null)
                         .commit()
                 }
+                */
             )
 
-            // 취소 또는 거절 상태가 아니면 하단 상세 정보 보여주기
+            // 취소 또는 거절 상태가 아니면 세부 항목 출력
             if (!isCancel && !isReject) {
                 Spacer(modifier = Modifier.height(16.dp))
                 RequestDetailSectionList(
@@ -149,7 +206,6 @@ fun RequestDetailScreen(
                     formAnswer = formAnswer
                 )
             }
-
         }
     }
 }

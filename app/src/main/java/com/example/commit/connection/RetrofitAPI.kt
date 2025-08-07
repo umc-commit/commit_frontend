@@ -7,8 +7,8 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
-import com.example.commit.connection.dto.CommissionDetailResponse
-import com.example.commit.connection.dto.RequestListResponse
+import com.example.commit.connection.dto.*
+
 
 interface RetrofitAPI {
     // 회원가입
@@ -60,4 +60,12 @@ interface RetrofitAPI {
     suspend fun getRequestList(
         @Header("Authorization") token: String
     ):  ApiResponse<RequestListResponse>
+
+    //신청함 상세 조회
+    @GET("/api/requests/{requestId}")
+    suspend fun getRequestDetail(
+        @Header("Authorization") token: String,
+        @Path("requestId") requestId: Int
+    ): ApiResponse<RequestDetailResponse>
+
 }
