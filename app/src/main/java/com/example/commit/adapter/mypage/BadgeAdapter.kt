@@ -9,7 +9,7 @@ import com.bumptech.glide.Glide
 import com.example.commit.R
 
 class BadgeAdapter(
-    private val badgeList: List<String>, // URL 목록
+    val badgeList: List<String>, // URL 목록
     private val onClick: (String) -> Unit // 클릭 시 동작
 ) : RecyclerView.Adapter<BadgeAdapter.BadgeViewHolder>() {
 
