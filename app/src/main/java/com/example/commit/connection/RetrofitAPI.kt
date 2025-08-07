@@ -60,4 +60,14 @@ interface RetrofitAPI {
         @Path("commissionId") commissionId: String,
         @Body request: CommissionRequestSubmit
     ): Response<CommissionRequestResponse>
+
+    // 채팅방 생성
+    @POST("/api/chatrooms")
+    fun createChatroom(
+        @Body request: RetrofitClient.CreateChatroomRequest
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
+
+    // 채팅방 목록 조회
+    @GET("/api/chatrooms/list")
+    fun getChatroomList(): Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>
 }
