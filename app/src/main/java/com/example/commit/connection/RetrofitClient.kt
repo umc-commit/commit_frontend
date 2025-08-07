@@ -356,11 +356,11 @@ class RetrofitClient {
         @SerializedName("unreadCount")
         val unreadCount: Int,
         @SerializedName("artist")
-        val artist: ChatroomArtist,
+        val artist: ChatroomArtist?,
         @SerializedName("consumer")
-        val consumer: ChatroomConsumer,
+        val consumer: ChatroomConsumer?,
         @SerializedName("request")
-        val request: ChatroomRequest
+        val request: ChatroomRequest?
     )
 
     data class ChatroomArtist(

@@ -12,10 +12,12 @@ object RetrofitObject {
     private const val BASE_URL = "https://commit.n-e.kr"
 
     // 토큰을 SharedPreferences에서 가져오기
+
     private fun getAccessToken(context: Context): String? {
         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
         return prefs.getString("accessToken", null)
     }
+
 
     /*private fun getAccessToken(context: Context): String? {
         // 테스트용 임시 토큰 고정

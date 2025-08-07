@@ -10,7 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
-import kotlinx.coroutines.delay
+
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.example.commit.R
@@ -52,27 +52,6 @@ class FragmentChat : Fragment() {
                             chatItemsState.value = chatItems
                             isLoadingState.value = false
                         }
-                    }
-
-                    // 테스트용 채팅방 생성 버튼 (나중에 제거)
-                    LaunchedEffect(Unit) {
-                        // 3초 후에 테스트 채팅방 생성
-                        kotlinx.coroutines.delay(3000)
-                        createChatroom(
-                            consumerId = 1,
-                            artistId = 2,
-                            requestId = 3,
-                            onSuccess = { chatroomId ->
-                                Log.d("ChatAPI", "테스트 채팅방 생성 성공: $chatroomId")
-                                // 채팅방 생성 후 목록 새로고침
-                                fetchChatroomList { chatItems ->
-                                    chatItemsState.value = chatItems
-                                }
-                            },
-                            onError = { error ->
-                                Log.e("ChatAPI", "테스트 채팅방 생성 실패: $error")
-                            }
-                        )
                     }
 
                     // ChatListScreen에 onSettingClick 인자를 넘김
@@ -119,15 +98,6 @@ class FragmentChat : Fragment() {
         Log.d("ChatAPI", "채팅방 목록 조회 시작")
         val api = RetrofitObject.getRetrofitService(requireContext())
         
-        // 먼저 raw response를 확인하기 위해 동기 호출
-        try {
-            val response = api.getChatroomList().execute()
-            Log.d("ChatAPI", "Raw response code: ${response.code()}")
-            Log.d("ChatAPI", "Raw response body: ${response.body()}")
-        } catch (e: Exception) {
-            Log.e("ChatAPI", "Raw response 확인 실패: ${e.message}")
-        }
-        
         api.getChatroomList().enqueue(object : Callback<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>> {
             override fun onResponse(
                 call: Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>,
@@ -137,25 +107,41 @@ class FragmentChat : Fragment() {
                 Log.d("ChatAPI", "응답 바디: ${response.body()}")
                 
                 if (response.isSuccessful) {
-                    val data = response.body()?.success
-                    if (data != null) {
-                        Log.d("ChatAPI", "채팅방 개수: ${data.size}")
-                        val chatItems = data.map { chatroom ->
-                            ChatItem(
-                                profileImageRes = R.drawable.ic_profile,
-                                name = chatroom.artist.nickname,
-                                message = chatroom.lastMessage ?: "새로운 메시지가 없습니다",
-                                time = formatTime(chatroom.lastMessageTime),
-                                isNew = chatroom.unreadCount > 0,
-                                title = chatroom.request.title
-                            )
+                    try {
+                        val data = response.body()?.success
+                        if (data != null) {
+                            Log.d("ChatAPI", "채팅방 개수: ${data.size}")
+                            val chatItems = data.mapNotNull { chatroom ->
+                                try {
+                                    // 필수 정보가 없는 경우 null 반환 (채팅방 목록에서 제외)
+                                    if (chatroom.artist == null || chatroom.request == null) {
+                                        Log.d("ChatAPI", "유효하지 않은 채팅방 데이터 제외: ${chatroom.id}")
+                                        return@mapNotNull null
+                                    }
+                                    
+                                    ChatItem(
+                                        profileImageRes = R.drawable.ic_profile,
+                                        name = chatroom.artist.nickname,
+                                        message = chatroom.lastMessage ?: "새로운 메시지가 없습니다",
+                                        time = formatTime(chatroom.lastMessageTime),
+                                        isNew = chatroom.unreadCount > 0,
+                                        title = chatroom.request.title
+                                    )
+                                } catch (e: Exception) {
+                                    Log.e("ChatAPI", "채팅방 데이터 매핑 실패: ${e.message}")
+                                    null
+                                }
+                            }
+                            Log.d("ChatAPI", "실제 API 데이터로 채팅방 목록 설정")
+                            onSuccess(chatItems)
+                        } else {
+                            Log.e("ChatAPI", "success 데이터가 없음")
+                            Log.e("ChatAPI", "전체 응답: ${response.body()}")
+                            // 기본 데이터로 폴백
+                            onSuccess(getDefaultChatItems())
                         }
-                        Log.d("ChatAPI", "실제 API 데이터로 채팅방 목록 설정")
-                        onSuccess(chatItems)
-                    } else {
-                        Log.e("ChatAPI", "success 데이터가 없음")
-                        Log.e("ChatAPI", "전체 응답: ${response.body()}")
-                        // 기본 데이터로 폴백
+                    } catch (e: Exception) {
+                        Log.e("ChatAPI", "API 응답 처리 중 오류: ${e.message}")
                         onSuccess(getDefaultChatItems())
                     }
                 } else {
@@ -172,14 +158,6 @@ class FragmentChat : Fragment() {
             ) {
                 Log.e("ChatAPI", "네트워크 오류", t)
                 Log.e("ChatAPI", "오류 메시지: ${t.message}")
-                
-                // 실제 응답을 확인하기 위해 raw response 로깅
-                try {
-                    val response = call.execute()
-                    Log.e("ChatAPI", "Raw response: ${response.body()}")
-                } catch (e: Exception) {
-                    Log.e("ChatAPI", "Raw response 확인 실패: ${e.message}")
-                }
                 
                 // 기본 데이터로 폴백
                 onSuccess(getDefaultChatItems())
