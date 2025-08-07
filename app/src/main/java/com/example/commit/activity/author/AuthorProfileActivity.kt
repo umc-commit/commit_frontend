@@ -75,7 +75,6 @@ class AuthorProfileActivity : AppCompatActivity() {
         // 배지 RecyclerView
         binding.recyclerBadges.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.recyclerBadges.adapter = BadgeAdapter(emptyList()) {}
 
         // 커미션 RecyclerView
         binding.recyclerCard.layoutManager = LinearLayoutManager(this)
@@ -95,41 +94,6 @@ class AuthorProfileActivity : AppCompatActivity() {
         binding.btnFollowing.setBackgroundResource(
             if (isFollowing) R.drawable.pf_follow else R.drawable.pf_unfollow
         )
-    }
-
-    private fun showBadgePopup(badgeUrl: String, badgeThreshold: Int) {
-        val badgeLevel = when {
-            badgeThreshold >= 50 -> "다이아"
-            badgeThreshold >= 15 -> "금"
-            badgeThreshold >= 5 -> "은"
-            else -> "동"
-        }
-
-        val popupView = layoutInflater.inflate(R.layout.badge_popup, null)
-        popupView.findViewById<TextView>(R.id.tv_badge_popup_text)
-            .text = "커미션 완료 배지 ($badgeLevel)"
-        popupView.findViewById<TextView>(R.id.tv_badge_popup_text2)
-            .text = "조건 : 커미션 완료 ${badgeThreshold}회 달성"
-
-        Glide.with(this)
-            .load(badgeUrl.takeIf { it.isNotBlank() } ?: R.drawable.ic_profile)
-            .placeholder(R.drawable.ic_profile)
-            .error(R.drawable.ic_profile)
-            .into(popupView.findViewById(R.id.iv_badge_popup))
-
-        Dialog(this).apply {
-            setContentView(popupView)
-            window?.apply {
-                setBackgroundDrawableResource(android.R.color.transparent)
-                setDimAmount(0.6f)
-                setLayout(
-                    (resources.displayMetrics.widthPixels - (92 * resources.displayMetrics.density).toInt() * 2),
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                setGravity(Gravity.CENTER)
-            }
-            show()
-        }
     }
 
     private fun showSortBottomSheet() {
@@ -194,13 +158,30 @@ class AuthorProfileActivity : AppCompatActivity() {
                         .into(binding.ivProfile)
                     updateSlots(data.slot)
 
-                    // 배지
-                    val badgeList = data.badges
+                    // 1. badges 변환
+                    val convertedBadges = data.badges.map {
+                        val badgeDetail = RetrofitClient.BadgeDetail(
+                            id = it.badge.id,
+                            type = it.badge.type,
+                            threshold = it.badge.threshold,
+                            name = it.badge.name,
+                            badgeImage = it.badge.badgeImage
+                        )
+                        RetrofitClient.UserBadge(
+                            id = it.id,
+                            earnedAt = it.earnedAt,
+                            badge = badgeDetail
+                        )
+                    }
+
                     binding.recyclerBadges.adapter =
-                        BadgeAdapter(badgeList.map { it.badge.badgeImage ?: "" }) { url ->
-                            val badgeData = badgeList.firstOrNull { it.badge.badgeImage == url }
-                            showBadgePopup(url, badgeData?.badge?.threshold ?: 1)
+                        BadgeAdapter(
+                            badgeList = convertedBadges,
+                            context = this@AuthorProfileActivity
+                        ) { dialog ->
+                            dialog.show()
                         }
+
 
                     // 커미션
                     binding.recyclerCard.adapter =
