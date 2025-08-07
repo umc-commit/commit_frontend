@@ -46,15 +46,8 @@ class ReportActivity : AppCompatActivity() {
 
 
     private fun fetchReportData() {
-        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
-        val token = prefs.getString("accessToken", null)
-        if (token.isNullOrEmpty()) {
-            Log.e("ReportAPI", "로그인이 필요합니다.")
-            return
-        }
-
         val service = RetrofitObject.getRetrofitService(this)
-        service.getCommissionReport("Bearer $token").enqueue(object :
+        service.getCommissionReport().enqueue(object :
             Callback<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>> {
             override fun onResponse(
                 call: Call<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>>,
@@ -72,12 +65,14 @@ class ReportActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>>, t: Throwable) {
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>>,
+                t: Throwable
+            ) {
                 Log.e("ReportAPI", "네트워크 오류", t)
             }
         })
     }
-
 
     private fun saveReportImage() {
         // tv_description만 잠깐 숨겼다가 다시 보이게

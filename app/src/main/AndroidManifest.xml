@@ -15,7 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Commit"
-        tools:targetApi="35">
+        tools:targetApi="35"
+        android:enableOnBackInvokedCallback="true">
 
         <activity
             android:name=".activity.login.LoginActivity"

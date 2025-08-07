@@ -109,16 +109,9 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun loadProfileFromApi() {
-        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
-        val token = prefs.getString("accessToken", null)
-
-        if (token.isNullOrEmpty()) {
-            Log.d("ProfileAPI", "로그인이 필요합니다.")
-            return
-        }
-
         val api = RetrofitObject.getRetrofitService(this)
-        api.getMyProfile("Bearer $token")
+
+        api.getMyProfile()
             .enqueue(object : Callback<RetrofitClient.ApiResponse<RetrofitClient.ProfileResponseData>> {
                 override fun onResponse(
                     call: Call<RetrofitClient.ApiResponse<RetrofitClient.ProfileResponseData>>,
@@ -158,7 +151,7 @@ class ProfileActivity : AppCompatActivity() {
 
         // 프로필 이미지 로드
         Glide.with(this)
-            .load(user.profileImage)
+            .load(user.profileImage?.takeIf { it.isNotBlank() } ?: R.drawable.ic_profile) // null이면 기본 이미지
             .placeholder(R.drawable.ic_profile)
             .error(R.drawable.ic_profile)
             .into(binding.ivProfile)
@@ -169,6 +162,11 @@ class ProfileActivity : AppCompatActivity() {
             .putString("nickname", user.nickname)
             .putString("imageUri", user.profileImage ?: "") // URL 그대로 저장
             .apply()
+
+        // 배지 RecyclerView 초기화
+        binding.recyclerBadges.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.recyclerBadges.adapter = BadgeAdapter(emptyList()) {}
 
         // 배지 표시
         val badgeAdapter = BadgeAdapter(user.badges.map { it.badge.badgeImage }) { badgeUrl ->
