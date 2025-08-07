@@ -1,5 +1,6 @@
 package com.example.commit.connection
 
+import com.example.commit.connection.dto.ApiResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -7,7 +8,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 import com.example.commit.connection.dto.CommissionDetailResponse
-
+import com.example.commit.connection.dto.RequestListResponse
 
 interface RetrofitAPI {
     // 회원가입
@@ -54,4 +55,9 @@ interface RetrofitAPI {
         @Path("commissionId") commissionId: Int
     ): CommissionDetailResponse
 
+    //신청함 목록
+    @GET("/api/requests")
+    suspend fun getRequestList(
+        @Header("Authorization") token: String
+    ):  ApiResponse<RequestListResponse>
 }

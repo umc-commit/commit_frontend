@@ -23,9 +23,15 @@ import com.example.commit.ui.Theme.CommitTypography
 import com.example.commit.ui.request.components.FilterRow
 import com.example.commit.ui.request.components.RequestCard
 import androidx.compose.ui.unit.sp
+import com.example.commit.viewmodel.RequestViewModel
+import androidx.fragment.app.viewModels
+import com.example.commit.connection.dto.RequestItem
 
 
 class FragmentRequest : Fragment() {
+
+    private val requestViewModel: RequestViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -33,64 +39,21 @@ class FragmentRequest : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val sampleRequests = listOf(
-                    RequestItem(
-                        requestId = 1,
-                        status = "PENDING",
-                        title = "귀여운 타입 커미션",
-                        price = 40000,
-                        thumbnailImage = "",
-                        artist = Artist(10, "키르")
-                    ),
-                    RequestItem(
-                        requestId = 2,
-                        status = "ACCEPTED",
-                        title = "꼼꼼한 타입 커미션",
-                        price = 40000,
-                        thumbnailImage = "",
-                        artist = Artist(10, "키르")
-                    ),
-                    RequestItem(
-                        requestId = 3,
-                        status = "IN_PROGRESS",
-                        title = "낙서 타입 커미션",
-                        price = 40000,
-                        thumbnailImage = "",
-                        artist = Artist(10, "키르")
-                    ),
-                    RequestItem(
-                        requestId = 4,
-                        status = "DONE",
-                        title = "2인 캐릭터 세트",
-                        price = 60000,
-                        thumbnailImage = "",
-                        artist = Artist(11, "리아")
-                    ) ,
-                    RequestItem(
-                        requestId = 5,
-                    status = "CANCEL",
-                    title = "낙서 타입 커미션",
-                    price = 40000,
-                    thumbnailImage = "",
-                    artist = Artist(10, "키르")
-                ),
-                RequestItem(
-                    requestId = 6,
-                    status = "REJECT",
-                    title = "낙서 타입 커미션",
-                    price = 40000,
-                    thumbnailImage = "",
-                    artist = Artist(10, "키르")
-                )
-                )
+                // ViewModel의 StateFlow 관찰
+                val requestList by requestViewModel.requestList.collectAsState(initial = emptyList())
 
+                // 최초 진입 시 API 호출
+                LaunchedEffect(Unit) {
+                    requestViewModel.loadRequests(requireContext())
+                }
+
+                // 화면 렌더링
                 RequestScreen(
-                    requests = sampleRequests,
+                    requests = requestList,
                     onCardClick = { item ->
                         val detailFragment = FragmentRequestDetail().apply {
                             arguments = Bundle().apply {
                                 putParcelable("requestItem", item)
-
                                 putParcelableArrayList("timeline", arrayListOf(
                                     TimelineItem("COMPLETED", "작업이 완료 되었어요.", "25.05.03 10:57"),
                                     TimelineItem("CONFIRMED", "작업물을 확인했어요.", "25.05.03 10:44"),
@@ -99,7 +62,6 @@ class FragmentRequest : Fragment() {
                                     TimelineItem("STARTED", "작가가 작업을 시작했어요.", "25.04.25 17:00"),
                                     TimelineItem("ACCEPTED", "작가가 작업을 수락했어요.", "25.04.25 16:00")
                                 ))
-
                                 putParcelable("paymentInfo", PaymentInfo(
                                     paidAt = "2025-06-30 20:05",
                                     basePrice = 40000,
@@ -107,14 +69,12 @@ class FragmentRequest : Fragment() {
                                     totalPrice = 40000,
                                     paymentMethod = "kakaopay"
                                 ))
-
                                 putParcelableArrayList("formSchema", arrayListOf(
                                     FormItem("radio", "당일마감 옵션", listOf(OptionItem("O (+10000P)"))),
                                     FormItem("radio", "신청 부위", listOf(OptionItem("전신"))),
                                     FormItem("checkbox", "프로필 공지사항 확인해주세요 !", listOf(OptionItem("확인했습니다."))),
                                     FormItem("textarea", "신청 내용")
                                 ))
-
                                 putSerializable("formAnswer", hashMapOf<String, Any>(
                                     "당일마감 옵션" to "yes",
                                     "신청 부위" to "전신",
@@ -138,8 +98,8 @@ class FragmentRequest : Fragment() {
 
 @Composable
 fun RequestScreen(
-    requests: List<RequestItem>,
-    onCardClick: (RequestItem) -> Unit
+requests: List<RequestItem>,
+onCardClick: (RequestItem) -> Unit
 ) {
     var selectedStatus by remember { mutableStateOf("전체") }
 
@@ -147,7 +107,6 @@ fun RequestScreen(
         "진행 중" -> requests.filter { it.status == "IN_PROGRESS" || it.status == "ACCEPTED" }
         "거래 완료" -> requests.filter { it.status == "DONE" }
         else -> requests
-
 
     }
 
@@ -184,7 +143,7 @@ fun RequestScreen(
         ) {
             items(filteredRequests) { item ->
                 Column {
-                    RequestCard(item = item, onClick = { onCardClick(item) })
+                   RequestCard(item = item, onClick = { onCardClick(item) })
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }

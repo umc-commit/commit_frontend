@@ -38,21 +38,21 @@ class FragmentRequestDetail : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val item = arguments?.getParcelable<RequestItem>("requestItem")
+                /*val item = arguments?.getParcelable<RequestItem>("requestItem")*/
                 val timeline = arguments?.getParcelableArrayList<TimelineItem>("timeline") ?: emptyList()
                 val paymentInfo = arguments?.getParcelable<PaymentInfo>("paymentInfo")
                 val formSchema = arguments?.getParcelableArrayList<FormItem>("formSchema") ?: emptyList()
                 val formAnswer = arguments?.getSerializable("formAnswer") as? Map<String, Any> ?: emptyMap()
 
-                if (item != null && paymentInfo != null) {
-                    RequestDetailScreen(
+                if (/*item != null && */paymentInfo != null) {
+                  /*  RequestDetailScreen(
                         item = item,
                         timeline = timeline,
                         paymentInfo = paymentInfo,
                         formSchema = formSchema,
                         formAnswer = formAnswer,
                         onBackClick = { requireActivity().onBackPressedDispatcher.onBackPressed() }
-                    )
+                    )*/
                 } else {
                     Text("데이터를 불러오지 못했습니다.", style = CommitTypography.bodyMedium)
                 }

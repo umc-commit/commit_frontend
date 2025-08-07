@@ -27,7 +27,7 @@ import com.google.gson.Gson
 
 @Composable
 fun CommissionFormScreen() {
-    val scrollState = rememberScrollState()
+  /*  val scrollState = rememberScrollState()
     val context = LocalContext.current
 
     // FormItem 구조에 맞춰 label, type, options 순으로 정의
@@ -136,7 +136,7 @@ fun CommissionFormScreen() {
                                 Log.d("FormDebug", "Image text changed: $it")
                             },
                             images = images,
-                            onAddClick = { /* TODO */ },
+                            onAddClick = { *//* TODO *//* },
                             onRemoveClick = { index -> images.removeAt(index) }
                         )
                     }
@@ -199,7 +199,7 @@ fun CommissionFormScreen() {
 
             Spacer(modifier = Modifier.height(30.dp))
         }
-    }
+    }*/
 }
 
 @Preview(showBackground = true, widthDp = 400, heightDp = 800)

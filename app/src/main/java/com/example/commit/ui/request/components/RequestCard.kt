@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.commit.R
 import com.example.commit.data.model.Artist
-import com.example.commit.data.model.RequestItem
 import com.example.commit.ui.Theme.CommitTypography
+import com.example.commit.connection.dto.RequestItem
 
 @Composable
 fun RequestCard(item: RequestItem, onClick: () -> Unit) {
@@ -84,7 +84,7 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
                 // 썸네일 + 정보
                 Row {
                     AsyncImage(
-                        model = item.thumbnailImage,
+                        model = item.thumbnailImageUrl,
                         contentDescription = "Thumbnail",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -94,7 +94,6 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
                         error = painterResource(id = R.drawable.ic_default_image),
                         fallback = painterResource(id = R.drawable.ic_default_image)
                     )
-
                     Spacer(modifier = Modifier.width(16.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
@@ -190,16 +189,3 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun RequestCardPreview() {
-    val sampleItem = RequestItem(
-        requestId = 1,
-        status = "PENDING",
-        title = "낙서 타입 커미션",
-        price = 16000,
-        thumbnailImage = "https://via.placeholder.com/150",
-        artist = Artist(1, "사과")
-    )
-    RequestCard(item = sampleItem, onClick = {})
-}

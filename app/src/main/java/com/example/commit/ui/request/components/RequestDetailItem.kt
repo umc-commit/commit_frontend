@@ -79,7 +79,7 @@ fun RequestDetailItem(
 
         // 썸네일 + 정보
         Row(verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
+          /*  AsyncImage(
                 model = item.thumbnailImage,
                 contentDescription = "Thumbnail",
                 contentScale = ContentScale.Crop,
@@ -89,7 +89,7 @@ fun RequestDetailItem(
                     .background(Color(0xFFE8E8E8)),
                 error = painterResource(id = R.drawable.ic_default_image),
                 fallback = painterResource(id = R.drawable.ic_default_image)
-            )
+            )*/
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
@@ -256,16 +256,3 @@ fun RequestDetailItem(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewRequestDetailItem() {
-    val dummyItem = RequestItem(
-        requestId = 1,
-        status = "REJECT",
-        title = "낙서 타입 커미션",
-        price = 40000,
-        thumbnailImage = "",
-        artist = Artist(id = 1, nickname = "키르")
-    )
-    RequestDetailItem(item = dummyItem)
-}
