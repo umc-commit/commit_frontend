@@ -2,7 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="140dp"
-    android:layout_height="200dp"
+    android:layout_height="195dp"
     android:layout_marginEnd="11dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="0dp"
@@ -22,8 +22,8 @@
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/iv_profile"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:src="@drawable/ic_profile"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -88,60 +88,18 @@
             android:ellipsize="end"
             app:layout_constraintTop_toBottomOf="@id/image_placeholder" />
 
-        <!-- 태그 영역 -->
-        <LinearLayout
+        <!-- 태그 영역 (동적 태그 생성을 위한 FlexboxLayout으로 교체) -->
+        <com.google.android.flexbox.FlexboxLayout
             android:id="@+id/tags_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginTop="8dp"
             app:layout_constraintTop_toBottomOf="@id/tv_course_title"
-            android:minHeight="15dp"
-            android:minWidth="30dp">
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            app:flexWrap="wrap"
+            app:justifyContent="flex_start" />
 
-            <TextView
-                android:id="@+id/tv_tag_drawing"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="그림"
-                android:fontFamily="@font/notosanskr_medium"
-                android:textSize="8sp"
-                android:textColor="@color/mint1"
-                android:includeFontPadding="false"
-                android:background="@drawable/tag_background_cyan"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"
-                android:layout_marginStart="4dp" />
-
-            <TextView
-                android:id="@+id/tv_tag_ld"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="#LD"
-                android:fontFamily="@font/notosanskr_medium"
-                android:textSize="8sp"
-                android:textColor="@color/gray2"
-                android:includeFontPadding="false"
-                android:background="@drawable/tag_background_gray"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"
-                android:layout_marginStart="3dp"/>
-
-            <TextView
-                android:id="@+id/tv_tag_couple"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="#커플"
-                android:fontFamily="@font/notosanskr_medium"
-                android:textSize="8sp"
-                android:textColor="@color/gray2"
-                android:includeFontPadding="false"
-                android:background="@drawable/tag_background_gray"
-                android:layout_marginStart="3dp"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"/>
-
-        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

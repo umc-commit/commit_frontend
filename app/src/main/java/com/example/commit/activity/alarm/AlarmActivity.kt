@@ -64,16 +64,8 @@ class AlarmActivity : AppCompatActivity() {
     }
 
     private fun loadNotifications() {
-        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
-        val token = prefs.getString("accessToken", null)
-
-        if (token.isNullOrEmpty()) {
-            Log.d("AlarmAPI", "로그인이 필요합니다.")
-            return
-        }
-
         val api = RetrofitObject.getRetrofitService(this)
-        api.getNotifications("Bearer $token") // page/limit 안 쓰면 기본값 적용
+        api.getNotifications()
             .enqueue(object : retrofit2.Callback<RetrofitClient.ApiResponse<RetrofitClient.NotificationResponseData>> {
                 override fun onResponse(
                     call: Call<RetrofitClient.ApiResponse<RetrofitClient.NotificationResponseData>>,

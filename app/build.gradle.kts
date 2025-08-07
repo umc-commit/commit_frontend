@@ -100,4 +100,6 @@ dependencies {
     // OKhttp logging intercepter
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation ("com.squareup.okhttp3:okhttp:4.9.0")
+
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 }
