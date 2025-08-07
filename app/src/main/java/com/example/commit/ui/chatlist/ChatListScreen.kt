@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.commit.R
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.ui.Theme.CommitTheme
@@ -18,6 +19,7 @@ import com.example.commit.ui.Theme.CommitTheme
 @Composable
 fun ChatListScreen(
     chatItems: List<ChatItem>,
+    isLoading: Boolean = false,
     onItemClick: (ChatItem) -> Unit,
     onSettingClick: () -> Unit // 수정: 외부로부터 받는 콜백
 ) {
@@ -41,23 +43,48 @@ fun ChatListScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            LazyColumn {
-                items(chatItems) { item ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                item.isNew = false
-                                onItemClick(item)
-                            }
-                    ) {
-                        ChatListItem(item = item, showNewIndicator = item.isNew)
-                    }
-                    Divider(color = Color(0xFFE8E8E8), thickness = 1.dp)
-
-
+            if (isLoading) {
+                // 로딩 중일 때 표시할 내용
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.CircularProgressIndicator(
+                        color = androidx.compose.ui.graphics.Color(0xFF4CAF50)
+                    )
                 }
-
+            } else if (chatItems.isEmpty()) {
+                // 데이터가 없을 때 표시할 내용
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.Text(
+                        text = "채팅방이 없습니다",
+                        color = androidx.compose.ui.graphics.Color(0xFF666666),
+                        fontSize = 16.sp
+                    )
+                }
+            } else {
+                LazyColumn {
+                    items(chatItems) { item ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    item.isNew = false
+                                    onItemClick(item)
+                                }
+                        ) {
+                            ChatListItem(item = item, showNewIndicator = item.isNew)
+                        }
+                        Divider(color = Color(0xFFE8E8E8), thickness = 1.dp)
+                    }
+                }
             }
 
         }
@@ -97,6 +124,7 @@ fun ChatListScreenPreview() {
     CommitTheme {
         ChatListScreen(
             chatItems = sampleChats,
+            isLoading = false,
             onItemClick = {},
             onSettingClick = {} // 필수 파라미터 추가
         )
