@@ -33,8 +33,8 @@ import com.example.commit.connection.RetrofitClient
 import com.example.commit.connection.RetrofitObject
 import com.example.commit.databinding.BottomSheetHomeBinding
 import com.example.commit.databinding.FragmentHomeBinding
-import com.example.commit.ui.post.PostHeaderSection
 import com.example.commit.ui.search.FragmentSearch
+import com.example.commit.ui.post.PostScreen
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import retrofit2.Call
 import retrofit2.Callback
@@ -68,7 +68,7 @@ class FragmentHome : Fragment() {
             val composeView = ComposeView(requireContext()).apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
-                    PostHeaderSection(
+                    PostScreen(
                         title = postTitle,
                         tags = listOf("그림", "#LD", "#당일마감"),
                         minPrice = 10000,
@@ -114,7 +114,7 @@ class FragmentHome : Fragment() {
 
             val composeView = ComposeView(requireContext()).apply {
                 setContent {
-                    PostHeaderSection(
+                    PostScreen(
                         title = "그림 커미션",
                         tags = listOf("그림", "#LD", "#당일마감"),
                         minPrice = 10000,
@@ -142,7 +142,7 @@ class FragmentHome : Fragment() {
                 setContent {
                     //PostHeaderSection
                     Log.d("FragmentHome", "PostScreen 호출됨")
-                    PostHeaderSection(
+                    PostScreen(
                         title = "그림 커미션",
                         tags = listOf("그림", "#LD", "#당일마감"),
                         minPrice = 10000,

@@ -40,7 +40,7 @@ class FragmentPostScreen : Fragment() {
             )
 
             setContent {
-                PostHeaderSection(
+                PostScreen(
                     title = commission?.title ?: "제목 없음",
                     tags = commission?.tags ?: emptyList(),
                     minPrice = 30000,
