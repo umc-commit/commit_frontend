@@ -6,6 +6,8 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
+import com.example.commit.connection.dto.CommissionDetailResponse
+
 
 interface RetrofitAPI {
     // 회원가입
@@ -44,4 +46,12 @@ interface RetrofitAPI {
         @Header("Authorization") token: String,
         @Path("artistId") artistId: Int
     ): Call<RetrofitClient.AuthorProfileResponse>
+
+    // 커미션 상세보기 (postScreen)
+    @GET("/api/commissions/{commissionId}")
+    suspend fun getCommissionDetail(
+        @Header("Authorization") token: String,
+        @Path("commissionId") commissionId: Int
+    ): CommissionDetailResponse
+
 }

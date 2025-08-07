@@ -36,6 +36,9 @@ fun PostScreen(
     tags: List<String>,
     minPrice: Int,
     summary: String,
+    content: String,
+    images: List<String>,
+    isBookmarked: Boolean,
     imageCount: Int = 3,
     currentIndex: Int = 0,
     onReviewListClick: () -> Unit

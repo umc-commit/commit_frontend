@@ -62,22 +62,31 @@ class FragmentHome : Fragment() {
         // arguments 확인하여 PostHeaderSection 표시
         val showPostDetail = arguments?.getBoolean("show_post_detail", false) ?: false
         val postTitle = arguments?.getString("post_title", "그림 커미션") ?: "그림 커미션"
-        
+
         if (showPostDetail) {
             // PostHeaderSection 표시
             val composeView = ComposeView(requireContext()).apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
                     PostScreen(
-                        title = postTitle,
-                        tags = listOf("그림", "#LD", "#당일마감"),
+                        title = "그림 커미션",
+                        tags = listOf("일러스트", "#캐릭터", "#당일마감"),
                         minPrice = 10000,
-                        summary = "작업 설명입니다",
+                        summary = "짧은 작업 설명이 이곳에 들어갑니다.",
+                        content = "이곳에 커미션 상세 내용이 들어갑니다.\n예시로 작업 방식이나 주의사항 등을 적을 수 있습니다.",
+                        images = listOf(
+                            "https://example.com/image1.png",
+                            "https://example.com/image2.png"
+                        ),
+                        isBookmarked = false,
+                        imageCount = 2,
+                        currentIndex = 0,
                         onReviewListClick = {
-                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
-                            startActivity(intent)
+                            val intent = Intent(context, WrittenReviewsActivity::class.java)
+                            context.startActivity(intent)
                         }
                     )
+
                 }
             }
 
@@ -116,14 +125,23 @@ class FragmentHome : Fragment() {
                 setContent {
                     PostScreen(
                         title = "그림 커미션",
-                        tags = listOf("그림", "#LD", "#당일마감"),
+                        tags = listOf("일러스트", "#캐릭터", "#당일마감"),
                         minPrice = 10000,
-                        summary = "작업 설명입니다",
+                        summary = "짧은 작업 설명이 이곳에 들어갑니다.",
+                        content = "이곳에 커미션 상세 내용이 들어갑니다.\n예시로 작업 방식이나 주의사항 등을 적을 수 있습니다.",
+                        images = listOf(
+                            "https://example.com/image1.png",
+                            "https://example.com/image2.png"
+                        ),
+                        isBookmarked = false,
+                        imageCount = 2,
+                        currentIndex = 0,
                         onReviewListClick = {
-                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
-                            startActivity(intent)
+                            val intent = Intent(context, WrittenReviewsActivity::class.java)
+                            context.startActivity(intent)
                         }
                     )
+
                 }
             }
 
@@ -144,14 +162,23 @@ class FragmentHome : Fragment() {
                     Log.d("FragmentHome", "PostScreen 호출됨")
                     PostScreen(
                         title = "그림 커미션",
-                        tags = listOf("그림", "#LD", "#당일마감"),
+                        tags = listOf("일러스트", "#캐릭터", "#당일마감"),
                         minPrice = 10000,
-                        summary = "작업 설명입니다",
+                        summary = "짧은 작업 설명이 이곳에 들어갑니다.",
+                        content = "이곳에 커미션 상세 내용이 들어갑니다.\n예시로 작업 방식이나 주의사항 등을 적을 수 있습니다.",
+                        images = listOf(
+                            "https://example.com/image1.png",
+                            "https://example.com/image2.png"
+                        ),
+                        isBookmarked = false,
+                        imageCount = 2,
+                        currentIndex = 0,
                         onReviewListClick = {
-                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
-                            startActivity(intent)
+                            val intent = Intent(context, WrittenReviewsActivity::class.java)
+                            context.startActivity(intent)
                         }
                     )
+
                 }
             }
 
