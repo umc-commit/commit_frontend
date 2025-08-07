@@ -167,90 +167,22 @@ class ProfileActivity : AppCompatActivity() {
         // 배지 RecyclerView 초기화
         binding.recyclerBadges.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.recyclerBadges.adapter = BadgeAdapter(emptyList()) {}
         latestUserBadges = user.badges
 
 
         // 배지 표시
-        val badgeAdapter = BadgeAdapter(user.badges.map { it.badge.badgeImage }) { badgeUrl ->
-            showBadgePopup(badgeUrl)
+        val badgeAdapter = BadgeAdapter(
+            badgeList = user.badges,
+            context = this
+        ) { dialog ->
+            dialog.show() // 팝업 띄우는 건 여기서만
         }
+
         binding.recyclerBadges.adapter = badgeAdapter
     }
 
 
     private fun updateFollowingCount() {
         binding.btnFollowing.text = "팔로잉 ${followingUsersData.size}"
-    }
-
-    private fun showBadgePopup(badgeUrl: String) {
-        val popupView = layoutInflater.inflate(R.layout.badge_popup, null)
-
-        val tvTitle = popupView.findViewById<TextView>(R.id.tv_badge_popup_text)
-        val tvCondition = popupView.findViewById<TextView>(R.id.tv_badge_popup_text2)
-        val ivBadge = popupView.findViewById<ImageView>(R.id.iv_badge_popup)
-
-        tvTitle.text = "획득한 배지"
-
-        // 해당 뱃지 객체를 찾음 (badgeUrl로 비교)
-        val badgeObj = (binding.recyclerBadges.adapter as? BadgeAdapter)?.let { adapter ->
-            val index = adapter.badgeList.indexOf(badgeUrl)
-            if (index != -1 && index < latestUserBadges.size) latestUserBadges[index] else null
-        }
-
-        // threshold에 따른 등급 매핑
-        fun getGrade(threshold: Int): String = when (threshold) {
-            1 -> "동"
-            5 -> "은"
-            15 -> "금"
-            50 -> "다이아"
-            else -> ""
-        }
-
-        // type + 등급에 따른 배지 이름
-        val titleText = badgeObj?.let {
-            val grade = getGrade(it.badge.threshold)
-            when (it.badge.type) {
-                "comm_finish" -> "커미션 완료 배지 ($grade)"
-                "follow" -> "팔로워 배지 ($grade)"
-                "comm_apply" -> "커미션 신청 배지 ($grade)"
-                "review" -> "후기 작성 배지 ($grade)"
-                else -> "가입 1주년 배지"
-            }
-        } ?: ""
-
-
-        val conditionText = badgeObj?.let {
-            when (it.badge.type) {
-                "comm_finish" -> "조건 : 커미션 완료 ${it.badge.threshold}회 달성"
-                "follow" -> "조건 : 팔로워 ${it.badge.threshold}명 달성"
-                "comm_apply" -> "조건 : 커미션 신청 ${it.badge.threshold}회 달성"
-                "review" -> "조건 : 후기 작성 ${it.badge.threshold}회 달성"
-                else -> "회원가입 후 1주년 달성"
-            }
-        } ?: ""
-
-        tvTitle.text = titleText
-        tvCondition.text = conditionText
-
-        Glide.with(this)
-            .load(badgeUrl)
-            .placeholder(R.drawable.ic_profile)
-            .error(R.drawable.ic_profile)
-            .into(ivBadge)
-
-        val dialog = Dialog(this).apply {
-            setContentView(popupView)
-            window?.apply {
-                setBackgroundDrawableResource(android.R.color.transparent)
-                setDimAmount(0.6f)
-                setLayout(
-                    (resources.displayMetrics.widthPixels - (92 * resources.displayMetrics.density).toInt() * 2),
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                setGravity(Gravity.CENTER)
-            }
-        }
-        dialog.show()
     }
 }
