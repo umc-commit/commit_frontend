@@ -170,6 +170,7 @@ class ProfileActivity : AppCompatActivity() {
         binding.recyclerBadges.adapter = BadgeAdapter(emptyList()) {}
         latestUserBadges = user.badges
 
+
         // 배지 표시
         val badgeAdapter = BadgeAdapter(user.badges.map { it.badge.badgeImage }) { badgeUrl ->
             showBadgePopup(badgeUrl)
