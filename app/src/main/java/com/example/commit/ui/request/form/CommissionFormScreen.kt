@@ -72,7 +72,39 @@ fun CommissionFormScreen(commissionId: String = "1") {
     val formSchema = when (commissionFormState) {
         is CommissionFormState.Success -> {
             val response = (commissionFormState as CommissionFormState.Success).data
-            response.success?.formSchema ?: defaultFormSchema
+            val rawFormSchema = response.success?.formSchema
+            
+            // formSchema가 Map<String, Any>인 경우 처리
+            if (rawFormSchema != null) {
+                try {
+                    // formSchema에서 fields 배열을 추출
+                    val fields = rawFormSchema["fields"] as? List<Map<String, Any>>
+                    if (fields != null) {
+                        fields.mapNotNull { field ->
+                            val label = field["label"] as? String
+                            val type = field["type"] as? String
+                            val options = (field["options"] as? List<Map<String, Any>>)?.map { option ->
+                                OptionItem(option["label"] as? String ?: "")
+                            } ?: emptyList()
+                            
+                            if (label != null && type != null) {
+                                FormItem(
+                                    label = label,
+                                    type = type,
+                                    options = options
+                                )
+                            } else null
+                        }
+                    } else {
+                        defaultFormSchema
+                    }
+                } catch (e: Exception) {
+                    Log.e("FormSchema", "formSchema 파싱 오류: ${e.message}")
+                    defaultFormSchema
+                }
+            } else {
+                defaultFormSchema
+            }
         }
         else -> defaultFormSchema
     }
@@ -203,7 +235,7 @@ fun CommissionFormScreen(commissionId: String = "1") {
                                     }
                                 )
                             }
-                            "image" -> {
+                            "image", "file" -> {
                                 // 이미지 업로드 상태 처리
                                 when (imageUploadState) {
                                     is ImageUploadState.Loading -> {
@@ -232,16 +264,28 @@ fun CommissionFormScreen(commissionId: String = "1") {
                                 }
 
                                 CommissionImageTextSection(
+                                    index = index, // index 전달
                                     text = formAnswer["신청 내용"] as? String ?: "",
                                     onTextChange = {
                                         formAnswer["신청 내용"] = it
                                         Log.d("FormDebug", "Image text changed: $it")
                                     },
                                     images = images,
-                                    onAddClick = { /* TODO */ },
+                                    onAddClick = { 
+                                        // 이미지 업로드 성공 시 이미지 추가 로직
+                                        Log.d("FormDebug", "onAddClick 호출됨")
+                                        // 실제로는 업로드된 이미지 URL을 사용해야 하지만,
+                                        // 현재는 로컬 이미지를 사용
+                                        // 이미지는 CommissionImageTextSection에서 이미 처리됨
+                                    },
                                     onRemoveClick = { index -> images.removeAt(index) },
                                     onImageUpload = { uri ->
                                         viewModel.uploadImage(uri, context)
+                                    },
+                                    onImageAdded = { bitmap ->
+                                        // 실제로 이미지를 리스트에 추가
+                                        images.add(bitmap)
+                                        Log.d("FormDebug", "이미지가 리스트에 추가됨, 총 ${images.size}개")
                                     }
                                 )
                             }
@@ -295,37 +339,17 @@ fun CommissionFormScreen(commissionId: String = "1") {
                                     context = context
                                 )
 
-                                // 기존 로직 (임시로 유지)
-                                val gson = Gson()
-                                val schemaJson = gson.toJson(formSchema)
-                                val answerJson = gson.toJson(formAnswer)
-
-                                val requestItem = RequestItem(
-                                    requestId = 1,
-                                    status = "진행중",
-                                    title = "낙서 타입 커미션",
-                                    price = 10000,
-                                    thumbnailImageUrl = "https://example.com/image.jpg",
-                                    progressPercent = 0, // 진행률 기본값 (필요에 따라 수정)
-                                    createdAt = "2023.2.3 19:20",
-                                    artist = Artist(id = 101, nickname = "키르"),
-                                    commission = Commission(id = commissionId.toIntOrNull() ?: 0) // 실제 commissionId 반영
-                                )
-
-                                val requestItemJson = gson.toJson(requestItem)
-
-                                val fragment = FragmentFormCheckScreen().apply {
-                                    arguments = Bundle().apply {
-                                        putString("requestItem", requestItemJson)
-                                        putString("formSchema", schemaJson)
-                                        putString("formAnswer", answerJson)
-                                    }
+                                // 성공 메시지 표시
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "신청이 성공적으로 제출되었습니다!",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                                
+                                // Activity 종료
+                                if (context is androidx.fragment.app.FragmentActivity) {
+                                    context.finish()
                                 }
-
-                                (context as FragmentActivity).supportFragmentManager.beginTransaction()
-                                    .replace(R.id.Nav_Frame, fragment)
-                                    .addToBackStack(null)
-                                    .commit()
                             }
                         },
                         modifier = Modifier

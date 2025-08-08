@@ -57,6 +57,11 @@ class CommissionFormViewModel : ViewModel() {
                 
                 if (response.isSuccessful) {
                     response.body()?.let { commissionFormResponse ->
+                        // API 응답 로그 출력
+                        android.util.Log.d("CommissionFormViewModel", "API 응답: $commissionFormResponse")
+                        android.util.Log.d("CommissionFormViewModel", "formSchema 타입: ${commissionFormResponse.success?.formSchema?.javaClass}")
+                        android.util.Log.d("CommissionFormViewModel", "formSchema 내용: ${commissionFormResponse.success?.formSchema}")
+                        
                         _commissionFormState.value = CommissionFormState.Success(commissionFormResponse)
                     } ?: run {
                         _commissionFormState.value = CommissionFormState.Error("응답 데이터가 없습니다.")

@@ -2,6 +2,7 @@ package com.example.commit.data.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 
 @Parcelize
 data class CommissionFormResponse(
@@ -13,7 +14,7 @@ data class CommissionFormResponse(
 @Parcelize
 data class CommissionFormSuccess(
     val commission: CommissionInfo,
-    val formSchema: List<FormItem>? = null
+    val formSchema: @RawValue Map<String, Any>? = null
 ) : Parcelable
 
 @Parcelize
