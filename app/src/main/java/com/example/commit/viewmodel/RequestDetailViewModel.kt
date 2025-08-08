@@ -19,6 +19,7 @@ class RequestDetailViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
+    // context는 넘기되, RetrofitObject 내부에서 하드코딩된 토큰 사용
     fun loadRequestDetail(context: Context, requestId: Int) {
         Log.d("RequestDetailVM", "loadRequestDetail 호출됨: requestId=$requestId")
 

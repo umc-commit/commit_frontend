@@ -229,6 +229,7 @@ class FragmentHome : Fragment() {
                     val data = response.body()?.success
                     if (data != null) {
                         setupHomeAdapters(data)
+                        Log.d("HomeAPI", "성공")
                     } else {
                         Log.e("HomeAPI", "success null\\ndata 없음")
                     }

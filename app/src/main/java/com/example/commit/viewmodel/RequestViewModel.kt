@@ -23,8 +23,13 @@ class RequestViewModel : ViewModel() {
     fun loadRequests(context: Context) {
         viewModelScope.launch {
             try {
+                Log.d("RequestViewModel", "하드코딩된 accessToken으로 요청합니다")
+
+                // context 인자 넘겨줌
                 val service = RetrofitObject.getRetrofitService(context)
                 val response: ApiResponse<RequestListResponse> = service.getRequestList()
+
+                Log.d("RequestViewModel", "전체 응답 = $response")
 
                 if (response.resultType == "SUCCESS" && response.success != null) {
                     _requestList.value = response.success.requests

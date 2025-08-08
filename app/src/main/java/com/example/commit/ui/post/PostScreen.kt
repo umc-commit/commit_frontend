@@ -1,18 +1,22 @@
 package com.example.commit.ui.post
 
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,13 +24,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
+import coil.compose.AsyncImage
 import com.example.commit.R
 import com.example.commit.activity.CommissionFormActivity
 import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.ui.Theme.CommitTypography
-import android.os.Bundle
-import android.widget.Toast
-import androidx.fragment.app.FragmentActivity
 import com.example.commit.ui.post.components.PostBottomBar
 import com.example.commit.ui.post.components.PostDetailTabSection
 
@@ -39,11 +42,12 @@ fun PostScreen(
     content: String,
     images: List<String>,
     isBookmarked: Boolean,
-    imageCount: Int = 3,
+    imageCount: Int = images.size,
     currentIndex: Int = 0,
     onReviewListClick: () -> Unit
 ) {
     val context = LocalContext.current
+    var selectedImageIndex by remember { mutableStateOf(currentIndex) }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -75,7 +79,6 @@ fun PostScreen(
                         }
                 )
 
-                // 텍스트도 약간 아래로
                 Text(
                     text = title,
                     style = CommitTypography.headlineSmall,
@@ -88,13 +91,30 @@ fun PostScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 썸네일
+            // 이미지 슬라이더
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(233.dp)
-                    .background(Color(0xFFE0E0E0))
-            )
+            ) {
+                if (images.isNotEmpty()) {
+                    AsyncImage(
+                        model = images[selectedImageIndex],
+                        contentDescription = "썸네일 이미지",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable {
+                                selectedImageIndex = (selectedImageIndex + 1) % imageCount
+                            }
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.LightGray)
+                    )
+                }
+            }
 
             // 인디케이터
             Row(
@@ -109,7 +129,7 @@ fun PostScreen(
                             .padding(horizontal = 2.dp)
                             .size(8.dp)
                             .background(
-                                color = if (index == currentIndex) Color.Black else Color.LightGray,
+                                color = if (index == selectedImageIndex) Color.Black else Color.LightGray,
                                 shape = RoundedCornerShape(50)
                             )
                     )
@@ -142,11 +162,12 @@ fun PostScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 태그 영역
+                // 태그
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     tags.forEachIndexed { index, tag ->
                         val isCategory = index == 0
@@ -193,6 +214,7 @@ fun PostScreen(
             }
 
             Spacer(modifier = Modifier.height(5.dp))
+
             PostDetailTabSection(
                 onTabSelected = {},
                 onReviewListClick = onReviewListClick
@@ -206,12 +228,9 @@ fun PostScreen(
             remainingSlots = 11,
             onApplyClick = {
                 val intent = Intent(context, CommissionFormActivity::class.java)
-                Log.d("PostScreen", "Intent 생성됨: $intent")
                 context.startActivity(intent)
-                Log.d("PostScreen", "startActivity 호출됨")
             },
             onChatClick = {
-                // Fragment 전환
                 try {
                     val fragment = FragmentPostChatDetail().apply {
                         arguments = Bundle().apply {
@@ -219,7 +238,6 @@ fun PostScreen(
                             putString("authorName", "키르")
                         }
                     }
-
                     if (context is FragmentActivity) {
                         context.supportFragmentManager.beginTransaction()
                             .replace(R.id.Nav_Frame, fragment)
