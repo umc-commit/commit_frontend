@@ -109,15 +109,16 @@ class AuthorProfileActivity : AppCompatActivity() {
     }
 
     private fun updateSlots(remainingSlots: Int, totalSlots: Int = 4) {
+        val clampedRemaining = remainingSlots.coerceIn(0, totalSlots)
         val slotIcons = listOf(binding.slot1, binding.slot2, binding.slot3, binding.slot4)
-        val filledCount = totalSlots - remainingSlots
+        val filledCount = totalSlots - clampedRemaining
 
         for (i in slotIcons.indices) {
             slotIcons[i].setImageResource(
                 if (i < filledCount) R.drawable.ic_slot_filled else R.drawable.ic_slot_empty
             )
         }
-        binding.tvRemainingSlots.text = "남은 슬롯 ${remainingSlots}개"
+        binding.tvRemainingSlots.text = "남은 슬롯 ${clampedRemaining}개"
     }
 
     private fun toggleReviewSection(show: Boolean) {
