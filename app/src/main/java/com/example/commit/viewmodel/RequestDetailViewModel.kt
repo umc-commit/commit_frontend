@@ -19,20 +19,13 @@ class RequestDetailViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-    // 하드코딩된 임시 토큰
-    private fun getAccessToken(): String {
-        return "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwibmlja25hbWUiOiJ1c2VyX29uZSIsImFjY291bnRJZCI6IjEiLCJwcm92aWRlciI6Imtha2FvIiwiaWF0IjoxNzU0NTc0ODgwLCJleHAiOjE3NTQ2NjEyODB9.-a5Ijn-Xr2dZoswxYW2khL56G2y5dKwLcjuEx7SM7-c"
-    }
-
     fun loadRequestDetail(context: Context, requestId: Int) {
         Log.d("RequestDetailVM", "loadRequestDetail 호출됨: requestId=$requestId")
 
         viewModelScope.launch {
             try {
                 val service = RetrofitObject.getRetrofitService(context)
-                val token = getAccessToken()
-
-                val response: ApiResponse<RequestDetailResponse> = service.getRequestDetail(token, requestId)
+                val response: ApiResponse<RequestDetailResponse> = service.getRequestDetail(requestId)
                 Log.d("RequestDetailVM", "response.success = ${response.success}")
 
                 if (response.resultType == "SUCCESS" && response.success != null) {

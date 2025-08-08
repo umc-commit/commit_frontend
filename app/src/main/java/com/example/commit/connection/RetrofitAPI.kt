@@ -41,20 +41,17 @@ interface RetrofitAPI {
     // 커미션 상세보기 (postScreen)
     @GET("/api/commissions/{commissionId}")
     suspend fun getCommissionDetail(
-        @Header("Authorization") token: String,
         @Path("commissionId") commissionId: Int
     ): CommissionDetailResponse
 
     //신청함 목록
     @GET("/api/requests")
     suspend fun getRequestList(
-        @Header("Authorization") token: String
     ):  ApiResponse<RequestListResponse>
 
     //신청함 상세 조회
     @GET("/api/requests/{requestId}")
     suspend fun getRequestDetail(
-        @Header("Authorization") token: String,
         @Path("requestId") requestId: Int
     ): ApiResponse<RequestDetailResponse>
 
