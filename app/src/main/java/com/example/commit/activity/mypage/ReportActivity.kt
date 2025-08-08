@@ -46,15 +46,8 @@ class ReportActivity : AppCompatActivity() {
 
 
     private fun fetchReportData() {
-        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
-        val token = prefs.getString("accessToken", null)
-        if (token.isNullOrEmpty()) {
-            Log.e("ReportAPI", "로그인이 필요합니다.")
-            return
-        }
-
         val service = RetrofitObject.getRetrofitService(this)
-        service.getCommissionReport("Bearer $token").enqueue(object :
+        service.getCommissionReport().enqueue(object :
             Callback<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>> {
             override fun onResponse(
                 call: Call<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>>,
@@ -72,12 +65,14 @@ class ReportActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>>, t: Throwable) {
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.ReportResponseData>>,
+                t: Throwable
+            ) {
                 Log.e("ReportAPI", "네트워크 오류", t)
             }
         })
     }
-
 
     private fun saveReportImage() {
         // tv_description만 잠깐 숨겼다가 다시 보이게
@@ -153,17 +148,36 @@ class ReportActivity : AppCompatActivity() {
             .append(" 리포트예요!")
         binding.tvSubtitle.text = builder
 
-        Glide.with(this).load(report.characterImage).placeholder(R.drawable.ic_profile) // 로딩 중 표시
-            .error(R.drawable.ic_profile).into(binding.ivCharacter)
+        Log.d("ReportUI", "quote title: ${report.quote.title}")
+        Log.d("ReportUI", "quote desc: ${report.quote.description}")
+        Log.d("ReportUI", "character image: ${report.characterImage}")
+
+
+        Glide.with(this).load(report.characterImage).placeholder(R.drawable.report_cat_2) // 로딩 중 표시
+            .error(R.drawable.report_cat_2).into(binding.ivCharacter)
         binding.tvBadge.text = report.quote.title
-        binding.tvQuote.text = report.quote.description
+
+        val original = report.quote.description
+        val firstQuoteStart = original.indexOf("\"")
+        val secondQuoteEnd = original.indexOf("\"", firstQuoteStart + 1)
+
+        val quoteWithLineBreak = if (firstQuoteStart != -1 && secondQuoteEnd != -1) {
+            val quotedPart = original.substring(firstQuoteStart, secondQuoteEnd + 1) // "..." 포함
+            val remainingPart = original.substring(secondQuoteEnd + 1).trim()         // 나머지 설명
+            "$quotedPart\n$remainingPart"
+        } else {
+            original // 쌍따옴표 없으면 그대로 출력
+        }
+
+        binding.tvQuote.text = quoteWithLineBreak
+
         binding.tvCategory.text = "${report.statistics.mainCategory.name} (${report.statistics.mainCategory.count}건)"
+
         Glide.with(this).load(report.statistics.favoriteArtist.profileImage).placeholder(R.drawable.ic_profile)
             .error(R.drawable.ic_profile).into(binding.ivProfile)
+
         binding.tvAuthor.text = report.statistics.favoriteArtist.nickname
         binding.tvPoint.text = "${NumberFormat.getNumberInstance(Locale.KOREA).format(report.statistics.pointsUsed)}P"
         binding.tvReview.text = "${(report.statistics.reviewRate * 100).toInt()}%"
     }
-
-
 }

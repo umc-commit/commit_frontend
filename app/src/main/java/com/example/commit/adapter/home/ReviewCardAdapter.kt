@@ -17,11 +17,13 @@ class ReviewCardAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: RetrofitClient.HomeReviewItem) {
             binding.tvReviewContent.text = item.content
+            binding.tvReviewer.text = item.user.nickname
 
             Glide.with(binding.root.context)
                 .load(item.reviewImageUrl)
-                .placeholder(R.drawable.ic_profile)
+                .placeholder(R.drawable.image_placeholder)
                 .error(R.drawable.ic_profile)
+                .centerCrop()
                 .into(binding.ivReview)
 
             binding.root.setOnClickListener { onItemClick(item) }

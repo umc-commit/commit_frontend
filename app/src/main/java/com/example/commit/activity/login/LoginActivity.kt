@@ -3,6 +3,7 @@ package com.example.commit.activity.login
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.commit.activity.MainActivity
 import com.example.commit.databinding.ActivityLoginBinding
@@ -47,33 +48,36 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun handleDeepLink(intent: Intent) {
+        Log.d("LoginActivity", "intent.action = ${intent.action}")
+        Log.d("LoginActivity", "intent.data = ${intent.data}")
+        Log.d("LoginActivity", "intent.extras = ${intent.extras}")
+
         val data: Uri? = intent.data
-        if (data != null && data.scheme == "commit") { // manifest에 등록한 scheme과 동일해야 함
-            val token = data.getQueryParameter("token")
-            val signupRequired = data.getQueryParameter("signupRequired")?.toBoolean() ?: false
+        Log.d("LoginActivity", "딥링크 수신: $data")
 
-            if (!token.isNullOrEmpty()) {
-                // 토큰 저장
-                val prefs = getSharedPreferences("auth", MODE_PRIVATE)
-                prefs.edit().putString("accessToken", token).apply()
+        val token = data?.getQueryParameter("token") ?: intent.getStringExtra("token")
+        val signupRequired = data?.getQueryParameter("signupRequired")?.toBoolean()
+            ?: intent.getBooleanExtra("signupRequired", false)
 
-                // 저장된 토큰 확인 (로그 출력)
-                val savedToken = prefs.getString("accessToken", null)
-                android.util.Log.d("LoginActivity", "저장된 토큰: $savedToken")
+        if (!token.isNullOrEmpty()) {
+            val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+            prefs.edit().putString("accessToken", token).apply()
+            android.util.Log.d("LoginActivity", "저장된 토큰: $token")
 
-                if (signupRequired) {
-                    // 회원가입 페이지
-                    val signUpIntent = Intent(this, AgreeFirstActivity::class.java)
-                    signUpIntent.putExtra("token", token)
-                    startActivity(signUpIntent)
-                } else {
-                    // 메인화면
-                    val mainIntent = Intent(this, MainActivity::class.java)
-                    mainIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(mainIntent)
+            if (signupRequired) {
+                val signUpIntent = Intent(this, AgreeFirstActivity::class.java).apply {
+                    putExtra("token", token)
                 }
-                finish()
+                startActivity(signUpIntent)
+            } else {
+                val mainIntent = Intent(this, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                startActivity(mainIntent)
             }
+            finishAffinity()
+        } else {
+            Log.e("LoginActivity", "token이 null입니다. 딥링크 data=$data")
         }
     }
 }

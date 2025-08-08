@@ -54,9 +54,9 @@ class FragmentHome : Fragment() {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
 
-        //전체 거래수 api 연동 시 꼭 지우기
         setBannerTransactionCount(4257)
 
+        initEmptyAdapters()
         fetchHomeData()
 
         // arguments 확인하여 PostHeaderSection 표시
@@ -312,7 +312,7 @@ class FragmentHome : Fragment() {
         }
 
         val api = RetrofitObject.getRetrofitService(requireContext())
-        api.getHomeData("Bearer $token").enqueue(object :
+        api.getHomeData().enqueue(object :
             Callback<RetrofitClient.ApiResponse<RetrofitClient.HomeResponseData>> {
             override fun onResponse(
                 call: Call<RetrofitClient.ApiResponse<RetrofitClient.HomeResponseData>>,
@@ -364,6 +364,15 @@ class FragmentHome : Fragment() {
             adapter = AuthorCardAdapter(data.newArtist)
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
+    }
+
+    private fun initEmptyAdapters() {
+        binding.rvTodayRecommendations.adapter = HomeCardAdapter(emptyList()) {}
+        binding.rvNewRegistrations.adapter = HomeCardAdapter(emptyList()) {}
+        binding.rvHotContent.adapter = HomeCardAdapter(emptyList()) {}
+        binding.rvDeadlineContent.adapter = HomeCardAdapter(emptyList()) {}
+        binding.rvReviewContent.adapter = ReviewCardAdapter(emptyList()) {}
+        binding.rvNewAuthorContent.adapter = AuthorCardAdapter(emptyList())
     }
 
     override fun onDestroyView() {
