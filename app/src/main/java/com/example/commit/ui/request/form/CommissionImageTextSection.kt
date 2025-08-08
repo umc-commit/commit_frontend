@@ -33,15 +33,18 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTheme
+import android.util.Log
 
 @Composable
 fun CommissionImageTextSection(
+    index: Int, // index 파라미터 추가
     text: String,
     onTextChange: (String) -> Unit,
     images: List<Bitmap>,
     onAddClick: () -> Unit,
     onRemoveClick: (Int) -> Unit,
-    onImageUpload: (Uri) -> Unit = {}
+    onImageUpload: (Uri) -> Unit = {},
+    onImageAdded: (Bitmap) -> Unit = {} // 새로운 콜백 추가
 ) {
     val context = LocalContext.current
     
@@ -54,11 +57,19 @@ fun CommissionImageTextSection(
                 val inputStream = context.contentResolver.openInputStream(selectedUri)
                 val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
                 inputStream?.close()
+                
+                // 이미지를 UI에 추가
+                onImageAdded(bitmap)
+                
                 // 이미지 업로드 호출
                 onImageUpload(selectedUri)
+                
+                // 기존 onAddClick 호출
                 onAddClick()
+                
+                Log.d("ImageUpload", "이미지 선택됨: $selectedUri")
             } catch (e: Exception) {
-                // 에러 처리
+                Log.e("ImageUpload", "이미지 처리 오류: ${e.message}")
             }
         }
     }
@@ -69,7 +80,7 @@ fun CommissionImageTextSection(
             .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
         Text(
-            text = "신청 내용",
+            text = "${index}. 신청 내용", // index 추가
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.SemiBold
             )
@@ -209,6 +220,7 @@ fun CommissionImageTextSectionPreview() {
 
     CommitTheme {
         CommissionImageTextSection(
+            index = 1, // index 파라미터 추가
             text = text,
             onTextChange = { text = it },
             images = images,
