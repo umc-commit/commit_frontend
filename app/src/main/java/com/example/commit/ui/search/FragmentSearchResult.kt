@@ -4,15 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.compose.foundation.layout.*
-import com.example.commit.ui.request.components.Commission
-import com.example.commit.ui.post.FragmentPostScreen
 import com.example.commit.R
-
-
+import com.example.commit.ui.post.FragmentPostScreen
+import com.example.commit.ui.request.components.Commission
 
 class FragmentSearchResult : Fragment() {
 
@@ -47,6 +45,7 @@ class FragmentSearchResult : Fragment() {
 
                 val dummyCommissions = List(10) {
                     Commission(
+                        commissionId = it, // 중요: id 필요
                         nickname = "작가$it",
                         title = "테스트 커미션 $it",
                         tags = listOf("그림", "#예시", "#귀여움")
@@ -70,16 +69,19 @@ class FragmentSearchResult : Fragment() {
                     onClearClick = {},
                     onHomeClick = {},
                     onCommissionClick = { commission ->
-                        navigateToPostDetail(commission)
+                        navigateToPostDetail(commission.commissionId)
                     }
                 )
             }
         }
     }
 
-    private fun navigateToPostDetail(commission: Commission) {
+    private fun navigateToPostDetail(commissionId: Int) {
         parentFragmentManager.beginTransaction()
-            .replace(R.id.Nav_Frame, FragmentPostScreen.newInstance(commission))
+            .replace(
+                R.id.Nav_Frame,
+                FragmentPostScreen.newInstance(commissionId)
+            )
             .addToBackStack(null)
             .commit()
     }

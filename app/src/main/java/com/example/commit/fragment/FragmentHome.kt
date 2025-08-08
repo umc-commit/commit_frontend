@@ -14,11 +14,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.commit.R
 import com.example.commit.activity.alarm.AlarmActivity
@@ -35,10 +40,12 @@ import com.example.commit.databinding.BottomSheetHomeBinding
 import com.example.commit.databinding.FragmentHomeBinding
 import com.example.commit.ui.search.FragmentSearch
 import com.example.commit.ui.post.PostScreen
+import com.example.commit.viewmodel.PostViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import androidx.fragment.app.viewModels
 
 
 class FragmentHome : Fragment() {
@@ -46,7 +53,7 @@ class FragmentHome : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-
+    private val postViewModel: PostViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,39 +62,12 @@ class FragmentHome : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
 
         setBannerTransactionCount(4257)
-
-        initEmptyAdapters()
         fetchHomeData()
 
-        // arguments 확인하여 PostHeaderSection 표시
+        val commissionId = arguments?.getInt("commission_id") ?: -1
         val showPostDetail = arguments?.getBoolean("show_post_detail", false) ?: false
-        val postTitle = arguments?.getString("post_title", "그림 커미션") ?: "그림 커미션"
-        
-        if (showPostDetail) {
-            // PostHeaderSection 표시
-            val composeView = ComposeView(requireContext()).apply {
-                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-                setContent {
-                    PostScreen(
-                        title = postTitle,
-                        tags = listOf("그림", "#LD", "#당일마감"),
-                        minPrice = 10000,
-                        summary = "작업 설명입니다",
-                        onReviewListClick = {
-                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
-                            startActivity(intent)
-                        }
-                    )
-                }
-            }
-
-            binding.frameComposeContainer.apply {
-                visibility = View.VISIBLE
-                removeAllViews()
-                addView(composeView)
-            }
-
-            (activity as? MainActivity)?.showBottomNav(false)
+        if (showPostDetail && commissionId != -1) {
+            showPostScreen(commissionId)
         }
 
         binding.ivProfile.setOnClickListener {
@@ -95,13 +75,11 @@ class FragmentHome : Fragment() {
             startActivity(intent)
         }
 
-        // 알람 아이콘 클릭
         binding.ivAlarm.setOnClickListener {
             val intent = Intent(requireContext(), AlarmActivity::class.java)
             startActivity(intent)
         }
 
-        // 검색 아이콘 클릭 시 FragmentCategory로 이동
         binding.ivSearch.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.Nav_Frame, FragmentSearch())
@@ -109,62 +87,6 @@ class FragmentHome : Fragment() {
                 .commit()
         }
 
-        // 카드 클릭 시 PostHeaderSection 띄우기 + 바텀바 숨기기
-        val homeCardClick: (String) -> Unit = { title ->
-
-            val composeView = ComposeView(requireContext()).apply {
-                setContent {
-                    PostScreen(
-                        title = "그림 커미션",
-                        tags = listOf("그림", "#LD", "#당일마감"),
-                        minPrice = 10000,
-                        summary = "작업 설명입니다",
-                        onReviewListClick = {
-                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
-                            startActivity(intent)
-                        }
-                    )
-                }
-            }
-
-            binding.frameComposeContainer.apply {
-                visibility = View.VISIBLE
-                removeAllViews()
-                addView(composeView)
-            }
-
-            (activity as? MainActivity)?.showBottomNav(false)
-        }
-
-        val homeReviewClick: (String) -> Unit = { title ->
-            val composeView = ComposeView(requireContext()).apply {
-                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-                setContent {
-                    //PostHeaderSection
-                    Log.d("FragmentHome", "PostScreen 호출됨")
-                    PostScreen(
-                        title = "그림 커미션",
-                        tags = listOf("그림", "#LD", "#당일마감"),
-                        minPrice = 10000,
-                        summary = "작업 설명입니다",
-                        onReviewListClick = {
-                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
-                            startActivity(intent)
-                        }
-                    )
-                }
-            }
-
-            binding.frameComposeContainer.apply {
-                visibility = View.VISIBLE
-                removeAllViews()
-                addView(composeView)
-            }
-
-            (activity as? MainActivity)?.showBottomNav(false)
-        }
-
-        // 뒤로가기 누르면 바텀바 다시 보이기
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (binding.frameComposeContainer.visibility == View.VISIBLE) {
@@ -178,23 +100,16 @@ class FragmentHome : Fragment() {
         })
 
         binding.tvFollowing.setOnClickListener {
-            // 팔로우 탭 UI 표시
             binding.rvFollowingPosts.visibility = View.VISIBLE
             binding.nestedScrollView.visibility = View.GONE
-
-            // 탭 텍스트 색상 변경
             binding.tvRecommend.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray2))
             binding.tvFollowing.setTextColor(ContextCompat.getColor(requireContext(), R.color.black1))
-
-            // indicator 이동
             binding.indicatorRecommend.visibility = View.GONE
             binding.indicatorFollowing?.visibility = View.VISIBLE
 
-            // 리스트 어댑터 설정
             val dummyList = listOf("타임글1", "타임글2", "타임글3", "타입글4", "타입글5")
             binding.rvFollowingPosts.apply {
                 adapter = FollowingPostAdapter(dummyList) {
-                    // iv_more 클릭 시 바텀시트 띄우는 로직
                     val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_post_more, null)
                     val bottomSheetDialog = BottomSheetDialog(requireContext())
                     bottomSheetDialog.setContentView(bottomSheetView)
@@ -203,7 +118,6 @@ class FragmentHome : Fragment() {
                         setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                         setDimAmount(0.6f)
                     }
-
                     bottomSheetDialog.show()
                 }
                 layoutManager = LinearLayoutManager(requireContext())
@@ -211,15 +125,10 @@ class FragmentHome : Fragment() {
         }
 
         binding.tvRecommend.setOnClickListener {
-            // 추천 콘텐츠 표시
             binding.nestedScrollView.visibility = View.VISIBLE
             binding.rvFollowingPosts.visibility = View.GONE
-
-            // 탭 텍스트 색상 변경
             binding.tvRecommend.setTextColor(ContextCompat.getColor(requireContext(), R.color.black1))
             binding.tvFollowing.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray2))
-
-            // indicator 변경
             binding.indicatorRecommend.visibility = View.VISIBLE
             binding.indicatorFollowing?.visibility = View.GONE
         }
@@ -227,37 +136,68 @@ class FragmentHome : Fragment() {
         return binding.root
     }
 
+    private fun showPostScreen(commissionId: Int) {
+        val composeView = ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val commission by postViewModel.commissionDetail.collectAsState()
+
+                LaunchedEffect(commissionId) {
+                    postViewModel.loadCommissionDetail(requireContext(), commissionId)
+                }
+
+                commission?.let {
+                    PostScreen(
+                        title = it.title,
+                        tags = listOf(it.category) + it.tags,
+                        minPrice = it.minPrice,
+                        summary = it.summary,
+                        content = it.content,
+                        images = it.images.map { img -> img.imageUrl },
+                        isBookmarked = it.isBookmarked,
+                        imageCount = it.images.size,
+                        currentIndex = 0,
+                        onReviewListClick = {
+                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
+                            startActivity(intent)
+                        }
+                    )
+                }
+            }
+        }
+
+        binding.frameComposeContainer.apply {
+            visibility = View.VISIBLE
+            removeAllViews()
+            addView(composeView)
+        }
+
+        (activity as? MainActivity)?.showBottomNav(false)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // MainActivity로부터 전달받은 인자 확인
         val showSignupBottomSheet = arguments?.getBoolean("show_signup_bottom_sheet", false) ?: false
-
         if (showSignupBottomSheet) {
             showSignupCompleteBottomSheet()
         }
     }
 
     private fun showSignupCompleteBottomSheet() {
-        // BottomSheetDialog 생성 시 TransparentBottomSheetDialog 스타일을 적용합니다.
         val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.TransparentBottomSheetDialog)
         val sheetBinding = BottomSheetHomeBinding.inflate(layoutInflater)
         bottomSheetDialog.setContentView(sheetBinding.root)
 
-        // 바텀 시트가 닫힐 때 하단바를 다시 보이도록 리스너 설정
         bottomSheetDialog.setOnDismissListener {
             (activity as? MainActivity)?.showBottomNav(true)
         }
 
-        // 바텀 시트 윈도우 설정 (투명도 60% 효과)
         bottomSheetDialog.window?.apply {
-            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
-            setDimAmount(0.6f) // 투명도 60% (0.0f는 완전 투명, 1.0f는 완전 불투명)
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setDimAmount(0.6f)
         }
 
         bottomSheetDialog.show()
-
-        // 바텀 시트가 나타날 때 하단바 숨기기
         (activity as? MainActivity)?.showBottomNav(false)
     }
 
@@ -276,17 +216,11 @@ class FragmentHome : Fragment() {
     }
 
     private fun fetchHomeData() {
-        val prefs = requireContext().getSharedPreferences("auth", AppCompatActivity.MODE_PRIVATE)
-        val token = prefs.getString("accessToken", null)
-
-        if (token.isNullOrEmpty()) {
-            Log.e("HomeAPI", "로그인이 필요합니다.")
-            return
-        }
-
         val api = RetrofitObject.getRetrofitService(requireContext())
+
         api.getHomeData().enqueue(object :
             Callback<RetrofitClient.ApiResponse<RetrofitClient.HomeResponseData>> {
+
             override fun onResponse(
                 call: Call<RetrofitClient.ApiResponse<RetrofitClient.HomeResponseData>>,
                 response: Response<RetrofitClient.ApiResponse<RetrofitClient.HomeResponseData>>
@@ -295,8 +229,9 @@ class FragmentHome : Fragment() {
                     val data = response.body()?.success
                     if (data != null) {
                         setupHomeAdapters(data)
+                        Log.d("HomeAPI", "성공")
                     } else {
-                        Log.e("HomeAPI", "success 데이터가 없음")
+                        Log.e("HomeAPI", "success null\\ndata 없음")
                     }
                 } else {
                     Log.e("HomeAPI", "API 실패: ${response.code()}")
@@ -314,38 +249,42 @@ class FragmentHome : Fragment() {
 
     private fun setupHomeAdapters(data: RetrofitClient.HomeResponseData) {
         binding.rvTodayRecommendations.apply {
-            adapter = HomeCardAdapter(data.section1) { /* 클릭 처리 */ }
+            adapter = HomeCardAdapter(data.section1) { item ->
+                showPostScreen(item.id)
+            }
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
+
         binding.rvNewRegistrations.apply {
-            adapter = HomeCardAdapter(data.section2) { /* 클릭 처리 */ }
+            adapter = HomeCardAdapter(data.section2) { item ->
+                showPostScreen(item.id)
+            }
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
+
         binding.rvHotContent.apply {
-            adapter = HomeCardAdapter(data.section3) { /* 클릭 처리 */ }
+            adapter = HomeCardAdapter(data.section3) { item ->
+                showPostScreen(item.id)
+            }
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
+
         binding.rvDeadlineContent.apply {
-            adapter = HomeCardAdapter(data.section4) { /* 클릭 처리 */ }
+            adapter = HomeCardAdapter(data.section4) { item ->
+                showPostScreen(item.id)
+            }
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
+
         binding.rvReviewContent.apply {
-            adapter = ReviewCardAdapter(data.newReview) { /* 클릭 처리 */ }
+            adapter = ReviewCardAdapter(data.newReview) { /* TODO: 리뷰 클릭 이벤트 정의 */ }
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
+
         binding.rvNewAuthorContent.apply {
             adapter = AuthorCardAdapter(data.newArtist)
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
-    }
-
-    private fun initEmptyAdapters() {
-        binding.rvTodayRecommendations.adapter = HomeCardAdapter(emptyList()) {}
-        binding.rvNewRegistrations.adapter = HomeCardAdapter(emptyList()) {}
-        binding.rvHotContent.adapter = HomeCardAdapter(emptyList()) {}
-        binding.rvDeadlineContent.adapter = HomeCardAdapter(emptyList()) {}
-        binding.rvReviewContent.adapter = ReviewCardAdapter(emptyList()) {}
-        binding.rvNewAuthorContent.adapter = AuthorCardAdapter(emptyList())
     }
 
     override fun onDestroyView() {

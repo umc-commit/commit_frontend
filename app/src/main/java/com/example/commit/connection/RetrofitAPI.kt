@@ -1,10 +1,13 @@
 package com.example.commit.connection
 
+import com.example.commit.connection.dto.ApiResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import com.example.commit.connection.dto.*
+
 
 interface RetrofitAPI {
     // 회원가입 (토큰 불필요)
@@ -34,4 +37,22 @@ interface RetrofitAPI {
     fun getAuthorProfile(
         @Path("artistId") artistId: Int
     ): Call<RetrofitClient.AuthorProfileResponse>
+
+    // 커미션 상세보기 (postScreen)
+    @GET("/api/commissions/{commissionId}")
+    suspend fun getCommissionDetail(
+        @Path("commissionId") commissionId: Int
+    ): CommissionDetailResponse
+
+    //신청함 목록
+    @GET("/api/requests")
+    suspend fun getRequestList(
+    ):  ApiResponse<RequestListResponse>
+
+    //신청함 상세 조회
+    @GET("/api/requests/{requestId}")
+    suspend fun getRequestDetail(
+        @Path("requestId") requestId: Int
+    ): ApiResponse<RequestDetailResponse>
+
 }

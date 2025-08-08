@@ -42,7 +42,7 @@ class FragmentChatDetail : Fragment() {
                     val showFormCheckSheet = remember { mutableStateOf(false) }
                     
                     // FormCheck 데이터 준비
-                    val requestItem = RequestItem(
+              /*      val requestItem = RequestItem(
                         requestId = 1,
                         status = "신청완료",
                         title = chatName,
@@ -50,7 +50,7 @@ class FragmentChatDetail : Fragment() {
                         thumbnailImage = "",
                         artist = com.example.commit.data.model.Artist(1, authorName),
                         createdAt = "2024.06.02"
-                    )
+                    )*/
                     
                     val formSchema = listOf(
                         FormItem(
@@ -109,7 +109,7 @@ class FragmentChatDetail : Fragment() {
                         }
                     }
                     
-                    if (showFormCheckSheet.value) {
+                    /*if (showFormCheckSheet.value) {
                         FormCheckBottomSheet(
                             chatItem = chatItem,
                             requestItem = requestItem,
@@ -117,7 +117,7 @@ class FragmentChatDetail : Fragment() {
                             formAnswer = formAnswer,
                             onDismiss = { showFormCheckSheet.value = false }
                         )
-                    }
+                    }*/
                 }
             }
         }

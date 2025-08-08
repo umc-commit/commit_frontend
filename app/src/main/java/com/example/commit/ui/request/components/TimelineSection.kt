@@ -12,9 +12,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.commit.R
-import com.example.commit.data.model.TimelineEvent
-import com.example.commit.data.model.TimelineItem
+import com.example.commit.connection.dto.TimelineItem
 import com.example.commit.ui.Theme.CommitTypography
+
+data class TimelineEvent(
+    val iconRes: Int,
+    val description: String,
+    val date: String
+)
 
 @Composable
 fun TimelineSection(events: List<TimelineEvent>) {
@@ -63,36 +68,34 @@ fun TimelineSection(events: List<TimelineEvent>) {
     }
 }
 
-// 아이콘 리소스 매핑용 확장 함수
+// API에서 받은 DTO(TimelineItem)를 UI용 TimelineEvent로 변환하는 확장 함수
 fun TimelineItem.toEvent(): TimelineEvent {
     val iconRes = when (status) {
         "COMPLETED" -> R.drawable.timeline_complete
         "CONFIRMED" -> R.drawable.timeline_confirm
-        "DELIVERED" -> R.drawable.timeline_delivery
+        "SUBMITTED " -> R.drawable.timeline_delivery
         "STARTED" -> R.drawable.timeline_start
         "ACCEPTED" -> R.drawable.timeline_accept
+        "APPROVED" -> R.drawable.timeline_confirm
         else -> R.drawable.timeline_complete
     }
     return TimelineEvent(
         iconRes = iconRes,
-        description = this.label,
-        date = this.changedAt
+        description = getStatusLabel(status),
+        date = this.timestamp
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewTimelineSection() {
-    val dummyItems = listOf(
-        TimelineItem("COMPLETED", "작업이 완료 되었어요.", "25.05.03 10:57"),
-        TimelineItem("CONFIRMED", "작업물을 확인했어요.", "25.05.03 10:44"),
-        TimelineItem("DELIVERED", "추가금 4,000P를 결제했어요.", "25.05.01 13:11"),
-        TimelineItem("DELIVERED", "작업물이 전달되었어요.", "25.05.01 12:30"),
-        TimelineItem("STARTED", "작가가 작업을 시작했어요.", "25.04.25 17:00"),
-        TimelineItem("ACCEPTED", "작가가 작업을 수락했어요.", "25.04.25 16:00")
-    )
-
-    val dummyEvents = dummyItems.map { it.toEvent() }
-
-    TimelineSection(events = dummyEvents)
+// 상태값에 따른 설명 텍스트 반환 함수
+fun getStatusLabel(status: String): String {
+    return when (status) {
+        "COMPLETED" -> "작업이 완료 되었어요."
+        "CONFIRMED" -> "작업물을 확인했어요."
+        "SUBMITTED " -> "작업물이 전달되었어요."
+        "STARTED" -> "작가가 작업을 시작했어요."
+        "APPROVED" -> "작가가 작업을 수락했어요."
+        "APPROVED" -> "결제가 승인되었어요."
+        else -> "알 수 없는 상태입니다."
+    }
 }
+
