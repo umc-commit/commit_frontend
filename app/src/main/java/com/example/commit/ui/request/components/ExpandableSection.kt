@@ -15,15 +15,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.commit.R
-import com.example.commit.data.model.*
 import com.example.commit.ui.Theme.CommitTypography
+import com.example.commit.connection.dto.*
+
 
 @Composable
 fun RequestDetailSectionList(
     timeline: List<TimelineItem>,
     paymentInfo: PaymentInfo,
     formSchema: List<FormItem>,
-    formAnswer: Map<String, Any>
+    formAnswer: Map<String, String>
 ) {
     var isTimelineExpanded by remember { mutableStateOf(false) }
     var isPaymentExpanded by remember { mutableStateOf(false) }
@@ -66,7 +67,7 @@ fun RequestDetailSectionList(
                         style = CommitTypography.bodyMedium.copy(color = Color.Gray)
                     )
                     Text(
-                        text = "${"%,d".format(paymentInfo.basePrice)}P",
+                         text = "${"%,d".format(paymentInfo.minPrice)}P",
                         style = CommitTypography.bodyMedium.copy(color = Color.Black)
                     )
                 }
@@ -110,10 +111,10 @@ fun RequestDetailSectionList(
             expanded = isFormExpanded,
             onToggle = { isFormExpanded = !isFormExpanded }
         ) {
-            FormAnswerSection(
+          /*  FormAnswerSection(
                 formSchema = formSchema,
                 formAnswer = formAnswer
-            )
+            )*/
         }
     }
 }

@@ -5,6 +5,7 @@ import com.example.commit.data.model.ImageUploadResponse
 import com.example.commit.data.model.CommissionRequestSubmit
 import com.example.commit.data.model.CommissionRequestResponse
 import okhttp3.MultipartBody
+import com.example.commit.connection.dto.ApiResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
@@ -14,6 +15,8 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Header
+import com.example.commit.connection.dto.*
+
 
 interface RetrofitAPI {
     // 회원가입 (토큰 불필요)
@@ -70,4 +73,22 @@ interface RetrofitAPI {
     // 채팅방 목록 조회
     @GET("/api/chatrooms/list")
     fun getChatroomList(): Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>
+
+    // 커미션 상세보기 (postScreen)
+    @GET("/api/commissions/{commissionId}")
+    suspend fun getCommissionDetail(
+        @Path("commissionId") commissionId: Int
+    ): CommissionDetailResponse
+
+    //신청함 목록
+    @GET("/api/requests")
+    suspend fun getRequestList(
+    ):  ApiResponse<RequestListResponse>
+
+    //신청함 상세 조회
+    @GET("/api/requests/{requestId}")
+    suspend fun getRequestDetail(
+        @Path("requestId") requestId: Int
+    ): ApiResponse<RequestDetailResponse>
+
 }

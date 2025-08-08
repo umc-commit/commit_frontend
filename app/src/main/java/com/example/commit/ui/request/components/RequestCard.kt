@@ -20,21 +20,24 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.commit.R
 import com.example.commit.data.model.Artist
-import com.example.commit.data.model.RequestItem
 import com.example.commit.ui.Theme.CommitTypography
+import com.example.commit.connection.dto.RequestItem
 
 @Composable
 fun RequestCard(item: RequestItem, onClick: () -> Unit) {
-    val isPending = item.status == "PENDING"
-    val isInProgress = item.status == "IN_PROGRESS" || item.status == "ACCEPTED"
-    val isCancel = item.status == "CANCEL"
-    val isReject = item.status == "REJECT"
+    val status = item.status.trim()
+
+    val isPending = status == "PENDING"
+    val isInProgress = status == "IN_PROGRESS" || status == "APPROVED"
+    val isCancel = status == "CANCELED"
+    val isReject = status == "REJECTED"
+    val isCompleted = status == "COMPLETED"
+    val isSubmitted = status == "SUBMITTED"
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
-    )
-    {
+    ) {
         Card(
             shape = RoundedCornerShape(12.dp),
             elevation = 2.dp,
@@ -51,20 +54,23 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    val statusText = when (item.status) {
+                    val statusText = when (status) {
                         "PENDING" -> "수락 대기"
-                        "IN_PROGRESS", "ACCEPTED" -> "진행 중"
-                        "CANCEL" -> "신청 취소"
-                        "REJECT" -> "신청 거절"
-                        else -> "작업 완료"
+                        "APPROVED", "IN_PROGRESS"-> "진행 중"
+                        "SUBMITTED"->"작업 완료"
+                        "CANCELED" -> "신청 취소"
+                        "REJECTED" -> "신청 거절"
+                        "COMPLETED" -> "거래 완료"
+                        else -> "오류"
                     }
 
                     val statusColor = when {
                         isInProgress -> Color(0xFF17D5C6)
-                        isCancel -> Color(0xFFFF4D4D)
-                        isReject -> Color(0xFFFF4D4D)
+                        isCancel || isReject -> Color(0xFFFF4D4D)
+                        isCompleted -> Color.Black
                         else -> Color.Black
                     }
+
                     Text(
                         text = statusText,
                         style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
@@ -84,7 +90,7 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
                 // 썸네일 + 정보
                 Row {
                     AsyncImage(
-                        model = item.thumbnailImage,
+                        model = item.thumbnailImageUrl,
                         contentDescription = "Thumbnail",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -94,7 +100,6 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
                         error = painterResource(id = R.drawable.ic_default_image),
                         fallback = painterResource(id = R.drawable.ic_default_image)
                     )
-
                     Spacer(modifier = Modifier.width(16.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
@@ -133,7 +138,7 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
                     }
                 }
 
-                if (isInProgress || isPending) {
+                if (isInProgress || isPending ||isSubmitted) {
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Row(
@@ -143,23 +148,17 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
                         Text(
                             text = "수락",
                             style = CommitTypography.labelSmall,
-                            color = if (item.status == "ACCEPTED") Color(0xFF17D5C6) else Color(
-                                0xFFB0B0B0
-                            )
+                            color = if (status == "APPROVED") Color(0xFF17D5C6) else Color(0xFFB0B0B0)
                         )
                         Text(
                             text = "진행중",
                             style = CommitTypography.labelSmall,
-                            color = if (item.status == "IN_PROGRESS") Color(0xFF17D5C6) else Color(
-                                0xFFB0B0B0
-                            )
+                            color = if (status == "IN_PROGRESS") Color(0xFF17D5C6) else Color(0xFFB0B0B0)
                         )
                         Text(
                             text = "작업완료",
                             style = CommitTypography.labelSmall,
-                            color = if (item.status == "DONE") Color(0xFF17D5C6) else Color(
-                                0xFFB0B0B0
-                            )
+                            color = if (status == "SUBMITTED") Color(0xFF17D5C6) else Color(0xFFB0B0B0)
                         )
                     }
 
@@ -169,11 +168,11 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
                             .height(4.dp)
                             .background(Color(0xFFE8E8E8))
                     ) {
-                        val barWidth = when (item.status) {
+                        val barWidth = when (status) {
                             "PENDING" -> 0f
-                            "ACCEPTED" -> 0f
+                            "APPROVED" -> 0f
                             "IN_PROGRESS" -> 0.47f
-                            "DONE" -> 1f
+                            "SUBMITTED" -> 1f
                             else -> 0f
                         }
 
@@ -188,18 +187,4 @@ fun RequestCard(item: RequestItem, onClick: () -> Unit) {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RequestCardPreview() {
-    val sampleItem = RequestItem(
-        requestId = 1,
-        status = "PENDING",
-        title = "낙서 타입 커미션",
-        price = 16000,
-        thumbnailImage = "https://via.placeholder.com/150",
-        artist = Artist(1, "사과")
-    )
-    RequestCard(item = sampleItem, onClick = {})
 }
