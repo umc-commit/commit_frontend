@@ -18,19 +18,10 @@
         tools:targetApi="35"
         android:enableOnBackInvokedCallback="true">
 
-  <!--      <activity
+        <activity
             android:name=".activity.login.LoginActivity"
             android:exported="true"
-            android:launchMode="singleTask">-->
-
-        <activity
-            android:name=".activity.MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <!-- 앱 실행 진입점 -->
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:launchMode="singleTask">
 
             <!-- 구글 로그인 -->
             <intent-filter>
@@ -57,10 +48,15 @@
             </intent-filter>
         </activity>
 
-<!--        <activity
+        <activity
             android:name=".activity.MainActivity"
             android:exported="true">
-        </activity>-->
+            <intent-filter>
+                <!-- 앱 실행 진입점 -->
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity android:name=".activity.ReviewWriteActivity" android:exported="false"/>
         <activity android:name=".activity.WrittenReviewsActivity" android:exported="false"/>

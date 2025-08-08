@@ -313,6 +313,81 @@ class RetrofitClient {
         val badgeImage: String
     )
 
+    // 채팅방 생성 요청 DTO
+    data class CreateChatroomRequest(
+        @SerializedName("consumerId")
+        val consumerId: Int,
+        @SerializedName("artistId")
+        val artistId: Int,
+        @SerializedName("requestId")
+        val requestId: Int
+    )
+
+    // 채팅방 생성 응답 DTO
+    data class CreateChatroomResponse(
+        @SerializedName("id")
+        val id: Int,
+        @SerializedName("consumerId")
+        val consumerId: Int,
+        @SerializedName("artistId")
+        val artistId: Int,
+        @SerializedName("requestId")
+        val requestId: Int
+    )
+
+    // 채팅방 목록 응답 DTO - success 필드가 직접 배열임
+    data class ChatroomListResponse(
+        val chatrooms: List<ChatroomItem>
+    )
+
+    data class ChatroomItem(
+        @SerializedName("id")
+        val id: Int,
+        @SerializedName("consumerId")
+        val consumerId: Int,
+        @SerializedName("artistId")
+        val artistId: Int,
+        @SerializedName("requestId")
+        val requestId: Int,
+        @SerializedName("lastMessage")
+        val lastMessage: String?,
+        @SerializedName("lastMessageTime")
+        val lastMessageTime: String?,
+        @SerializedName("unreadCount")
+        val unreadCount: Int,
+        @SerializedName("artist")
+        val artist: ChatroomArtist?,
+        @SerializedName("consumer")
+        val consumer: ChatroomConsumer?,
+        @SerializedName("request")
+        val request: ChatroomRequest?
+    )
+
+    data class ChatroomArtist(
+        @SerializedName("id")
+        val id: Int,
+        @SerializedName("nickname")
+        val nickname: String,
+        @SerializedName("profileImage")
+        val profileImage: String?
+    )
+
+    data class ChatroomConsumer(
+        @SerializedName("id")
+        val id: Int,
+        @SerializedName("nickname")
+        val nickname: String,
+        @SerializedName("profileImage")
+        val profileImage: String?
+    )
+
+    data class ChatroomRequest(
+        @SerializedName("id")
+        val id: Int,
+        @SerializedName("title")
+        val title: String
+    )
+
 
 
 
