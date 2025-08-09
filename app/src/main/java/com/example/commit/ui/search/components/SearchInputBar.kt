@@ -3,14 +3,20 @@ package com.example.commit.ui.search.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.commit.R
@@ -22,7 +28,8 @@ fun SearchInputBar(
     onQueryChange: (String) -> Unit,
     onBackClick: () -> Unit,
     onClearClick: () -> Unit,
-    onHomeClick: () -> Unit
+    onHomeClick: () -> Unit,
+    onSearchSubmit: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -30,7 +37,6 @@ fun SearchInputBar(
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        //뒤로가기
         Icon(
             painter = painterResource(id = R.drawable.ic_back),
             contentDescription = "뒤로가기",
@@ -41,10 +47,10 @@ fun SearchInputBar(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // 텍스트 필드
         TextField(
             value = query,
-            onValueChange = onQueryChange,
+            // ❗ 절대 trim/filter 등 가공하지 말 것 — 한글 조합 깨짐
+            onValueChange = { text -> onQueryChange(text) },
             placeholder = {
                 Text(
                     text = "작가 이름은 @작가로 검색이 가능해요.",
@@ -56,15 +62,18 @@ fun SearchInputBar(
                 )
             },
             trailingIcon = {
-                if (query.isNotEmpty()) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_close),
-                        contentDescription = "지우기",
-                        modifier = Modifier
-                            .size(16.dp)
-                            .clickable { onClearClick() },
-                        tint = Color(0xFFA8A8A8)
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (query.isNotEmpty()) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_close),
+                            contentDescription = "지우기",
+                            modifier = Modifier
+                                .size(16.dp)
+                                .clickable { onClearClick() },
+                            tint = Color(0xFFA8A8A8)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                    }
                 }
             },
             colors = TextFieldDefaults.colors(
@@ -77,6 +86,14 @@ fun SearchInputBar(
             textStyle = CommitTypography.bodyMedium.copy(color = Color.Black),
             shape = RoundedCornerShape(12.dp),
             singleLine = true,
+            // ✅ 한글 입력 보장: Text, Search IME
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search,
+                keyboardType = KeyboardType.Text
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = { onSearchSubmit() }
+            ),
             modifier = Modifier
                 .weight(1f)
                 .height(48.dp)
@@ -84,7 +101,6 @@ fun SearchInputBar(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // 홈 아이콘
         Icon(
             painter = painterResource(id = R.drawable.ic_search_home),
             contentDescription = "홈",
@@ -94,18 +110,4 @@ fun SearchInputBar(
             tint = Color(0xFF4D4D4D)
         )
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
-@Composable
-fun SearchInputBarPreview() {
-    var query by remember { mutableStateOf("") }
-
-    SearchInputBar(
-        query = query,
-        onQueryChange = { query = it },
-        onBackClick = {},
-        onClearClick = { query = "" },
-        onHomeClick = {}
-    )
 }

@@ -16,19 +16,11 @@ import com.example.commit.ui.request.components.Commission
 fun SearchScreen(
     onBackClick: () -> Unit = {},
     onTotalClick: () -> Unit = {},
-    onCategoryClick: (String) -> Unit = {}
+    onCategoryClick: (String) -> Unit = {},
+    onSearchSubmit: (String) -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedKeyword by remember { mutableStateOf("") }
-
-    val dummyCommissions = List(10) {
-        Commission(
-            commissionId = it,
-            nickname = "작가$it",
-            title = "테스트 커미션 $it",
-            tags = listOf("그림", "#예시", "#귀엽음")
-        )
-    }
 
     val recommendedTags = listOf("SD", "LD", "반려동물", "커플", "오마카세")
     val recentSearches = remember {
@@ -36,21 +28,6 @@ fun SearchScreen(
     }
 
     if (selectedKeyword.isNotEmpty()) {
-        SearchResultScreen(
-            keyword = selectedKeyword,
-            commissions = dummyCommissions,
-            selectedFilters = emptySet(),
-            showFollowOnly = false,
-            onBackClick = { selectedKeyword = "" },
-            onClearClick = { searchQuery = "" },
-            onHomeClick = {},
-            onFilterClick = {},
-            onFollowToggle = {},
-            onCommissionClick = { commission ->
-                {}
-            }
-        )
-
     } else {
         Column(
             modifier = Modifier
@@ -61,7 +38,11 @@ fun SearchScreen(
             SearchBarWithBack(
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },
-                onSearchClick = {},
+                onSearchClick = {
+                    if (searchQuery.isNotBlank()) {
+                        onSearchSubmit(searchQuery)
+                    }
+                },
                 onBackClick = onBackClick
             )
 
@@ -69,26 +50,20 @@ fun SearchScreen(
 
             CategoryRow(
                 onCategoryClick = { label ->
-                    selectedKeyword = label
                     onCategoryClick(label)
                 },
                 onTotalClick = onTotalClick
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-
             RecommendedTagsSection(tags = recommendedTags)
-
             Spacer(modifier = Modifier.height(24.dp))
-
             Divider(
                 color = Color(0xFFF3F3F3),
                 thickness = 1.dp,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-
             Spacer(modifier = Modifier.height(24.dp))
-
             RecentSearchSection(
                 searches = recentSearches,
                 onDeleteItem = { index -> recentSearches.removeAt(index) },
@@ -96,10 +71,4 @@ fun SearchScreen(
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SearchScreenPreview() {
-    SearchScreen()
 }

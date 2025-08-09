@@ -19,20 +19,27 @@ import com.example.commit.ui.request.components.Commission
 import com.example.commit.ui.request.components.CommissionCard
 import com.example.commit.ui.search.components.*
 import com.example.commit.ui.search.components.FilterBottomSheet
+import androidx.compose.ui.zIndex
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchResultScreen(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    onSearchSubmit: () -> Unit,
+
     keyword: String,
-    resultCount: Int = 1275,
+
     commissions: List<Commission>,
-    selectedFilters: Set<String> = emptySet(),
-    showFollowOnly: Boolean = false,
-    onFollowToggle: (Boolean) -> Unit = {},
-    onBackClick: () -> Unit = {},
-    onClearClick: () -> Unit = {},
-    onHomeClick: () -> Unit = {},
-    onFilterClick: (String) -> Unit = {},
+    selectedFilters: Set<String>,
+    showFollowOnly: Boolean,
+    onFilterClick: (String) -> Unit,
+    onFilterIconClick: () -> Unit,
+    onFollowToggle: (Boolean) -> Unit,
+    onBackClick: () -> Unit,
+    onClearClick: () -> Unit,
+    onHomeClick: () -> Unit,
     onCommissionClick: (Commission) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
@@ -60,11 +67,12 @@ fun SearchResultScreen(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     SearchInputBar(
-                        query = query,
-                        onQueryChange = { query = it },
+                        query = searchQuery,
+                        onQueryChange = onSearchQueryChange,
                         onBackClick = onBackClick,
-                        onClearClick = { query = "" },
-                        onHomeClick = onHomeClick
+                        onClearClick = onClearClick,
+                        onHomeClick = onHomeClick,
+                        onSearchSubmit = onSearchSubmit
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -102,9 +110,12 @@ fun SearchResultScreen(
                         }
 
                         Spacer(modifier = Modifier.weight(1f))
-
                         Box(
-                            modifier = Modifier.offset(y = (-4).dp),
+                            modifier = Modifier
+                                .offset(y = (-4).dp)
+                                .zIndex(1f)
+                                .padding(4.dp)
+                                .background(Color.Transparent),
                             contentAlignment = Alignment.Center
                         ) {
                             FollowOnlyToggle(
@@ -112,6 +123,7 @@ fun SearchResultScreen(
                                 onToggle = { onFollowToggle(!showFollowOnly) }
                             )
                         }
+
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -122,7 +134,7 @@ fun SearchResultScreen(
                 CommissionCard(
                     commission = commission,
                     modifier = Modifier.clickable {
-                        onCommissionClick(commission) // 👉 외부 콜백 호출
+                        onCommissionClick(commission)
                     }
                 )
             }
@@ -167,7 +179,9 @@ fun FollowOnlyToggle(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { onToggle() }
+        modifier = Modifier
+            .clickable { onToggle() }
+            .padding(6.dp)
     ) {
         Text(
             text = "팔로우 중인 작가만",
@@ -177,7 +191,7 @@ fun FollowOnlyToggle(
         Spacer(modifier = Modifier.width(6.dp))
         Box(
             modifier = Modifier
-                .size(16.dp)
+                .size(18.dp)
                 .border(
                     width = 2.dp,
                     color = Color(0xFF17D5C6),
@@ -188,7 +202,7 @@ fun FollowOnlyToggle(
             if (isChecked) {
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
+                        .size(10.dp)
                         .background(Color(0xFF17D5C6), shape = CircleShape)
                 )
             }

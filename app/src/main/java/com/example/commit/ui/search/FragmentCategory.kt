@@ -30,11 +30,20 @@ class FragmentCategory : Fragment() {
             setContent {
                 CategoryScreen(
                     onBackClicked = {
-                        navigateToSearch()
+                        // 뒤로가기: 이전 화면(Search)로
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
                     },
+                    // FragmentCategory 쪽
                     onCategoryClick = { category ->
-                        navigateToSearchResult(category)
+                        parentFragmentManager.beginTransaction()
+                            .replace(
+                                R.id.Nav_Frame,
+                                FragmentSearchResult.newInstance(keyword = null, category = category)
+                            )
+                            .addToBackStack(null)
+                            .commit()
                     }
+
                 )
             }
         }
@@ -42,14 +51,18 @@ class FragmentCategory : Fragment() {
 
     private fun navigateToSearch() {
         parentFragmentManager.beginTransaction()
-            .replace(R.id.Nav_Frame, FragmentSearch())
+            .replace(R.id.Nav_Frame, FragmentSearch.newInstance(hideBottomBar = true))
             .addToBackStack(null)
             .commit()
     }
 
-    private fun navigateToSearchResult(category: String) {
+    private fun navigateToSearchResultByCategory(category: String) {
         parentFragmentManager.beginTransaction()
-            .replace(R.id.Nav_Frame, FragmentSearchResult.newInstance(category))
+            .replace(
+                R.id.Nav_Frame,
+                // ㄴFragmentSearchResult.newInstance(keyword = null, category = category)
+                FragmentSearchResult.newInstance(keyword = null, category = category)
+            )
             .addToBackStack(null)
             .commit()
     }

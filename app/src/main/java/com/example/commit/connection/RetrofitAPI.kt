@@ -14,8 +14,8 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
-import retrofit2.http.Header
 import com.example.commit.connection.dto.*
+import retrofit2.http.Query
 
 
 interface RetrofitAPI {
@@ -91,4 +91,12 @@ interface RetrofitAPI {
         @Path("requestId") requestId: Int
     ): ApiResponse<RequestDetailResponse>
 
+    //검색 결과 조회
+    @GET("/api/search")
+    suspend fun getSearchResults(
+        @Query("q") q: String? = null,
+        @Query("category") category: String? = null,
+        @Query("page") page: Int? = 1,
+        @Query("limit") limit: Int? = 12
+    ): ApiResponse<SearchSuccess>
 }
