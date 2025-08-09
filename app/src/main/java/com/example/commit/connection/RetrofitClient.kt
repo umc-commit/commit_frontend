@@ -349,18 +349,17 @@ class RetrofitClient {
         val artistId: Int,
         @SerializedName("requestId")
         val requestId: Int,
-        @SerializedName("lastMessage")
-        val lastMessage: String?,
-        @SerializedName("lastMessageTime")
-        val lastMessageTime: String?,
-        @SerializedName("unreadCount")
-        val unreadCount: Int,
-        @SerializedName("artist")
-        val artist: ChatroomArtist?,
-        @SerializedName("consumer")
-        val consumer: ChatroomConsumer?,
-        @SerializedName("request")
-        val request: ChatroomRequest?
+        @SerializedName("createdAt")
+        val createdAt: String?,
+        @SerializedName("updatedAt")
+        val updatedAt: String?,
+        // 백엔드에서 제공하지 않는 필드들 - 기본값 사용
+        val lastMessage: String? = null,
+        val lastMessageTime: String? = null,
+        val unreadCount: Int = 0,
+        val artist: ChatroomArtist? = null,
+        val consumer: ChatroomConsumer? = null,
+        val request: ChatroomRequest? = null
     )
 
     data class ChatroomArtist(

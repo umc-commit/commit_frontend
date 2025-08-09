@@ -39,6 +39,11 @@ class FragmentPostChatDetail : Fragment() {
     ): View {
         val chatName = arguments?.getString("chatName") ?: "채팅방"
         val authorName = arguments?.getString("authorName") ?: "익명"
+        val chatroomId = arguments?.getInt("chatroomId", -1) ?: -1
+        val sourceFragment = arguments?.getString("sourceFragment") ?: ""
+        val commissionId = arguments?.getInt("commissionId", -1) ?: -1
+        
+        Log.d("FragmentPostChatDetail", "채팅방 정보 - ID: $chatroomId, 제목: $chatName, 작가: $authorName, 출처: $sourceFragment")
 
         return ComposeView(requireContext()).apply {
             _binding = this
@@ -63,33 +68,34 @@ class FragmentPostChatDetail : Fragment() {
                             ).show()
                         },
                         onBackClick = {
-                            // PostHeaderSection으로 돌아가기
-                            Log.d("FragmentPostChatDetail", "뒤로가기 클릭됨")
+                            Log.d("FragmentPostChatDetail", "뒤로가기 클릭됨 - 출처: $sourceFragment")
                             
-                            android.widget.Toast.makeText(
-                                requireContext(),
-                                "이전 화면으로 돌아갑니다",
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
-                            
-                            try {
-                                // PostHeaderSection을 포함하는 Fragment로 전환
-                                val fragment = com.example.commit.fragment.FragmentHome().apply {
-                                    arguments = Bundle().apply {
-                                        putBoolean("show_post_detail", true)
-                                        putString("post_title", chatName)
+                            if (isAdded && !isDetached) {
+                                when (sourceFragment) {
+                                    "FragmentHome" -> {
+                                        // FragmentHome에서 PostScreen을 다시 표시
+                                        val fragment = com.example.commit.fragment.FragmentHome().apply {
+                                            arguments = Bundle().apply {
+                                                putBoolean("show_post_detail", true)
+                                                putInt("commission_id", commissionId)
+                                            }
+                                        }
+                                        parentFragmentManager.beginTransaction()
+                                            .replace(R.id.Nav_Frame, fragment)
+                                            .commit()
+                                    }
+                                    "FragmentPostScreen" -> {
+                                        // FragmentPostScreen으로 돌아가기
+                                        val fragment = com.example.commit.ui.post.FragmentPostScreen.newInstance(commissionId)
+                                        parentFragmentManager.beginTransaction()
+                                            .replace(R.id.Nav_Frame, fragment)
+                                            .commit()
+                                    }
+                                    else -> {
+                                        // 기본적으로 popBackStack 사용
+                                        parentFragmentManager.popBackStack()
                                     }
                                 }
-                                
-                                if (isAdded && !isDetached) {
-                                    parentFragmentManager.beginTransaction()
-                                        .replace(com.example.commit.R.id.Nav_Frame, fragment)
-                                        .addToBackStack(null)
-                                        .commit()
-                                }
-                            } catch (e: Exception) {
-                                Log.e("FragmentPostChatDetail", "화면 전환 실패", e)
-                                parentFragmentManager.popBackStack()
                             }
                         },
                         onSettingClick = {
