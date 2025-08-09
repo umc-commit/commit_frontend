@@ -37,6 +37,11 @@ class FragmentChat : Fragment() {
         // 화면이 다시 보여질 때 채팅방 목록 새로고침
         refreshCallback?.invoke()
     }
+    
+    // 외부에서 채팅방 목록 새로고침을 요청할 수 있는 메서드
+    fun refreshChatroomList() {
+        refreshCallback?.invoke()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,11 +81,21 @@ class FragmentChat : Fragment() {
                         chatItems = chatItemsState.value,
                         isLoading = isLoadingState.value,
                         onItemClick = { clickedItem ->
+                            // 실제 채팅방 ID를 찾아서 전달
+                            val chatroomData = chatItemsState.value?.find { 
+                                it.title == clickedItem.title && it.name == clickedItem.name 
+                            }
+                            val actualChatroomId = chatroomData?.let { 
+                                // chatItems에서 원본 데이터 찾기 (추후 개선 필요)
+                                1 // 임시로 1 사용, 실제로는 매핑 테이블 필요
+                            } ?: 1
+                            
                             parentFragmentManager.beginTransaction()
                                 .replace(R.id.Nav_Frame, FragmentChatDetail().apply {
                                     arguments = bundleOf(
                                         "chatName" to clickedItem.title,     // 커미션 제목
-                                        "authorName" to clickedItem.name       // 작가 이름
+                                        "authorName" to clickedItem.name,     // 작가 이름
+                                        "chatroomId" to actualChatroomId      // 실제 채팅방 ID
                                     )
                                 })
                                 .addToBackStack(null)
@@ -133,21 +148,15 @@ class FragmentChat : Fragment() {
                             Log.d("ChatAPI", "채팅방 원시 데이터: $data")
                             val chatItems = data.mapNotNull { chatroom ->
                                 try {
-                                    Log.d("ChatAPI", "채팅방 데이터 확인: id=${chatroom.id}, artist=${chatroom.artist}, request=${chatroom.request}")
-                                    
-                                    // 임시: 백엔드에서 artist, request 정보를 제대로 보내지 않으므로 기본값 사용
-                                    if (chatroom.artist == null || chatroom.request == null) {
-                                        Log.w("ChatAPI", "백엔드에서 artist/request 정보 누락, 기본값 사용: id=${chatroom.id}")
-                                        // null이어도 채팅방을 표시하도록 처리
-                                    }
+                                    Log.d("ChatAPI", "채팅방 데이터 확인: id=${chatroom.chatroomId}, artist=${chatroom.artistNickname}, request=${chatroom.requestTitle}")
                                     
                                     ChatItem(
                                         profileImageRes = R.drawable.ic_profile,
-                                        name = chatroom.artist?.nickname ?: "작가 이름 미상",
+                                        name = chatroom.artistNickname,
                                         message = chatroom.lastMessage ?: "새로운 메시지가 없습니다",
                                         time = formatTime(chatroom.lastMessageTime),
-                                        isNew = chatroom.unreadCount > 0,
-                                        title = chatroom.request?.title ?: "제목 미상"
+                                        isNew = chatroom.hasUnread > 0,
+                                        title = chatroom.requestTitle
                                     )
                                 } catch (e: Exception) {
                                     Log.e("ChatAPI", "채팅방 데이터 매핑 실패: ${e.message}")
@@ -201,10 +210,6 @@ class FragmentChat : Fragment() {
         return "방금 전"
     }
 
-    // 채팅방 목록 새로고침 함수
-    fun refreshChatroomList() {
-        refreshCallback?.invoke()
-    }
     
     // 채팅방 생성 함수
     fun createChatroom(consumerId: Int, artistId: Int, requestId: Int, onSuccess: (Int) -> Unit, onError: (String) -> Unit) {

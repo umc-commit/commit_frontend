@@ -73,12 +73,26 @@ interface RetrofitAPI {
     // 채팅방 목록 조회
     @GET("/api/chatrooms/list")
     fun getChatroomList(): Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>
+    
+    // 채팅방 메시지 조회 API
+    @GET("/api/chatrooms/{chatroomId}/messages")
+    fun getChatroomMessages(
+        @Path("chatroomId") chatroomId: Int,
+        @retrofit2.http.Query("limit") limit: Int = 20,
+        @retrofit2.http.Query("offset") offset: Int = 0
+    ): Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatMessage>>>
 
     // 커미션 상세보기 (postScreen)
     @GET("/api/commissions/{commissionId}")
     suspend fun getCommissionDetail(
         @Path("commissionId") commissionId: Int
     ): CommissionDetailResponse
+    
+    // 커미션 신청폼 조회 (제출된 신청서 확인)
+    @GET("/api/commissions/{commissionId}/forms")
+    fun getSubmittedCommissionForm(
+        @Path("commissionId") commissionId: Int
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>
 
     //신청함 목록
     @GET("/api/requests")

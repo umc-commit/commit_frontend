@@ -9,8 +9,10 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.commit.R
 import com.example.commit.activity.MainActivity
 import com.example.commit.activity.author.AuthorProfileActivity
@@ -20,6 +22,13 @@ import com.example.commit.ui.chatroom.ChatRoomScreen
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.data.model.FormItem
 import com.example.commit.data.model.RequestItem
+import com.example.commit.viewmodel.ChatViewModel
+import com.example.commit.connection.RetrofitClient
+import com.example.commit.connection.RetrofitObject
+import com.google.gson.Gson
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class FragmentPostChatDetail : Fragment() {
     private var _binding: View? = null
@@ -50,22 +59,27 @@ class FragmentPostChatDetail : Fragment() {
             setContent {
                 CommitTheme {
                     val showBottomSheet = remember { mutableStateOf(false) }
+                    val chatViewModel: ChatViewModel = viewModel()
+                    
+                    // 채팅방 초기화 (신청서 제출된 상태로 설정)
+                    LaunchedEffect(chatroomId) {
+                        chatViewModel.initializeChatroom(chatroomId, hasSubmittedApplication = true)
+                        chatViewModel.loadMessages(requireContext(), chatroomId)
+                    }
                     
                     ChatRoomScreen(
                         commissionTitle = chatName,
                         authorName = authorName,
+                        chatViewModel = chatViewModel,
                         onPayClick = {
                             if (isAdded && !isDetached) {
                                 parentFragmentManager.popBackStack()
                             }
                         },
                         onFormCheckClick = {
-                            // Post 채팅방에서는 신청서 확인 기능 비활성화
-                            android.widget.Toast.makeText(
-                                requireContext(),
-                                "신청서 확인 기능은 신청 후에 사용할 수 있습니다",
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
+                            // 신청서 확인하기 클릭 시 FormCheckScreen 호출
+                            Log.d("FragmentPostChatDetail", "신청서 확인하기 클릭됨 - commissionId: $commissionId")
+                            showFormCheckScreen(commissionId)
                         },
                         onBackClick = {
                             Log.d("FragmentPostChatDetail", "뒤로가기 클릭됨 - 출처: $sourceFragment")
@@ -119,5 +133,71 @@ class FragmentPostChatDetail : Fragment() {
                 }
             }
         }
+    }
+    
+    // 신청서 확인 화면 표시
+    private fun showFormCheckScreen(commissionId: Int) {
+        val api = RetrofitObject.getRetrofitService(requireContext())
+        
+        Log.d("FragmentPostChatDetail", "제출된 신청서 조회 시작 - commissionId: $commissionId")
+        
+        api.getSubmittedCommissionForm(commissionId).enqueue(object : Callback<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>
+            ) {
+                if (response.isSuccessful) {
+                    val data = response.body()?.success
+                    if (data != null) {
+                        Log.d("FragmentPostChatDetail", "신청서 조회 성공: ${data}")
+                        
+                        // FormCheckDialogFragment로 화면 전환
+                        val formSchemaJson = Gson().toJson(data.formSchema)
+                        val formAnswerJson = if (data.formAnswer != null) {
+                            Gson().toJson(data.formAnswer)
+                        } else {
+                            "{}" // 빈 객체
+                        }
+                        
+                        val dialog = FormCheckDialogFragment.newInstance(
+                            commissionTitle = data.commission.title,
+                            artistName = data.commission.artist?.nickname ?: "작가명",
+                            formSchema = formSchemaJson,
+                            formAnswer = formAnswerJson
+                        )
+                        
+                        if (isAdded && !isDetached) {
+                            dialog.show(parentFragmentManager, "FormCheckDialog")
+                        }
+                    } else {
+                        Log.e("FragmentPostChatDetail", "신청서 조회 실패: 데이터 없음")
+                        android.widget.Toast.makeText(
+                            requireContext(),
+                            "신청서를 불러올 수 없습니다",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    Log.e("FragmentPostChatDetail", "신청서 조회 실패: ${response.code()}")
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        "신청서 조회에 실패했습니다",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>,
+                t: Throwable
+            ) {
+                Log.e("FragmentPostChatDetail", "신청서 조회 네트워크 오류", t)
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    "네트워크 오류가 발생했습니다",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
     }
 } 

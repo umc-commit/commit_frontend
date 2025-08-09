@@ -307,11 +307,13 @@ class FragmentHome : Fragment() {
         
         // 임시 값들 (실제로는 SharedPreferences나 다른 방법으로 가져와야 함)
         val currentUserId = 1
-        val artistId = 1 // 임시 - 실제로는 커미션 상세 정보에서 가져와야 함
-        val artistName = "키르" // 임시 - 실제로는 커미션 상세 정보에서 가져와야 함
+        // commissionId에 따라 다른 artistId 사용하여 새 채팅방 생성 시도
+        val artistId = if (commissionId % 2 == 0) 2 else 1 // 커미션 ID에 따라 다른 작가
+        val artistName = if (artistId == 1) "키르" else "작가2" // 작가에 따른 이름
         
         // 임시: 실제로는 커미션 신청 후 생성되는 requestId를 사용해야 함
-        val tempRequestId = 3 // 테스트용 고정값
+        // 일단 기존에 존재하는 requestId 사용 (3번이 존재함을 로그에서 확인)
+        val tempRequestId = 3 // 기존 존재하는 request ID 사용
         val request = RetrofitClient.CreateChatroomRequest(
             consumerId = currentUserId,
             artistId = artistId,
@@ -386,4 +388,6 @@ class FragmentHome : Fragment() {
             }
         })
     }
+
+
 }
