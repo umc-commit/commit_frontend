@@ -51,8 +51,9 @@ class FragmentPostChatDetail : Fragment() {
         val chatroomId = arguments?.getInt("chatroomId", -1) ?: -1
         val sourceFragment = arguments?.getString("sourceFragment") ?: ""
         val commissionId = arguments?.getInt("commissionId", -1) ?: -1
+        val hasSubmittedApplication = arguments?.getBoolean("hasSubmittedApplication", false) ?: false
         
-        Log.d("FragmentPostChatDetail", "채팅방 정보 - ID: $chatroomId, 제목: $chatName, 작가: $authorName, 출처: $sourceFragment")
+        Log.d("FragmentPostChatDetail", "채팅방 정보 - ID: $chatroomId, 제목: $chatName, 작가: $authorName, 출처: $sourceFragment, 신청서 제출됨: $hasSubmittedApplication")
 
         return ComposeView(requireContext()).apply {
             _binding = this
@@ -61,9 +62,9 @@ class FragmentPostChatDetail : Fragment() {
                     val showBottomSheet = remember { mutableStateOf(false) }
                     val chatViewModel: ChatViewModel = viewModel()
                     
-                    // 채팅방 초기화 (신청서 제출된 상태로 설정)
+                    // 채팅방 초기화 (동적으로 신청서 제출 상태 설정)
                     LaunchedEffect(chatroomId) {
-                        chatViewModel.initializeChatroom(chatroomId, hasSubmittedApplication = true)
+                        chatViewModel.initializeChatroom(chatroomId, hasSubmittedApplication = hasSubmittedApplication)
                         chatViewModel.loadMessages(requireContext(), chatroomId)
                     }
                     
@@ -199,5 +200,26 @@ class FragmentPostChatDetail : Fragment() {
                 ).show()
             }
         })
+    }
+    
+    companion object {
+        fun newInstance(
+            chatName: String,
+            authorName: String,
+            commissionId: Int,
+            hasSubmittedApplication: Boolean = false,
+            chatroomId: Int = 1 // 기본값
+        ): FragmentPostChatDetail {
+            return FragmentPostChatDetail().apply {
+                arguments = Bundle().apply {
+                    putString("chatName", chatName)
+                    putString("authorName", authorName)
+                    putInt("commissionId", commissionId)
+                    putBoolean("hasSubmittedApplication", hasSubmittedApplication)
+                    putInt("chatroomId", chatroomId)
+                    putString("sourceFragment", "CommissionForm")
+                }
+            }
+        }
     }
 } 

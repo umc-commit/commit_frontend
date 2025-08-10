@@ -36,15 +36,13 @@ import com.example.commit.ui.Theme.CommitTheme
 import android.util.Log
 
 @Composable
-fun CommissionImageTextSection(
-    index: Int, // index 파라미터 추가
-    text: String,
-    onTextChange: (String) -> Unit,
+fun CommissionImageSection(
+    index: Int,
     images: List<Bitmap>,
     onAddClick: () -> Unit,
     onRemoveClick: (Int) -> Unit,
     onImageUpload: (Uri) -> Unit = {},
-    onImageAdded: (Bitmap) -> Unit = {} // 새로운 콜백 추가
+    onImageAdded: (Bitmap) -> Unit = {}
 ) {
     val context = LocalContext.current
     
@@ -79,14 +77,19 @@ fun CommissionImageTextSection(
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
-        Text(
-            text = "${index}. 신청 내용", // index 추가
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.SemiBold
+        // 번호와 제목 표시
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "${index}. 참고 이미지",
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Default
+                )
             )
-        )
+        }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // 이미지 박스
         LazyRow {
@@ -112,7 +115,7 @@ fun CommissionImageTextSection(
                             tint = Color.Gray
                         )
 
-                        Spacer(modifier = Modifier.height(4.dp)) // 아이콘과 텍스트 간격 조절
+                        Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
                             text = "${images.size}/10",
@@ -121,7 +124,6 @@ fun CommissionImageTextSection(
                                 fontSize = 8.sp
                             ),
                         )
-
                     }
                 }
 
@@ -151,7 +153,7 @@ fun CommissionImageTextSection(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(4.dp)
-                            .size(10.dp) // 바깥 원 크기 = 10x10px = 약 20.dp
+                            .size(10.dp)
                             .background(Color.White, shape = CircleShape)
                             .clickable { onRemoveClick(index) },
                         contentAlignment = Alignment.Center
@@ -161,68 +163,28 @@ fun CommissionImageTextSection(
                             contentDescription = "삭제",
                             tint = Color.Black,
                             modifier = Modifier
-                                .size(8.dp) // 아이콘 크기 = 4x4px = 약 10.dp
+                                .size(8.dp)
                         )
                     }
-
-
-
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // 텍스트 입력 + 글자수 표시를 감싸는 박스
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
-                .width(340.dp)
-        ) {
-            OutlinedTextField(
-                value = text,
-                onValueChange = {
-                    if (it.length <= 5000) onTextChange(it)
-                },
-                placeholder = { Text("내용을 입력해주세요") },
-                modifier = Modifier
-                    .fillMaxSize()
-            )
-
-            // 오른쪽 하단 글자수 텍스트
-            Text(
-                text = "${text.length} / 5000",
-                style = TextStyle(
-                    fontSize = 8.sp,
-                    color = Color(0xFFB0B0B0)
-                ),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 15.dp, bottom = 15.dp)
-            )
-
-        }
-
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun CommissionImageTextSectionPreview() {
+fun CommissionImageSectionPreview() {
     val dummyImage = remember {
         Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
     }
     val images = remember { mutableStateListOf<Bitmap>(dummyImage, dummyImage) }
-    var text by remember { mutableStateOf("") }
 
     CommitTheme {
-        CommissionImageTextSection(
-            index = 1, // index 파라미터 추가
-            text = text,
-            onTextChange = { text = it },
+        CommissionImageSection(
+            index = 2,
             images = images,
             onAddClick = { /* 이미지 추가 로직 */ },
             onRemoveClick = { index -> images.removeAt(index) }

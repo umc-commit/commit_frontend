@@ -54,7 +54,7 @@ interface RetrofitAPI {
 
     @Multipart
     @POST("/api/commissions/request-images/upload")
-    suspend fun uploadImage(
+    suspend fun uploadRequestImage(
         @Part image: MultipartBody.Part
     ): Response<ImageUploadResponse>
 

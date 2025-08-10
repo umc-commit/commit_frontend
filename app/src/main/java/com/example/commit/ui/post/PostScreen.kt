@@ -232,6 +232,8 @@ fun PostScreen(
             remainingSlots = 11,
             onApplyClick = {
                 val intent = Intent(context, CommissionFormActivity::class.java)
+                intent.putExtra("commissionId", commissionId.toString())
+                Log.d("PostScreen", "신청하기 버튼 클릭 - commissionId: $commissionId")
                 context.startActivity(intent)
             },
             onChatClick = onChatClick,
