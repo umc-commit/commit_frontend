@@ -109,15 +109,16 @@ class AuthorProfileActivity : AppCompatActivity() {
     }
 
     private fun updateSlots(remainingSlots: Int, totalSlots: Int = 4) {
+        val clampedRemaining = remainingSlots.coerceIn(0, totalSlots)
         val slotIcons = listOf(binding.slot1, binding.slot2, binding.slot3, binding.slot4)
-        val filledCount = totalSlots - remainingSlots
+        val filledCount = totalSlots - clampedRemaining
 
         for (i in slotIcons.indices) {
             slotIcons[i].setImageResource(
                 if (i < filledCount) R.drawable.ic_slot_filled else R.drawable.ic_slot_empty
             )
         }
-        binding.tvRemainingSlots.text = "남은 슬롯 ${remainingSlots}개"
+        binding.tvRemainingSlots.text = "남은 슬롯 ${clampedRemaining}개"
     }
 
     private fun toggleReviewSection(show: Boolean) {
@@ -159,28 +160,27 @@ class AuthorProfileActivity : AppCompatActivity() {
                     updateSlots(data.slot)
 
                     // 1. badges 변환
-                    val convertedBadges = data.badges.map {
+                    // 기존 변환부 교체
+                    val convertedBadges = data.badges.mapNotNull { ub ->
+                        // badge 배열에서 첫 번째 배지 사용 (여러 개면 첫 것, 없으면 skip)
+                        val first = ub.badge.firstOrNull() ?: return@mapNotNull null
                         val badgeDetail = RetrofitClient.BadgeDetail(
-                            id = it.badge.id,
-                            type = it.badge.type,
-                            threshold = it.badge.threshold,
-                            name = it.badge.name,
-                            badgeImage = it.badge.badgeImage
+                            id = first.id,
+                            type = first.type,
+                            threshold = first.threshold,
+                            name = first.name,
+                            badgeImage = first.badgeImage
                         )
                         RetrofitClient.UserBadge(
-                            id = it.id,
-                            earnedAt = it.earnedAt,
-                            badge = badgeDetail
+                            id = ub.id,
+                            earnedAt = ub.earnedAt,
+                            badge = listOf(badgeDetail)
                         )
                     }
-
-                    binding.recyclerBadges.adapter =
-                        BadgeAdapter(
-                            badgeList = convertedBadges,
-                            context = this@AuthorProfileActivity
-                        ) { dialog ->
-                            dialog.show()
-                        }
+                    binding.recyclerBadges.adapter = BadgeAdapter(
+                        badgeList = convertedBadges,
+                        context = this@AuthorProfileActivity
+                    ) { dialog -> dialog.show() }
 
 
                     // 커미션

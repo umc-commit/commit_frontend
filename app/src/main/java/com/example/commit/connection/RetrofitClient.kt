@@ -88,7 +88,7 @@ class RetrofitClient {
         @SerializedName("earnedAt")
         val earnedAt: String,
         @SerializedName("badge")
-        val badge: BadgeDetail
+        val badge: List<BadgeDetail>
     )
 
     data class BadgeDetail(
@@ -296,13 +296,14 @@ class RetrofitClient {
         val summary: String,
         val minPrice: Int,
         val category: String,
-        val tags: List<String>
+        val tags: List<String>,
+        @SerializedName("commission_img") val commission_img: String?
     )
 
     data class AuthorBadgeItem(
         val id: String,
         val earnedAt: String,
-        val badge: BadgeInfo
+        val badge: List<BadgeInfo>
     )
 
     data class BadgeInfo(

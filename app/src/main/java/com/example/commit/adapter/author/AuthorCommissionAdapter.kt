@@ -36,10 +36,14 @@ class AuthorCommissionAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
 
+        val imgUrl = item.commission_img?.takeIf { it.isNotBlank() }
         Glide.with(holder.itemView.context)
-            .load(R.drawable.image_placeholder) // 실제 이미지 필드가 추가되면 수정
+            .load(imgUrl ?: R.drawable.image_placeholder)
             .placeholder(R.drawable.image_placeholder)
+            .error(R.drawable.image_placeholder)
+            .centerCrop()
             .into(holder.thumbnail)
+        holder.thumbnail.contentDescription = item.title
 
         holder.tvTitle.text = item.title
         holder.tvDescription.text = item.summary
