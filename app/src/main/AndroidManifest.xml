@@ -10,13 +10,22 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_commit"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher_commit_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Commit"
         tools:targetApi="35"
         android:enableOnBackInvokedCallback="true">
+
+        <activity
+            android:name=".activity.SplashActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".activity.login.LoginActivity"
@@ -51,11 +60,6 @@
         <activity
             android:name=".activity.MainActivity"
             android:exported="true">
-            <intent-filter>
-                <!-- 앱 실행 진입점 -->
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <activity android:name=".activity.ReviewWriteActivity" android:exported="false"/>
@@ -74,7 +78,6 @@
         <activity android:name=".activity.ReviewEditActivity" android:exported="false"/>
         <activity android:name=".activity.author.AuthorProfileActivity" android:exported="false"/>
         <activity android:name=".activity.CommissionFormActivity" android:exported="false"/>
-        <activity android:name=".activity.SplashActivity" android:exported="false"/>
 
     </application>
 

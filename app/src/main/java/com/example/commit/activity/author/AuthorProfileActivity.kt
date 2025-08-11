@@ -1,13 +1,9 @@
 package com.example.commit.activity.author
 
-import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
-import android.view.Gravity
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -28,6 +24,9 @@ import retrofit2.Response
 class AuthorProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAuthorProfileBinding
     private var isFollowing = false
+    private var isFollowLoading = false
+    private var artistIdFromIntent: Int = -1
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,9 +36,28 @@ class AuthorProfileActivity : AppCompatActivity() {
         // 기본 RecyclerView 초기화 (빈 어댑터)
         initRecyclerViews()
 
-        val artistId = intent.getIntExtra("artistId", -1)
-        if (artistId != -1) {
-            loadAuthorProfile(artistId)
+        // 팔로우 버튼
+        binding.btnFollowing.setOnClickListener {
+            if (artistIdFromIntent == -1 || isFollowLoading) return@setOnClickListener
+            if (isFollowing) {
+                callUnfollow(artistIdFromIntent)
+            } else {
+                callFollow(artistIdFromIntent)
+            }
+        }
+
+        artistIdFromIntent = intent.getIntExtra("artistId", -1)
+        if (artistIdFromIntent != -1) {
+            // 서버 데이터 로드
+            loadAuthorProfile(artistIdFromIntent)
+
+            // 로컬에 저장해둔 팔로우 상태로 '버튼 UI만' 먼저 맞춤 (카운트는 그대로)
+            setFollowVisualState(loadFollowState(artistIdFromIntent))
+
+            // 팔로워 수도 로컬 값 있으면 복원
+            loadFollowerCount(artistIdFromIntent)?.let { cached ->
+                setFollowerCountText(cached)
+            }
         }
 
         binding.ivBack.setOnClickListener { finish() }
@@ -56,12 +74,6 @@ class AuthorProfileActivity : AppCompatActivity() {
             toggleReviewSection(isReviewExpanded)
         }
 
-        // 팔로잉 버튼
-        binding.btnFollowing.setOnClickListener {
-            isFollowing = !isFollowing
-            updateFollowingCount()
-        }
-
         // 채팅 버튼
         binding.btnChat.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -69,6 +81,33 @@ class AuthorProfileActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+
+    // 버튼 이미지/상태만 바꾸는 함수 (팔로워 수 변동 없음)
+    private fun setFollowVisualState(state: Boolean) {
+        isFollowing = state
+        binding.btnFollowing.setBackgroundResource(
+            if (isFollowing) R.drawable.pf_follow else R.drawable.pf_unfollow
+        )
+    }
+
+    private fun saveFollowerCount(artistId: Int, count: Int) {
+        val prefs = getSharedPreferences("follow_state", MODE_PRIVATE)
+        prefs.edit().putInt("artist_${artistId}_count", count).apply()
+    }
+
+    private fun loadFollowerCount(artistId: Int): Int? {
+        val prefs = getSharedPreferences("follow_state", MODE_PRIVATE)
+        return if (prefs.contains("artist_${artistId}_count")) prefs.getInt("artist_${artistId}_count", 0) else null
+    }
+
+    private fun getCurrentFollowerCountFromUI(): Int {
+        val t = binding.tvFollowerCount.text.toString()
+        return t.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
+    }
+
+    private fun setFollowerCountText(count: Int) {
+        binding.tvFollowerCount.text = "팔로워 $count"
     }
 
     private fun initRecyclerViews() {
@@ -85,17 +124,6 @@ class AuthorProfileActivity : AppCompatActivity() {
         binding.recyclerReviews.adapter = AuthorReviewAdapter(emptyList())
     }
 
-    private fun updateFollowingCount() {
-        val currentText = binding.tvFollowerCount.text.toString()
-        val currentNumber = currentText.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
-        val newNumber = if (isFollowing) currentNumber + 1 else (currentNumber - 1).coerceAtLeast(0)
-
-        binding.tvFollowerCount.text = "팔로워 $newNumber"
-        binding.btnFollowing.setBackgroundResource(
-            if (isFollowing) R.drawable.pf_follow else R.drawable.pf_unfollow
-        )
-    }
-
     private fun showSortBottomSheet() {
         val bottomSheetDialog = BottomSheetDialog(this)
         val sheetBinding = BottomSheetPostMoreBinding.inflate(layoutInflater)
@@ -109,15 +137,16 @@ class AuthorProfileActivity : AppCompatActivity() {
     }
 
     private fun updateSlots(remainingSlots: Int, totalSlots: Int = 4) {
+        val clampedRemaining = remainingSlots.coerceIn(0, totalSlots)
         val slotIcons = listOf(binding.slot1, binding.slot2, binding.slot3, binding.slot4)
-        val filledCount = totalSlots - remainingSlots
+        val filledCount = totalSlots - clampedRemaining
 
         for (i in slotIcons.indices) {
             slotIcons[i].setImageResource(
                 if (i < filledCount) R.drawable.ic_slot_filled else R.drawable.ic_slot_empty
             )
         }
-        binding.tvRemainingSlots.text = "남은 슬롯 ${remainingSlots}개"
+        binding.tvRemainingSlots.text = "남은 슬롯 ${clampedRemaining}개"
     }
 
     private fun toggleReviewSection(show: Boolean) {
@@ -159,28 +188,27 @@ class AuthorProfileActivity : AppCompatActivity() {
                     updateSlots(data.slot)
 
                     // 1. badges 변환
-                    val convertedBadges = data.badges.map {
+                    // 기존 변환부 교체
+                    val convertedBadges = data.badges.mapNotNull { ub ->
+                        // badge 배열에서 첫 번째 배지 사용 (여러 개면 첫 것, 없으면 skip)
+                        val first = ub.badge.firstOrNull() ?: return@mapNotNull null
                         val badgeDetail = RetrofitClient.BadgeDetail(
-                            id = it.badge.id,
-                            type = it.badge.type,
-                            threshold = it.badge.threshold,
-                            name = it.badge.name,
-                            badgeImage = it.badge.badgeImage
+                            id = first.id,
+                            type = first.type,
+                            threshold = first.threshold,
+                            name = first.name,
+                            badgeImage = first.badgeImage
                         )
                         RetrofitClient.UserBadge(
-                            id = it.id,
-                            earnedAt = it.earnedAt,
-                            badge = badgeDetail
+                            id = ub.id,
+                            earnedAt = ub.earnedAt,
+                            badge = listOf(badgeDetail)
                         )
                     }
-
-                    binding.recyclerBadges.adapter =
-                        BadgeAdapter(
-                            badgeList = convertedBadges,
-                            context = this@AuthorProfileActivity
-                        ) { dialog ->
-                            dialog.show()
-                        }
+                    binding.recyclerBadges.adapter = BadgeAdapter(
+                        badgeList = convertedBadges,
+                        context = this@AuthorProfileActivity
+                    ) { dialog -> dialog.show() }
 
 
                     // 커미션
@@ -199,5 +227,123 @@ class AuthorProfileActivity : AppCompatActivity() {
                     t.printStackTrace()
                 }
             })
+    }
+
+    private fun saveFollowState(artistId: Int, following: Boolean) {
+        val prefs = getSharedPreferences("follow_state", MODE_PRIVATE)
+        prefs.edit().putBoolean("artist_$artistId", following).apply()
+    }
+
+    private fun loadFollowState(artistId: Int): Boolean {
+        val prefs = getSharedPreferences("follow_state", MODE_PRIVATE)
+        return prefs.getBoolean("artist_$artistId", false)
+    }
+
+
+    private fun callFollow(artistId: Int) {
+        val service = RetrofitObject.getRetrofitService(this)
+        setFollowLoading(true)
+
+        service.followArtist(artistId).enqueue(object :
+            Callback<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>
+            ) {
+                setFollowLoading(false)
+                val body = response.body()
+                val ok = response.isSuccessful && body?.resultType == "SUCCESS" && body.success != null
+                if (ok) {
+                    applyFollowState(true); return
+                }
+
+                // 이미 팔로우 중 → 성공으로 간주하여 동기화
+                val already = response.code() == 409 ||
+                        body?.error?.errorCode == "ALREADY_FOLLOWED" ||
+                        (body?.error?.reason?.contains("이미", true) == true
+                                && body.error.reason.contains("팔로우"))
+                if (already) {
+                    applyFollowState(true)
+                } else {
+                    showLog(body?.error?.reason ?: "팔로우에 실패했습니다.")
+                }
+            }
+
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>,
+                t: Throwable
+            ) {
+                setFollowLoading(false)
+                showLog("네트워크 오류로 팔로우에 실패했습니다.")
+            }
+        })
+    }
+
+    private fun callUnfollow(artistId: Int) {
+        val service = RetrofitObject.getRetrofitService(this)
+        setFollowLoading(true)
+
+        service.unfollowArtist(artistId).enqueue(object :
+            Callback<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>
+            ) {
+                setFollowLoading(false)
+                val body = response.body()
+                val ok = response.isSuccessful && body?.resultType == "SUCCESS" && body.success != null
+                if (ok) {
+                    applyFollowState(false); return
+                }
+
+                // 이미 언팔 상태 → 성공으로 간주하여 동기화
+                val already = response.code() == 409 ||
+                        body?.error?.errorCode == "ALREADY_UNFOLLOWED" ||
+                        (body?.error?.reason?.contains("이미", true) == true
+                                && body.error.reason.contains("취소"))
+                if (already) {
+                    applyFollowState(false)
+                } else {
+                    showLog(body?.error?.reason ?: "팔로우 취소에 실패했습니다.")
+                }
+            }
+
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>,
+                t: Throwable
+            ) {
+                setFollowLoading(false)
+                showLog("네트워크 오류로 팔로우 취소에 실패했습니다.")
+            }
+        })
+    }
+
+    private fun setFollowLoading(loading: Boolean) {
+        isFollowLoading = loading
+        binding.btnFollowing.isEnabled = !loading
+    }
+
+    private fun applyFollowState(newFollowing: Boolean, overrideCount: Int? = null) {
+        val currentNumber = getCurrentFollowerCountFromUI()
+        val nextNumber = overrideCount ?: when {
+            !isFollowing && newFollowing -> currentNumber + 1   // 팔로우 → +1
+            isFollowing && !newFollowing -> (currentNumber - 1).coerceAtLeast(0) // 언팔 → -1
+            else -> currentNumber
+        }
+
+        // 상태 반영
+        isFollowing = newFollowing
+        saveFollowState(artistIdFromIntent, isFollowing)    // 로컬: 팔로우 상태 저장
+        saveFollowerCount(artistIdFromIntent, nextNumber)   // 로컬: 팔로워 수 저장
+
+        // UI 반영
+        setFollowerCountText(nextNumber)
+        binding.btnFollowing.setBackgroundResource(
+            if (isFollowing) R.drawable.pf_follow else R.drawable.pf_unfollow
+        )
+    }
+
+    private fun showLog(msg: String) {
+        Log.d("AuthorProfileActivity", msg)
     }
 }
