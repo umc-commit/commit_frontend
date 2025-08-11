@@ -66,6 +66,7 @@ class FormCheckDialogFragment : DialogFragment() {
                             val fieldMap = field as? Map<*, *>
                             if (fieldMap != null) {
                                 FormItem(
+                                    id = (fieldMap["id"] as? String)?.toIntOrNull() ?: 0,
                                     type = fieldMap["type"] as? String ?: "",
                                     label = fieldMap["label"] as? String ?: "",
                                     options = emptyList()

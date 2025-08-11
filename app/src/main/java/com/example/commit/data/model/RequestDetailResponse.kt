@@ -21,6 +21,7 @@ data class PaymentInfo(
 
 @Parcelize
 data class FormItem(
+    val id: Int?,
     val type: String,
     val label: String,
     val options: List<OptionItem> = emptyList()

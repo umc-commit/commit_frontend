@@ -119,9 +119,9 @@ fun FormAnswerSection(
 @Composable
 fun PreviewFormAnswerSection() {
     val dummyFormSchema = listOf(
-        FormItem(type = "radio", label = "당일마감 옵션", options = listOf()),
-        FormItem(type = "radio", label = "신청 부위", options = listOf()),
-        FormItem(type = "checkbox", label = "프로필 공지사항 확인해주세요!", options = listOf())
+        FormItem(id = 1, type = "radio", label = "당일마감 옵션", options = listOf()),
+        FormItem(id = 2, type = "radio", label = "신청 부위", options = listOf()),
+        FormItem(id = 3, type = "checkbox", label = "프로필 공지사항 확인해주세요!", options = listOf())
     )
 
     val dummyFormAnswer = mapOf(

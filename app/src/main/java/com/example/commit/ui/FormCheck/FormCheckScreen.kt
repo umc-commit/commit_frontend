@@ -116,16 +116,19 @@ fun PreviewFormCheckScreen() {
         
         val dummyFormSchema = listOf(
             FormItem(
+                id = 1,
                 type = "textarea",
                 label = "신청 내용",
                 options = emptyList()
             ),
             FormItem(
+                id = 2,
                 type = "file",
                 label = "참고 이미지",
                 options = emptyList()
             ),
             FormItem(
+                id = 3,
                 type = "radio",
                 label = "당일마감",
                 options = listOf(

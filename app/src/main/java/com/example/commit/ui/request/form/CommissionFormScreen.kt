@@ -2,42 +2,22 @@ package com.example.commit.ui.request.form
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
-import com.example.commit.R
 import com.example.commit.data.model.FormItem
 import com.example.commit.data.model.OptionItem
 import com.example.commit.fragment.FragmentPostChatDetail
@@ -46,10 +26,13 @@ import com.example.commit.viewmodel.CommissionFormState
 import com.example.commit.viewmodel.CommissionFormViewModel
 import com.example.commit.viewmodel.ImageUploadState
 import com.example.commit.viewmodel.SubmitState
-import com.example.commit.ui.request.form.CommissionTextareaSection
-import com.example.commit.ui.request.form.CommissionImageSection
 import java.io.File
 import java.io.FileOutputStream
+import android.graphics.Bitmap.CompressFormat
+import android.net.Uri.fromFile
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun CommissionFormScreen(
@@ -59,38 +42,14 @@ fun CommissionFormScreen(
 ) {
     val context = LocalContext.current
 
-    // 미리보기 이미지 리스트를 런처보다 먼저 선언 (안전한 참조)
+    // 미리보기 이미지 리스트
     val images = remember { mutableStateListOf<Bitmap>() }
 
-    // 이미지 선택 런처
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let { picked ->
-            // 미리보기용 비트맵 생성
-            val bmp = try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    val src = ImageDecoder.createSource(context.contentResolver, picked)
-                    ImageDecoder.decodeBitmap(src)
-                } else {
-                    @Suppress("DEPRECATION")
-                    MediaStore.Images.Media.getBitmap(context.contentResolver, picked)
-                }
-            } catch (e: Exception) {
-                null
-            }
-            // 미리보기 리스트 추가
-            bmp?.let { images.add(it) }
-            // 업로드 실행
-            viewModel.uploadImage(picked, context)
-        }
-    }
-
-    // Bitmap → Uri (이미지 추가 시 업로드용)
+    // Bitmap -> Uri (업로드용)
     fun bitmapToUri(bitmap: Bitmap, ctx: Context): Uri {
         val file = File(ctx.cacheDir, "image_${System.currentTimeMillis()}.jpg")
-        FileOutputStream(file).use { fos -> bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos) }
-        return Uri.fromFile(file)
+        FileOutputStream(file).use { fos -> bitmap.compress(CompressFormat.JPEG, 90, fos) }
+        return fromFile(file)
     }
 
     // API 호출
@@ -102,26 +61,30 @@ fun CommissionFormScreen(
     val imageUploadState by viewModel.imageUploadState.collectAsState()
     val submitState by viewModel.submitState.collectAsState()
 
-    // 기본 폼 스키마
+    // 기본 폼 스키마 (API 미도착시)
     val defaultFormSchema = listOf(
         FormItem(
+            id = 1,
             label = "당일마감",
             type = "radio",
             options = listOf(OptionItem("O (+10000P)"), OptionItem("X"))
         ),
         FormItem(
+            id = 2,
             label = "신청 캐릭터",
             type = "radio",
             options = listOf(OptionItem("고양이"), OptionItem("햄스터"), OptionItem("캐리커쳐"), OptionItem("랜덤"))
         ),
         FormItem(
+            id = 3,
             label = "저희 팀 코밋 예쁘게 봐주세요!",
             type = "check",
             options = listOf(OptionItem("확인했습니다."))
         ),
         FormItem(
+            id = 4,
             label = "신청 내용",
-            type = "image" // ← 기본은 image
+            type = "textarea" // ← 반드시 textarea
         )
     )
 
@@ -133,35 +96,34 @@ fun CommissionFormScreen(
             Log.d("FormDebug", "API 응답 받음 - formSchema: $formSchemaData")
 
             if (formSchemaData?.fields != null) {
-                try {
-                    val parsed = formSchemaData.fields.map { field ->
+                runCatching {
+                    // API 응답 + 기본 라디오/체크박스 옵션 병합
+                    val apiFields = formSchemaData.fields.map { f ->
                         FormItem(
-                            type = field.type,
-                            label = field.label,
-                            options = field.options?.map { OptionItem(it.label) } ?: emptyList()
+                            id = f.id.toIntOrNull(),
+                            type = f.type,
+                            label = f.label,
+                            options = f.options?.map { OptionItem(it.label) } ?: emptyList()
                         )
                     }
+                    
                     val merged = mutableListOf<FormItem>()
-                    // 기본 라디오/체크 우선
+                    // 기본 라디오/체크박스 먼저 추가
                     merged += defaultFormSchema.filter { it.type in listOf("radio", "check") }
-                    // 중복되지 않는 항목만 추가
-                    parsed.forEach { apiItem ->
-                        if (merged.none { it.label == apiItem.label }) merged += apiItem
+                    // API 응답 필드 추가 (중복 라벨 제외)
+                    apiFields.forEach { apiItem ->
+                        if (merged.none { it.label == apiItem.label }) {
+                            merged += apiItem
+                        }
                     }
                     merged
-                } catch (e: Exception) {
-                    Log.e("FormSchema", "formSchema 파싱 오류: ${e.message}")
+                }.getOrElse {
+                    Log.e("FormSchema", "formSchema 파싱 오류: ${it.message}")
                     defaultFormSchema
                 }
-            } else {
-                Log.d("FormDebug", "fields가 null이므로 기본 스키마 사용")
-                defaultFormSchema
-            }
+            } else defaultFormSchema
         }
-        else -> {
-            Log.d("FormDebug", "API 응답이 아직 없으므로 기본 스키마 사용")
-            defaultFormSchema
-        }
+        else -> defaultFormSchema
     }
 
     Log.d("FormDebug", "최종 formSchema: $formSchema")
@@ -170,15 +132,23 @@ fun CommissionFormScreen(
 
     val isFormComplete by remember(formSchema, formAnswer) {
         derivedStateOf {
-            val required = formSchema.filter { it.type in listOf("radio", "check") }.map { it.label }
-            val completed = required.count { field ->
-                val v = formAnswer[field]
-                when {
-                    field.contains("확인") -> v == "확인했습니다."
-                    else -> (v as? String)?.isNotBlank() == true
+            // API 응답에 따라 동적으로 완성 조건 결정
+            val requiredFields = formSchema.filter { it.type in listOf("radio", "check") }
+            val requiredLabels = requiredFields.map { it.label }
+            
+            if (requiredLabels.isEmpty()) {
+                // 필수 필드가 없으면 항상 완성된 것으로 간주
+                true
+            } else {
+                val completed = requiredLabels.count { field ->
+                    val v = formAnswer[field]
+                    when {
+                        field.contains("확인") -> v == "확인했습니다."
+                        else -> (v as? String)?.isNotBlank() == true
+                    }
                 }
+                completed >= requiredLabels.size
             }
-            completed >= 1
         }
     }
 
@@ -213,23 +183,13 @@ fun CommissionFormScreen(
             ) {
                 CommissionTopBar(
                     onBackClick = {
-                        Log.d("FormDebug", "뒤로가기 버튼 클릭됨")
-                        if (context is FragmentActivity) {
-                            context.supportFragmentManager.popBackStack()
-                        } else if (context is androidx.activity.ComponentActivity) {
-                            context.finish()
-                        }
+                        if (context is FragmentActivity) context.supportFragmentManager.popBackStack()
+                        else if (context is androidx.activity.ComponentActivity) context.finish()
                     }
                 )
 
-                // 커미션 정보
-                val commissionInfo = when (commissionFormState) {
-                    is CommissionFormState.Success -> {
-                        val response = (commissionFormState as CommissionFormState.Success).data
-                        response.success?.commission
-                    }
-                    else -> null
-                }
+                val commissionInfo = (commissionFormState as? CommissionFormState.Success)
+                    ?.data?.success?.commission
 
                 CommissionHeader(
                     artistName = commissionInfo?.artist?.nickname ?: "키르",
@@ -265,6 +225,7 @@ fun CommissionFormScreen(
                     formSchema.forEachIndexed { index, item ->
                         Log.d("FormDebug", "폼 아이템 처리 시작 - index: $index, item: $item")
                         Spacer(Modifier.height(12.dp))
+
                         when (item.type) {
                             "radio", "check" -> {
                                 val selectedOption = formAnswer[item.label] as? String ?: ""
@@ -277,16 +238,8 @@ fun CommissionFormScreen(
                                 )
                             }
 
-                            "textarea" -> {
-                                CommissionTextareaSection(
-                                    index = index + 1,
-                                    text = formAnswer[item.label] as? String ?: "",
-                                    onTextChange = { formAnswer[item.label] = it }
-                                )
-                            }
-
-                            // ⬇️ "image"와 "file"을 동일하게 처리: 텍스트 박스 + 이미지
                             "image", "file" -> {
+                                // 이미지 박스 전용 (텍스트 절대 추가하지 않음)
                                 when (imageUploadState) {
                                     is ImageUploadState.Loading -> {
                                         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -309,11 +262,11 @@ fun CommissionFormScreen(
                                     }
                                     else -> {}
                                 }
-                                // 참고 이미지
+
                                 CommissionImageSection(
                                     index = index + 1,
                                     images = images,
-                                    onAddClick = { /* 추가 부가동작이 필요하면 사용 (실제 추가는 섹션 내부 런처에서 처리됨) */ },
+                                    onAddClick = { /* 필요시 부가동작 */ },
                                     onRemoveClick = { removeIndex -> images.removeAt(removeIndex) },
                                     onImageUpload = { uri -> viewModel.uploadImage(uri, context) },
                                     onImageAdded = { bitmap ->
@@ -322,12 +275,13 @@ fun CommissionFormScreen(
                                         viewModel.uploadImage(imageUri, context)
                                     }
                                 )
-
-                                // 신청 내용 (텍스트)
+                            }
+                            "textarea" -> {
+                                // 텍스트 박스 전용
                                 CommissionTextareaSection(
-                                    index = index,
+                                    index = index + 1,
                                     text = formAnswer[item.label] as? String ?: "",
-                                    onTextChange = { text -> formAnswer[item.label] = text }
+                                    onTextChange = { formAnswer[item.label] = it }
                                 )
                             }
                         }
@@ -335,14 +289,12 @@ fun CommissionFormScreen(
 
                     Spacer(Modifier.height(20.dp))
 
-                    // 제출 상태 처리
                     when (submitState) {
                         is SubmitState.Loading -> {
                             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                 CircularProgressIndicator()
                             }
                         }
-
                         is SubmitState.Error -> {
                             val errorMessage = (submitState as SubmitState.Error).message
                             Text(
@@ -351,22 +303,15 @@ fun CommissionFormScreen(
                                 fontSize = 14.sp,
                                 modifier = Modifier.padding(horizontal = 20.dp)
                             )
-
                             if (errorMessage.contains("이미 신청한 커미션")) {
                                 Spacer(Modifier.height(8.dp))
                                 Button(
                                     onClick = {
                                         val fragment = FragmentPostChatDetail.newInstance(
-                                            chatName = commissionFormState.let { state ->
-                                                if (state is CommissionFormState.Success) {
-                                                    state.data.success?.commission?.artist?.nickname ?: "작가"
-                                                } else "작가"
-                                            },
-                                            authorName = commissionFormState.let { state ->
-                                                if (state is CommissionFormState.Success) {
-                                                    state.data.success?.commission?.title ?: "커미션"
-                                                } else "커미션"
-                                            },
+                                            chatName = (commissionFormState as? CommissionFormState.Success)
+                                                ?.data?.success?.commission?.artist?.nickname ?: "작가",
+                                            authorName = (commissionFormState as? CommissionFormState.Success)
+                                                ?.data?.success?.commission?.title ?: "커미션",
                                             commissionId = commissionId.toIntOrNull() ?: 1,
                                             hasSubmittedApplication = true
                                         )
@@ -381,12 +326,9 @@ fun CommissionFormScreen(
                                         .fillMaxWidth()
                                         .padding(horizontal = 20.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C5CE7))
-                                ) {
-                                    Text("채팅방으로 이동", color = Color.White)
-                                }
+                                ) { Text("채팅방으로 이동", color = Color.White) }
                             }
                         }
-
                         is SubmitState.Success -> {
                             LaunchedEffect(Unit) {
                                 android.widget.Toast.makeText(
@@ -394,11 +336,12 @@ fun CommissionFormScreen(
                                     "신청이 성공적으로 제출되었습니다!",
                                     android.widget.Toast.LENGTH_SHORT
                                 ).show()
-
                                 if (context is FragmentActivity) {
                                     val fragment = FragmentPostChatDetail.newInstance(
-                                        chatName = commissionInfo?.artist?.nickname ?: "키르",
-                                        authorName = commissionInfo?.title ?: "낙서 타입 커미션",
+                                        chatName = (commissionFormState as? CommissionFormState.Success)
+                                            ?.data?.success?.commission?.artist?.nickname ?: "키르",
+                                        authorName = (commissionFormState as? CommissionFormState.Success)
+                                            ?.data?.success?.commission?.title ?: "낙서 타입 커미션",
                                         commissionId = commissionId.toIntOrNull() ?: 1,
                                         hasSubmittedApplication = true
                                     )
@@ -409,7 +352,6 @@ fun CommissionFormScreen(
                                 }
                                 onNavigateToSuccess()
                             }
-
                             Text(
                                 text = "신청이 성공적으로 제출되었습니다!",
                                 color = Color.Green,
@@ -417,7 +359,66 @@ fun CommissionFormScreen(
                                 modifier = Modifier.padding(horizontal = 20.dp)
                             )
                         }
-
+                        is SubmitState.Error -> {
+                            val errorMessage = (submitState as SubmitState.Error).message
+                            val isAlreadySubmitted = errorMessage.contains("이미 신청한 커미션입니다")
+                            
+                            if (isAlreadySubmitted) {
+                                // 이미 신청한 경우
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 20.dp)
+                                ) {
+                                    Text(
+                                        text = "이미 신청한 커미션입니다",
+                                        color = Color(0xFF6C5CE7),
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    )
+                                    Text(
+                                        text = "이 커미션에는 이미 신청이 완료되었습니다. 채팅방에서 진행 상황을 확인하실 수 있습니다.",
+                                        color = Color(0xFF666666),
+                                        fontSize = 14.sp,
+                                        modifier = Modifier.padding(bottom = 16.dp)
+                                    )
+                                    Button(
+                                        onClick = {
+                                            if (context is FragmentActivity) {
+                                                val fragment = FragmentPostChatDetail.newInstance(
+                                                    chatName = (commissionFormState as? CommissionFormState.Success)
+                                                        ?.data?.success?.commission?.artist?.nickname ?: "키르",
+                                                    authorName = (commissionFormState as? CommissionFormState.Success)
+                                                        ?.data?.success?.commission?.title ?: "낙서 타입 커미션",
+                                                    commissionId = commissionId.toIntOrNull() ?: 1,
+                                                    hasSubmittedApplication = true
+                                                )
+                                                context.supportFragmentManager.beginTransaction()
+                                                    .replace(android.R.id.content, fragment)
+                                                    .addToBackStack(null)
+                                                    .commit()
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(48.dp),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C5CE7))
+                                    ) { 
+                                        Text("채팅방으로 이동", color = Color.White) 
+                                    }
+                                }
+                            } else {
+                                // 일반적인 오류
+                                Text(
+                                    text = errorMessage ?: "알 수 없는 오류가 발생했습니다",
+                                    color = Color.Red,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(horizontal = 20.dp)
+                                )
+                            }
+                        }
                         else -> {}
                     }
 
@@ -428,8 +429,7 @@ fun CommissionFormScreen(
                             if (isFormComplete) {
                                 viewModel.submitCommissionRequest(
                                     commissionId = commissionId,
-                                    formAnswers = formAnswer,
-                                    imageUrls = emptyList(),
+                                    answersByLabel = formAnswer,
                                     context = context
                                 )
                             }

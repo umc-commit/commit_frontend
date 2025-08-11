@@ -66,6 +66,7 @@ class FragmentChatDetail : Fragment() {
                     
                     val formSchema = listOf(
                         FormItem(
+                            id = 1,
                             label = "신청 내용",
                             type = "text",
                             options = emptyList()

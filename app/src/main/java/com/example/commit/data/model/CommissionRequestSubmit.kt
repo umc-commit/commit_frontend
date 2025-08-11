@@ -1,5 +1,7 @@
 package com.example.commit.data.model
 
+import com.google.gson.annotations.SerializedName
+
 data class CommissionRequestSubmit(
-    val formData: Map<String, Any>  // form_answers -> formData로 변경
+    val formAnswer: Map<String, @JvmSuppressWildcards Any>
 ) 
