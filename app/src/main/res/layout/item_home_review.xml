@@ -76,7 +76,7 @@
             android:fontFamily="@font/notosanskr_regular"
             android:textSize="10sp"
             android:textColor="@color/black1"
-            android:maxLines="2"
+            android:maxLines="1"
             android:ellipsize="end"
             app:layout_constraintTop_toTopOf="@id/iv_review"
             app:layout_constraintStart_toEndOf="@id/iv_review"

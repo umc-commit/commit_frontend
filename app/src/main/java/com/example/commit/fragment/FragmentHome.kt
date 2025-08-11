@@ -107,19 +107,27 @@ class FragmentHome : Fragment() {
             binding.indicatorRecommend.visibility = View.GONE
             binding.indicatorFollowing?.visibility = View.VISIBLE
 
+            // tvFollowing 클릭 리스너 내부
             val dummyList = listOf("타임글1", "타임글2", "타임글3", "타입글4", "타입글5")
             binding.rvFollowingPosts.apply {
-                adapter = FollowingPostAdapter(dummyList) {
-                    val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_post_more, null)
-                    val bottomSheetDialog = BottomSheetDialog(requireContext())
-                    bottomSheetDialog.setContentView(bottomSheetView)
-
-                    bottomSheetDialog.window?.apply {
-                        setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                        setDimAmount(0.6f)
+                adapter = FollowingPostAdapter(
+                    postList = dummyList,
+                    onMoreClick = {
+                        val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_post_more, null)
+                        val bottomSheetDialog = BottomSheetDialog(requireContext())
+                        bottomSheetDialog.setContentView(bottomSheetView)
+                        bottomSheetDialog.window?.apply {
+                            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                            setDimAmount(0.6f)
+                        }
+                        bottomSheetDialog.show()
+                    },
+                    commissionIdProvider = { position ->
+                        // TODO: 실제 포스트 모델에서 commissionId 반환
+                        // 북마크 토글이 필요없으면 일단 null 리턴해도 됩니다.
+                        null
                     }
-                    bottomSheetDialog.show()
-                }
+                )
                 layoutManager = LinearLayoutManager(requireContext())
             }
         }

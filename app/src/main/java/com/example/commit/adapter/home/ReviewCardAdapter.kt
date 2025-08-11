@@ -22,7 +22,7 @@ class ReviewCardAdapter(
             Glide.with(binding.root.context)
                 .load(item.reviewImageUrl)
                 .placeholder(R.drawable.image_placeholder)
-                .error(R.drawable.ic_profile)
+                .error(R.drawable.image_placeholder)
                 .centerCrop()
                 .into(binding.ivReview)
 
