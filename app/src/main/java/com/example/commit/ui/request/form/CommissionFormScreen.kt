@@ -378,49 +378,20 @@ fun CommissionFormScreen(
                             val isAlreadySubmitted = errorMessage.contains("이미 신청한 커미션입니다")
                             
                             if (isAlreadySubmitted) {
-                                // 이미 신청한 경우
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 20.dp)
-                                ) {
-                                    Text(
-                                        text = "이미 신청한 커미션입니다",
-                                        color = Color(0xFF6C5CE7),
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        modifier = Modifier.padding(vertical = 8.dp)
-                                    )
-                                    Text(
-                                        text = "이 커미션에는 이미 신청이 완료되었습니다. 채팅방에서 진행 상황을 확인하실 수 있습니다.",
-                                        color = Color(0xFF666666),
-                                        fontSize = 14.sp,
-                                        modifier = Modifier.padding(bottom = 16.dp)
-                                    )
-                                    Button(
-                                        onClick = {
-                                            if (context is FragmentActivity) {
-                                                val fragment = FragmentPostChatDetail.newInstance(
-                                                    chatName = (commissionFormState as? CommissionFormState.Success)
-                                                        ?.data?.success?.commission?.artist?.nickname ?: "키르",
-                                                    authorName = (commissionFormState as? CommissionFormState.Success)
-                                                        ?.data?.success?.commission?.title ?: "낙서 타입 커미션",
-                                                    commissionId = commissionId.toIntOrNull() ?: 1,
-                                                    hasSubmittedApplication = true
-                                                )
-                                                context.supportFragmentManager.beginTransaction()
-                                                    .replace(android.R.id.content, fragment)
-                                                    .addToBackStack(null)
-                                                    .commit()
-                                            }
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(48.dp),
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C5CE7))
-                                    ) { 
-                                        Text("채팅방으로 이동", color = Color.White) 
+                                // 이미 신청한 경우: 토스트 메시지 표시 후 이전 화면으로 이동
+                                LaunchedEffect(Unit) {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "이미 신청한 커미션입니다",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                    
+                                    // 잠시 후 이전 페이지로 돌아가기
+                                    kotlinx.coroutines.delay(1000)
+                                    if (context is FragmentActivity) {
+                                        context.supportFragmentManager.popBackStack()
+                                    } else if (context is androidx.activity.ComponentActivity) {
+                                        context.finish()
                                     }
                                 }
                             } else {

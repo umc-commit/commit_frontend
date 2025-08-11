@@ -259,8 +259,16 @@ class CommissionFormViewModel : ViewModel() {
 
                     _submitState.value = when (response.code()) {
                         400 -> {
-                            // 예: C009 expectedType/receivedType 등 서버 메시지 그대로 보여주기
-                            SubmitState.Error(errorBody ?: "잘못된 요청입니다.")
+                            // C010 에러인지 확인 (이미 신청한 커미션)
+                            val errorBodyString = errorBody ?: ""
+                            if (errorBodyString.contains("C010") || errorBodyString.contains("이미 신청한 커미션입니다")) {
+                                // C010 에러인 경우 신청서 제출 상태 저장
+                                markApplicationSubmitted(commissionId, context)
+                                SubmitState.Error("이미 신청한 커미션입니다")
+                            } else {
+                                // 기타 400 에러
+                                SubmitState.Error(errorBodyString.ifEmpty { "잘못된 요청입니다." })
+                            }
                         }
                         401 -> SubmitState.Error("인증이 필요합니다.")
                         404 -> SubmitState.Error("커미션을 찾을 수 없습니다.")

@@ -199,26 +199,27 @@ class ChatViewModel : ViewModel() {
         
         Log.d("ChatViewModel", "채팅방 초기화 - ID: $chatroomId, 신청서 제출됨: $hasSubmittedApplication")
         
-        // 신청서 제출한 경우 즉시 시스템 메시지 표시
+        // 신청서 제출한 경우 즉시 CommissionRequestBubble 표시
         if (hasSubmittedApplication) {
-            Log.d("ChatViewModel", "신청서 제출 상태 - 시스템 메시지 표시")
-            showApplicationSubmittedMessage()
+            Log.d("ChatViewModel", "신청서 제출 상태 - CommissionRequestBubble 표시")
+            showCommissionRequestBubble()
         } else {
             Log.d("ChatViewModel", "신청서 미제출 상태 - 빈 채팅방으로 시작")
         }
     }
     
-    // 신청서 제출 시스템 메시지 표시
-    private fun showApplicationSubmittedMessage() {
-        val systemMessage = ChatMessage(
-            id = "application_submitted",
-            senderId = "me",
-            content = "커미션 신청서 확인하기",
+    // CommissionRequestBubble 표시
+    private fun showCommissionRequestBubble() {
+        val requestBubbleMessage = ChatMessage(
+            id = "commission_request_${System.currentTimeMillis()}",
+            senderId = "system",
+            content = "신청서가 제출되었습니다",
             timestamp = System.currentTimeMillis(),
             type = MessageType.COMMISSION_REQUEST,
             amount = null
         )
-        chatMessages = listOf(systemMessage)
+        chatMessages = listOf(requestBubbleMessage)
+        Log.d("ChatViewModel", "CommissionRequestBubble 추가됨")
     }
     
     // 커미션 수락 시스템 메시지 (상대방이 수락했을 때)
