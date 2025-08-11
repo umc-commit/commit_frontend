@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -38,9 +39,9 @@ fun FormCheckScreen(
     ) {
         // 상단 고정 TopBar
         FormCheckTopBar(
+            onBackClick = onBackClick,
             chatItem = chatItem,
             requestItem = requestItem,
-            onBackClick = onBackClick
         )
 
         // 스크롤 가능한 Section

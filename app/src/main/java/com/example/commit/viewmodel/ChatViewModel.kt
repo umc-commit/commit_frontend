@@ -50,6 +50,8 @@ class ChatViewModel : ViewModel() {
     fun setApplicationStatus(hasSubmitted: Boolean) {
         hasSubmittedApplication = hasSubmitted
     }
+    
+
 
     // 채팅방 메시지 로드
     fun loadMessages(context: Context, chatroomId: Int, limit: Int = 20) {

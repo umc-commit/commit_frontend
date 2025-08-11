@@ -191,7 +191,7 @@ class CommissionFormViewModel : ViewModel() {
                     ?.data?.success?.formSchema?.fields.orEmpty()
 
                 // 2) 서버가 기대하는 formAnswer (키 = 필드 id)
-                val answer = mutableMapOf<String, @JvmSuppressWildcards Any>()
+                val formAnswer = mutableMapOf<String, @JvmSuppressWildcards Any>()
 
                 fields.forEach { f ->
                     val key = f.id.toString()
@@ -203,53 +203,55 @@ class CommissionFormViewModel : ViewModel() {
                         "textarea", "radio", "check" -> {
                             val v = (answersByLabel[f.label] as? String)?.takeIf { it.isNotBlank() }
                             if (v != null) {
-                                answer[key] = v
+                                formAnswer[key] = v
                                 Log.d("SubmitDebug", "텍스트 필드 추가: $key = $v")
                             } else {
-                                Log.d("SubmitDebug", "텍스트 필드 건너뜀: $key (빈 값)")
+                                Log.d("SubmitDebug", "텍스트 필드 건너뛰기: $key (빈 값)")
                             }
                         }
                         "file", "image" -> {
                             val urls = uploadedImageUrls.value
                             if (urls.isNotEmpty()) {
-                                answer[key] = urls  // 반드시 배열
+                                formAnswer[key] = urls  // 반드시 배열
                                 Log.d("SubmitDebug", "이미지 필드 추가: $key = $urls")
                             } else {
-                                Log.d("SubmitDebug", "이미지 필드 건너뜀: $key (빈 배열)")
+                                Log.d("SubmitDebug", "이미지 필드 건너뛰기: $key (빈 배열)")
                             }
                         }
                         else -> {
                             val v = (answersByLabel[f.label] as? String)?.takeIf { it.isNotBlank() }
                             if (v != null) {
-                                answer[key] = v
+                                formAnswer[key] = v
                                 Log.d("SubmitDebug", "기타 필드 추가: $key = $v")
                             } else {
-                                Log.d("SubmitDebug", "기타 필드 건너뜀: $key (빈 값)")
+                                Log.d("SubmitDebug", "기타 필드 건너뛰기: $key (빈 값)")
                             }
                         }
                     }
                 }
                 
-                // 최종 answer 검증
-                Log.d("SubmitDebug", "최종 answer 크기: ${answer.size}")
-                answer.forEach { (key, value) ->
-                    Log.d("SubmitDebug", "answer[$key] = $value (타입: ${value?.javaClass?.simpleName})")
+                // 최종 formAnswer 검증
+                Log.d("SubmitDebug", "최종 formAnswer 크기: ${formAnswer.size}")
+                formAnswer.forEach { (key, value) ->
+                    Log.d("SubmitDebug", "formAnswer[$key] = $value (타입: ${value?.javaClass?.simpleName})")
                 }
 
-                // 빈 answer 방지
-                if (answer.isEmpty()) {
-                    Log.w("SubmitDebug", "answer가 비어있음 - 기본값 추가")
-                    answer["1"] = "신청 내용이 없습니다"
+                // 빈 formAnswer 방지
+                if (formAnswer.isEmpty()) {
+                    Log.w("SubmitDebug", "formAnswer가 비어있음 - 기본값 추가")
+                    formAnswer["1"] = "신청 내용이 없습니다"
                 }
                 
                 // 디버깅 로그
-                Log.d("SubmitPayload", gson.toJson(CommissionRequestSubmit(formAnswer = answer)))
+                Log.d("SubmitPayload", gson.toJson(CommissionRequestSubmit(formAnswer = formAnswer)))
 
                 // 3) 요청
-                val request = CommissionRequestSubmit(formAnswer = answer)
+                val request = CommissionRequestSubmit(formAnswer = formAnswer)
                 val response = retrofitAPI!!.submitCommissionRequest(commissionId, request)
 
                 if (response.isSuccessful) {
+                    // 신청서 제출 성공 시 상태 저장
+                    markApplicationSubmitted(commissionId, context)
                     _submitState.value = SubmitState.Success(response.body()!!)
                 } else {
                     val errorBody = response.errorBody()?.string()
@@ -270,6 +272,47 @@ class CommissionFormViewModel : ViewModel() {
                 _submitState.value = SubmitState.Error("네트워크 오류: ${e.message}")
             }
         }
+    }
+    
+    /* -------------------------------------------
+     * Check Application Status
+     * ------------------------------------------- */
+    
+    fun checkApplicationStatus(commissionId: String, context: Context, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+                val token = prefs.getString("accessToken", null)
+                
+                if (token.isNullOrEmpty()) {
+                    onResult(false)
+                    return@launch
+                }
+                
+                if (retrofitAPI == null) retrofitAPI = RetrofitObject.getRetrofitService(context)
+                
+                // TODO: 실제로는 신청서 제출 상태를 확인하는 API 엔드포인트가 필요합니다
+                // 예: GET /api/commissions/{commissionId}/applications/status
+                // 현재는 SharedPreferences에 저장된 신청서 제출 기록을 확인
+                val applicationKey = "commission_${commissionId}_submitted"
+                val hasSubmitted = prefs.getBoolean(applicationKey, false)
+                
+                Log.d("CommissionFormViewModel", "신청서 상태 확인: commissionId=$commissionId, hasSubmitted=$hasSubmitted")
+                onResult(hasSubmitted)
+                
+            } catch (e: Exception) {
+                Log.e("CommissionFormViewModel", "신청서 상태 확인 실패: ${e.message}")
+                onResult(false)
+            }
+        }
+    }
+    
+    // 신청서 제출 완료 시 상태 저장
+    fun markApplicationSubmitted(commissionId: String, context: Context) {
+        val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+        val applicationKey = "commission_${commissionId}_submitted"
+        prefs.edit().putBoolean(applicationKey, true).apply()
+        Log.d("CommissionFormViewModel", "신청서 제출 완료 표시: $commissionId")
     }
 }
 

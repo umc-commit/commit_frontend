@@ -1,5 +1,6 @@
 package com.example.commit.ui.request.form
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
@@ -97,26 +98,26 @@ fun CommissionFormScreen(
 
             if (formSchemaData?.fields != null) {
                 runCatching {
-                    // API 응답 + 기본 라디오/체크박스 옵션 병합
-                    val apiFields = formSchemaData.fields.map { f ->
-                        FormItem(
-                            id = f.id.toIntOrNull(),
-                            type = f.type,
-                            label = f.label,
-                            options = f.options?.map { OptionItem(it.label) } ?: emptyList()
-                        )
+                                    // API 응답 + 기본 라디오/체크박스 옵션 병합
+                val apiFields = formSchemaData.fields.map { f ->
+                    FormItem(
+                        id = f.id.toIntOrNull(),
+                        type = f.type,
+                        label = f.label,
+                        options = f.options?.map { OptionItem(it.label) } ?: emptyList()
+                    )
+                }
+                
+                val merged = mutableListOf<FormItem>()
+                // 기본 라디오/체크박스 먼저 추가
+                merged += defaultFormSchema.filter { it.type in listOf("radio", "check") }
+                // API 응답 필드 추가 (중복 라벨 제외)
+                apiFields.forEach { apiItem ->
+                    if (merged.none { it.label == apiItem.label }) {
+                        merged += apiItem
                     }
-                    
-                    val merged = mutableListOf<FormItem>()
-                    // 기본 라디오/체크박스 먼저 추가
-                    merged += defaultFormSchema.filter { it.type in listOf("radio", "check") }
-                    // API 응답 필드 추가 (중복 라벨 제외)
-                    apiFields.forEach { apiItem ->
-                        if (merged.none { it.label == apiItem.label }) {
-                            merged += apiItem
-                        }
-                    }
-                    merged
+                }
+                merged
                 }.getOrElse {
                     Log.e("FormSchema", "formSchema 파싱 오류: ${it.message}")
                     defaultFormSchema
@@ -183,8 +184,33 @@ fun CommissionFormScreen(
             ) {
                 CommissionTopBar(
                     onBackClick = {
-                        if (context is FragmentActivity) context.supportFragmentManager.popBackStack()
-                        else if (context is androidx.activity.ComponentActivity) context.finish()
+                        // 뒤로가기 버튼 클릭 시 이전 화면으로 돌아가기
+                        try {
+                            when (context) {
+                                is FragmentActivity -> {
+                                    if (context.supportFragmentManager.backStackEntryCount > 0) {
+                                        context.supportFragmentManager.popBackStack()
+                                    } else {
+                                        context.finish()
+                                    }
+                                }
+                                is androidx.activity.ComponentActivity -> {
+                                    context.finish()
+                                }
+                                else -> {
+                                    // 일반적인 경우 finish() 호출
+                                    (context as? android.app.Activity)?.finish()
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("CommissionFormScreen", "뒤로가기 처리 실패: ${e.message}")
+                            // 예외 발생 시 finish() 시도
+                            try {
+                                (context as? android.app.Activity)?.finish()
+                            } catch (finishException: Exception) {
+                                Log.e("CommissionFormScreen", "finish() 호출 실패: ${finishException.message}")
+                            }
+                        }
                     }
                 )
 
@@ -331,33 +357,21 @@ fun CommissionFormScreen(
                         }
                         is SubmitState.Success -> {
                             LaunchedEffect(Unit) {
+                                // 제출 성공 토스트 메시지 표시
                                 android.widget.Toast.makeText(
                                     context,
                                     "신청이 성공적으로 제출되었습니다!",
                                     android.widget.Toast.LENGTH_SHORT
                                 ).show()
+                                
+                                // 잠시 후 이전 페이지로 돌아가기
+                                kotlinx.coroutines.delay(1000)
                                 if (context is FragmentActivity) {
-                                    val fragment = FragmentPostChatDetail.newInstance(
-                                        chatName = (commissionFormState as? CommissionFormState.Success)
-                                            ?.data?.success?.commission?.artist?.nickname ?: "키르",
-                                        authorName = (commissionFormState as? CommissionFormState.Success)
-                                            ?.data?.success?.commission?.title ?: "낙서 타입 커미션",
-                                        commissionId = commissionId.toIntOrNull() ?: 1,
-                                        hasSubmittedApplication = true
-                                    )
-                                    context.supportFragmentManager.beginTransaction()
-                                        .replace(android.R.id.content, fragment)
-                                        .addToBackStack(null)
-                                        .commit()
+                                    context.supportFragmentManager.popBackStack()
+                                } else if (context is androidx.activity.ComponentActivity) {
+                                    context.finish()
                                 }
-                                onNavigateToSuccess()
                             }
-                            Text(
-                                text = "신청이 성공적으로 제출되었습니다!",
-                                color = Color.Green,
-                                fontSize = 14.sp,
-                                modifier = Modifier.padding(horizontal = 20.dp)
-                            )
                         }
                         is SubmitState.Error -> {
                             val errorMessage = (submitState as SubmitState.Error).message
