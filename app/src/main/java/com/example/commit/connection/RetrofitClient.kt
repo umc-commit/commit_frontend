@@ -88,7 +88,7 @@ class RetrofitClient {
         @SerializedName("earnedAt")
         val earnedAt: String,
         @SerializedName("badge")
-        val badge: BadgeDetail
+        val badge: List<BadgeDetail>
     )
 
     data class BadgeDetail(
@@ -296,13 +296,14 @@ class RetrofitClient {
         val summary: String,
         val minPrice: Int,
         val category: String,
-        val tags: List<String>
+        val tags: List<String>,
+        @SerializedName("commission_img") val commission_img: String?
     )
 
     data class AuthorBadgeItem(
         val id: String,
         val earnedAt: String,
-        val badge: BadgeInfo
+        val badge: List<BadgeInfo>
     )
 
     data class BadgeInfo(
@@ -388,7 +389,70 @@ class RetrofitClient {
         val title: String
     )
 
+    data class FollowSuccess(
+        @SerializedName("message") val message: String,
+        @SerializedName("artistId") val artistId: String
+    )
 
+    // 북마크 추가 응답
+    data class BookmarkAddSuccess(
+        @SerializedName("bookmarkId") val bookmarkId: Long,
+        @SerializedName("commissionId") val commissionId: Long,
+        @SerializedName("message") val message: String
+    )
+
+    // 북마크 삭제 응답
+    data class BookmarkDeleteSuccess(
+        @SerializedName("bookmarkId") val bookmarkId: Long,
+        @SerializedName("commissionId") val commissionId: Long,
+        @SerializedName("message") val message: String
+    )
+
+    // 북마크 목록 조회
+    data class BookmarkListSuccess(
+        @SerializedName("items") val items: List<BookmarkCommissionItem>,
+        @SerializedName("pagination") val pagination: BookmarkPagination
+    )
+
+    data class BookmarkPagination(
+        @SerializedName("page") val page: Int,
+        @SerializedName("limit") val limit: Int,
+        @SerializedName("totalCount") val totalCount: Int,
+        @SerializedName("totalPages") val totalPages: Int
+    )
+
+    data class BookmarkCommissionItem(
+        @SerializedName("id") val id: Int, // commissionId
+        @SerializedName("bookmarkId") val bookmarkId: Long?, // 선택삭제용(서버가 주면 채워짐)
+        @SerializedName("title") val title: String,
+        @SerializedName("minPrice") val minPrice: Int,
+        @SerializedName("category") val category: BookmarkCategory,
+        @SerializedName("tags") val tags: List<BookmarkTag>,
+        @SerializedName("thumbnailImageUrl") val thumbnailImageUrl: String?,
+        @SerializedName("remainingSlots") val remainingSlots: Int,
+        @SerializedName("artist") val artist: CommissionArtist // 기존 타입 재사용(id, nickname, profileImageUrl)
+    )
+
+    data class BookmarkCategory(
+        @SerializedName("id") val id: Int,
+        @SerializedName("name") val name: String
+    )
+
+    data class BookmarkTag(
+        @SerializedName("id") val id: Int,
+        @SerializedName("name") val name: String
+    )
+
+    // 북마크 선택삭제
+    data class BookmarkBulkDeleteRequest(
+        @SerializedName("bookmarkIds") val bookmarkIds: List<Long>
+    )
+
+    data class BookmarkBulkDeleteSuccess(
+        @SerializedName("deletedIds") val deletedIds: List<Long>,
+        @SerializedName("notFoundIds") val notFoundIds: List<Long>,
+        @SerializedName("message") val message: String
+    )
 
 
 }
