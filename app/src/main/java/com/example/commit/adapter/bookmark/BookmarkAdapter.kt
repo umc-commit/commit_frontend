@@ -1,6 +1,7 @@
 package com.example.commit.adapter.bookmark
 
 import android.content.Context
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,6 +50,7 @@ class BookmarkAdapter(
                     includeFontPadding = false
                     textSize = 8f
                     setPadding(dpToPx(context, 6), dpToPx(context, 2), dpToPx(context, 6), dpToPx(context, 2))
+                    gravity = Gravity.CENTER
                     typeface = ResourcesCompat.getFont(context, R.font.notosanskr_medium)
                     // 동일한 최소/최대 값으로 UI 정렬 (HomeCardAdapter 기준)
                     maxHeight = dpToPx(context, 16)
@@ -103,7 +105,7 @@ class BookmarkAdapter(
 
     fun setEditMode(edit: Boolean) {
         isEditMode = edit
-        if (!edit) selected.clear()
+        if (!edit) clearSelection()
         notifyDataSetChanged()
     }
 
@@ -111,28 +113,33 @@ class BookmarkAdapter(
     fun getSelected(): List<Selected> =
         selected.map { pos -> Selected(items[pos].id, items[pos].bookmarkId) }
 
-    fun getSelectedBookmarkIds(): List<Long>? {
-        val ids = selected.map { items[it].bookmarkId }
-        return if (ids.any { it == null }) null else ids.filterNotNull()
-    }
+    // 선택된 아이템들의 bookmarkId만 모아서 반환 (null은 자동 필터링)
+    fun getSelectedBookmarkIds(): List<Long> =
+        selected.mapNotNull { pos -> items[pos].bookmarkId }
 
-    fun removeByBookmarkIds(deletedIds: List<Long>) {
-        if (deletedIds.isEmpty()) return
-        val set = deletedIds.toHashSet()
+    // bookmarkIds 기준으로 리스트에서 제거
+    fun removeByBookmarkIds(bookmarkIds: Collection<Long>?) {
+        val ids = bookmarkIds?.toSet().orEmpty()
+        if (ids.isEmpty()) {
+            clearSelection() // 아무것도 안 지워져도 UI는 정리
+            return
+        }
         val it = items.iterator()
         while (it.hasNext()) {
             val item = it.next()
-            if (item.bookmarkId != null && set.contains(item.bookmarkId)) {
+            val bid = item.bookmarkId
+            if (bid != null && bid in ids) {
                 it.remove()
             }
         }
-        selected.clear()
+        clearSelection()
         notifyDataSetChanged()
     }
 
     fun clearSelection() {
         selected.clear()
         notifyDataSetChanged()
+        onSelectionChanged()
     }
 
     private fun dpToPx(context: Context, dp: Int): Int =

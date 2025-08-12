@@ -69,14 +69,21 @@ class HomeCardAdapter(
                     text = if (index == 0) tag else "#$tag"
                     if (index == 0) {
                         setTextColor(ContextCompat.getColor(context, R.color.mint1))
-                        background = ContextCompat.getDrawable(context, R.drawable.tag_background_cyan)
+                        background =
+                            ContextCompat.getDrawable(context, R.drawable.tag_background_cyan)
                     } else {
                         setTextColor(ContextCompat.getColor(context, R.color.gray2))
-                        background = ContextCompat.getDrawable(context, R.drawable.tag_background_gray)
+                        background =
+                            ContextCompat.getDrawable(context, R.drawable.tag_background_gray)
                     }
                     includeFontPadding = false
                     textSize = 8f
-                    setPadding(dpToPx(context, 6), dpToPx(context, 2), dpToPx(context, 6), dpToPx(context, 2))
+                    setPadding(
+                        dpToPx(context, 6),
+                        dpToPx(context, 2),
+                        dpToPx(context, 6),
+                        dpToPx(context, 2)
+                    )
                     gravity = Gravity.CENTER
                     typeface = ResourcesCompat.getFont(context, R.font.notosanskr_medium)
                     maxHeight = dpToPx(context, 16)
@@ -85,7 +92,14 @@ class HomeCardAdapter(
                 val lp = FlexboxLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply { if (index != tagList.lastIndex) setMargins(0, 0, dpToPx(binding.root.context, 4), 0) }
+                ).apply {
+                    if (index != tagList.lastIndex) setMargins(
+                        0,
+                        0,
+                        dpToPx(binding.root.context, 4),
+                        0
+                    )
+                }
                 tv.layoutParams = lp
                 binding.tagsLayout.addView(tv)
             }
@@ -129,18 +143,25 @@ class HomeCardAdapter(
                         ) {
                             bookmarking.remove(cId); binding.ivBookmark.isEnabled = true
                             val b = resp.body()
-                            val ok = resp.isSuccessful && b?.resultType == "SUCCESS" && b.success != null
-                            val already = resp.code() == 409 || b?.error?.reason?.contains("이미", true) == true
+                            val ok =
+                                resp.isSuccessful && b?.resultType == "SUCCESS" && b.success != null
+                            val already =
+                                resp.code() == 409 || b?.error?.reason?.contains("이미", true) == true
                             if (ok || already) {
                                 b?.success?.bookmarkId?.let { bid -> bookmarkIdMap[cId] = bid }
+                                if (already && !bookmarkIdMap.containsKey(cId)) {
+                                    resolveBookmarkId(ctx, cId) { bid ->
+                                        if (bid != null) bookmarkIdMap[cId] = bid
+                                    }
+                                }
                                 bookmarked.add(cId)
                                 binding.ivBookmark.setImageResource(R.drawable.ic_home_bookmark_on)
-                                Log.d(TAG, b?.success?.message ?: "북마크 추가됨")
                                 ctx.sendBroadcast(Intent("ACTION_BOOKMARK_CHANGED").setPackage(ctx.packageName))
                             } else {
                                 Log.d(TAG, b?.error?.reason ?: "북마크 추가 실패")
                             }
                         }
+
                         override fun onFailure(
                             call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkAddSuccess>>,
                             t: Throwable
@@ -153,37 +174,75 @@ class HomeCardAdapter(
                     // DELETE (bookmarkId 필요)
                     val bookmarkId = bookmarkIdMap[cId]
                     if (bookmarkId == null) {
-                        Log.d(TAG, "bookmarkId 없음 → 삭제 불가 (추가할 때 받은 값이 없거나 앱 재시작)")
+                        resolveBookmarkId(ctx, cId) { bid ->
+                            if (bid == null) return@resolveBookmarkId
+                            bookmarkIdMap[cId] = bid
+                            bookmarking.add(cId)
+                            binding.ivBookmark.isEnabled = false
+                            service.deleteBookmark(cId, bid).enqueue(object :
+                                Callback<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>> {
+                                override fun onResponse(
+                                    call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
+                                    resp: Response<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>
+                                ) {
+                                    bookmarking.remove(cId)
+                                    binding.ivBookmark.isEnabled = true
+                                    val ok2 = resp.isSuccessful && resp.body()?.success != null
+                                    if (ok2) {
+                                        bookmarked.remove(cId)
+                                        bookmarkIdMap.remove(cId)
+                                        binding.ivBookmark.setImageResource(R.drawable.ic_home_bookmark)
+                                        ctx.sendBroadcast(
+                                            Intent("ACTION_BOOKMARK_CHANGED").setPackage(
+                                                ctx.packageName
+                                            )
+                                        )
+                                    }
+                                }
+
+                                override fun onFailure(
+                                    call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
+                                    t: Throwable
+                                ) {
+                                    bookmarking.remove(cId)
+                                    binding.ivBookmark.isEnabled = true
+                                }
+                            })
+                        }
                         return@setOnClickListener
-                    }
-                    bookmarking.add(cId); binding.ivBookmark.isEnabled = false
-                    service.deleteBookmark(cId, bookmarkId).enqueue(object :
-                        Callback<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>> {
-                        override fun onResponse(
-                            call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
-                            resp: Response<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>
-                        ) {
-                            bookmarking.remove(cId); binding.ivBookmark.isEnabled = true
-                            val b = resp.body()
-                            val ok = resp.isSuccessful && b?.resultType == "SUCCESS" && b.success != null
-                            if (ok) {
-                                bookmarked.remove(cId)
-                                bookmarkIdMap.remove(cId)
-                                binding.ivBookmark.setImageResource(R.drawable.ic_home_bookmark)
-                                Log.d(TAG, b!!.success!!.message)
-                                ctx.sendBroadcast(Intent("ACTION_BOOKMARK_CHANGED").setPackage(ctx.packageName))
-                            } else {
-                                Log.d(TAG, b?.error?.reason ?: "북마크 삭제 실패")
+                    } else {
+                        bookmarking.add(cId)
+                        binding.ivBookmark.isEnabled = false
+                        service.deleteBookmark(cId, bookmarkId).enqueue(object :
+                            Callback<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>> {
+                            override fun onResponse(
+                                call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
+                                resp: Response<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>
+                            ) {
+                                bookmarking.remove(cId)
+                                binding.ivBookmark.isEnabled = true
+                                val ok = resp.isSuccessful && resp.body()?.success != null
+                                if (ok) {
+                                    bookmarked.remove(cId)
+                                    bookmarkIdMap.remove(cId)
+                                    binding.ivBookmark.setImageResource(R.drawable.ic_home_bookmark)
+                                    ctx.sendBroadcast(
+                                        Intent("ACTION_BOOKMARK_CHANGED").setPackage(
+                                            ctx.packageName
+                                        )
+                                    )
+                                }
                             }
-                        }
-                        override fun onFailure(
-                            call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
-                            t: Throwable
-                        ) {
-                            bookmarking.remove(cId); binding.ivBookmark.isEnabled = true
-                            Log.d(TAG, "네트워크 오류(delete): ${t.message}")
-                        }
-                    })
+
+                            override fun onFailure(
+                                call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
+                                t: Throwable
+                            ) {
+                                bookmarking.remove(cId)
+                                binding.ivBookmark.isEnabled = true
+                            }
+                        })
+                    }
                 }
             }
         }
@@ -202,4 +261,27 @@ class HomeCardAdapter(
 
     fun dpToPx(context: Context, dp: Int): Int =
         TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), context.resources.displayMetrics).toInt()
+
+    private fun resolveBookmarkId(
+        ctx: Context,
+        commissionId: Long,
+        onResult: (Long?) -> Unit
+    ) {
+        val service = RetrofitObject.getRetrofitService(ctx)
+        service.getBookmarks(page = 1, limit = 200, excludeFullSlots = false)
+            .enqueue(object : Callback<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>> {
+                override fun onResponse(
+                    call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>>,
+                    response: Response<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>>
+                ) {
+                    val items = response.body()?.success?.items.orEmpty()
+                    val bid = items.firstOrNull { it.id.toLong() == commissionId }?.bookmarkId
+                    onResult(bid)
+                }
+                override fun onFailure(
+                    call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>>,
+                    t: Throwable
+                ) { onResult(null) }
+            })
+    }
 }

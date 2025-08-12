@@ -297,7 +297,8 @@ class RetrofitClient {
         val minPrice: Int,
         val category: String,
         val tags: List<String>,
-        @SerializedName("commission_img") val commission_img: String?
+        @SerializedName("commission_img") val commission_img: String?,
+        @SerializedName("bookmark") val isBookmarked: Boolean = false
     )
 
     data class AuthorBadgeItem(
@@ -425,7 +426,7 @@ class RetrofitClient {
         @SerializedName("id") val id: Int, // commissionId
         @SerializedName("bookmarkId") val bookmarkId: Long?, // 선택삭제용(서버가 주면 채워짐)
         @SerializedName("title") val title: String,
-        @SerializedName("minPrice") val minPrice: Int,
+        @SerializedName("minPrice") val minPrice: Int?,
         @SerializedName("category") val category: BookmarkCategory,
         @SerializedName("tags") val tags: List<BookmarkTag>,
         @SerializedName("thumbnailImageUrl") val thumbnailImageUrl: String?,
@@ -434,12 +435,12 @@ class RetrofitClient {
     )
 
     data class BookmarkCategory(
-        @SerializedName("id") val id: Int,
+        @SerializedName("id") val id: String,
         @SerializedName("name") val name: String
     )
 
     data class BookmarkTag(
-        @SerializedName("id") val id: Int,
+        @SerializedName("id") val id: String,
         @SerializedName("name") val name: String
     )
 
@@ -449,10 +450,49 @@ class RetrofitClient {
     )
 
     data class BookmarkBulkDeleteSuccess(
-        @SerializedName("deletedIds") val deletedIds: List<Long>,
-        @SerializedName("notFoundIds") val notFoundIds: List<Long>,
-        @SerializedName("message") val message: String
+        @SerializedName("bookmarkIds") val bookmarkIds: List<Long>?, // 서버가 주는 배열
+        @SerializedName("message") val message: String?
     )
+
+    // 팔로잉 작가 커미션 조회
+    data class FollowingResponseData(
+        @SerializedName("items") val items: List<FollowingPostItem>,
+        @SerializedName("pagination") val pagination: FollowingPagination
+    )
+
+    data class FollowingPagination(
+        @SerializedName("page") val page: Int,
+        @SerializedName("limit") val limit: Int,
+        @SerializedName("totalCount") val totalCount: Int,
+        @SerializedName("totalPages") val totalPages: Int
+    )
+
+    data class FollowingPostItem(
+        @SerializedName("id") val id: Long,
+        @SerializedName("title") val title: String,
+        @SerializedName("summary") val summary: String,
+        @SerializedName("images") val images: List<FollowingImage>,
+        @SerializedName("timeAgo") val timeAgo: String,
+        @SerializedName("createdAt") val createdAt: String,
+        @SerializedName("isBookmarked") val isBookmarked: Boolean,
+        @SerializedName("artist") val artist: FollowingArtist
+    )
+
+    data class FollowingImage(
+        @SerializedName("id") val id: Long,
+        @SerializedName("imageUrl") val imageUrl: String,
+        @SerializedName("orderIndex") val orderIndex: Int
+    )
+
+    data class FollowingArtist(
+        @SerializedName("id") val id: Long,
+        @SerializedName("nickname") val nickname: String,
+        @SerializedName("profileImageUrl") val profileImageUrl: String?,
+        @SerializedName("followCount") val followCount: Int
+    )
+
+
+
 
 
 }
