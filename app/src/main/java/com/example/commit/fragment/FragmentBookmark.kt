@@ -8,6 +8,10 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.ImageView
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +25,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import androidx.core.content.ContextCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class FragmentBookmark : Fragment() {
 
@@ -35,6 +41,7 @@ class FragmentBookmark : Fragment() {
     private var excludeClosed = false
     private var page = 1
     private val limit = 12
+    private var sort = "latest"
 
     private val bookmarkChangedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -77,21 +84,16 @@ class FragmentBookmark : Fragment() {
         }
 
         binding.btnFilter.setOnClickListener {
-            // 정렬은 현재 latest만 – excludeFullSlots만 토글
-            excludeClosed = !excludeClosed
-            fetchBookmarks(reset = true)
-
-            // 아이콘 효과만 유지
             binding.btnFilter.setImageResource(R.drawable.ic_sort_mint)
-            binding.btnFilter.postDelayed({ binding.btnFilter.setImageResource(R.drawable.ic_sort) }, 400)
+            showFilterBottomSheet() // 바텀시트 열기
         }
     }
 
     private fun setupDeleteBar() {
         binding.deleteButton.setOnClickListener {
             val ids = adapter.getSelectedBookmarkIds()
-            if (ids == null || ids.isEmpty()) {
-                Log.d("FragmentBookmark", "서버에서 bookmarkId 필드 반영 후 이용 가능합니다.")
+            if (ids.isEmpty()) {
+                // 선택된 항목이 없으면 종료
                 return@setOnClickListener
             }
 
@@ -108,21 +110,18 @@ class FragmentBookmark : Fragment() {
                     binding.deleteButton.isEnabled = true
                     val body = response.body()?.success
                     if (response.isSuccessful && body != null) {
-                        // UI 갱신: 삭제된 항목 제거
-                        adapter.removeByBookmarkIds(body.deletedIds)
+                        val bookmarkIds = body.bookmarkIds.orEmpty()
+                        adapter.removeByBookmarkIds(bookmarkIds)
                         updateDeleteButton()
 
-                        // 전체 새로고침(페이징/필터 고려) + 다른 화면과 동기화
                         fetchBookmarks(reset = true)
                         requireContext().sendBroadcast(
-                            Intent("ACTION_BOOKMARK_CHANGED").setPackage(requireContext().packageName))
+                            Intent("ACTION_BOOKMARK_CHANGED").setPackage(requireContext().packageName)
+                        )
 
-                        Log.d("FragmentBookmark", body.message)
-                        if (body.notFoundIds.isNotEmpty()) {
-                            Log.d("FragmentBookmark", "notFoundIds=${body.notFoundIds}")
-                        }
+                        Log.d(TAG, body.message ?: "선택 삭제 완료")
                     } else {
-                        Log.d("FragmentBookmark", "선택 삭제 실패: ${response.errorBody()?.string()}")
+                        Log.d(TAG, "선택 삭제 실패: ${response.errorBody()?.string()}")
                     }
                 }
 
@@ -146,18 +145,23 @@ class FragmentBookmark : Fragment() {
     private fun fetchBookmarks(reset: Boolean) {
         if (reset) page = 1
         val service = RetrofitObject.getRetrofitService(requireContext())
-        service.getBookmarks(sort = "latest", page = page, limit = limit, excludeFullSlots = excludeClosed)
+        service.getBookmarks(sort = sort, page = page, limit = limit, excludeFullSlots = excludeClosed)
             .enqueue(object : Callback<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>> {
                 override fun onResponse(
                     call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>>,
                     response: Response<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>>
                 ) {
-                    val s = response.body()?.success ?: run {
-                        Log.d(TAG, "응답 파싱 실패 또는 body=null")
-                        return
+                    val s = response.body()?.success ?: return
+                    val items = s.items.toMutableList()
+
+                    when (sort) {
+                        "lowPrice"  -> items.sortBy { it.minPrice }          // 가격 낮은 순
+                        "highPrice" -> items.sortByDescending { it.minPrice } // 가격 높은 순
+                        else -> { }
                     }
+
                     if (reset) serverList.clear()
-                    serverList.addAll(s.items)
+                    serverList.addAll(items)
                     adapter.notifyDataSetChanged()
                 }
 
@@ -168,6 +172,66 @@ class FragmentBookmark : Fragment() {
                     Log.d(TAG, "네트워크 오류(목록): ${t.message}")
                 }
             })
+    }
+
+    private fun showFilterBottomSheet() {
+        val dialog = BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_bookmark, null)
+        dialog.setContentView(view)
+
+        // 뷰 바인딩
+        val ivToggle = view.findViewById<ImageView>(R.id.iv_closed_filter)
+        val rgSort = view.findViewById<RadioGroup>(R.id.rg_sort_options)
+        val rbLatest = view.findViewById<RadioButton>(R.id.rb_latest)
+        val rbLow = view.findViewById<RadioButton>(R.id.rb_low_price)
+        val rbHigh = view.findViewById<RadioButton>(R.id.rb_high_price)
+        val btnApply = view.findViewById<AppCompatButton>(R.id.btn_apply_filter)
+
+        // 현재 값으로 초기 상태 세팅
+        var tempExclude = excludeClosed
+        fun updateToggle() {
+            ivToggle.setImageResource(if (tempExclude) R.drawable.ic_toggle_on else R.drawable.ic_toggle_off)
+        }
+        updateToggle()
+
+        when (sort) {
+            "latest" -> rbLatest.isChecked = true
+            "lowPrice" -> rbLow.isChecked = true
+            "highPrice" -> rbHigh.isChecked = true
+        }
+
+        // 토글 클릭 처리
+        ivToggle.setOnClickListener {
+            tempExclude = !tempExclude
+            updateToggle()
+        }
+
+        // 적용 버튼
+        btnApply.setOnClickListener {
+            // 정렬 선택값 매핑
+            sort = when (rgSort.checkedRadioButtonId) {
+                R.id.rb_low_price -> "lowPrice"
+                R.id.rb_high_price -> "highPrice"
+                else -> "latest"
+            }
+            excludeClosed = tempExclude
+
+            fetchBookmarks(reset = true)
+            dialog.dismiss()
+            updateFilterIcon()
+        }
+
+        dialog.setOnDismissListener { updateFilterIcon() }
+        dialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        dialog.show()
+    }
+
+    private fun updateFilterIcon() {
+        // 기본값에서 벗어나 있으면 민트, 기본이면 기본 아이콘
+        val isFiltered = excludeClosed || sort != "latest"
+        binding.btnFilter.setImageResource(
+            if (isFiltered) R.drawable.ic_sort_mint else R.drawable.ic_sort
+        )
     }
 
     class GridSpacingItemDecoration(
@@ -187,6 +251,9 @@ class FragmentBookmark : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        updateFilterIcon()
+        // 돌아올 때마다 최신화
+        fetchBookmarks(reset = true)
         val filter = IntentFilter("ACTION_BOOKMARK_CHANGED")
 
         // OS 버전에 상관없이 안전하게 등록 (API 33+에서는 NOT_EXPORTED로 등록)
@@ -200,8 +267,16 @@ class FragmentBookmark : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        requireContext().unregisterReceiver(bookmarkChangedReceiver)
+        // 필터 초기화
+        sort = "latest"
+        excludeClosed = false
+        updateFilterIcon()
+        fetchBookmarks(reset = true)
+        try {
+            requireContext().unregisterReceiver(bookmarkChangedReceiver)
+        } catch (_: Exception) { }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

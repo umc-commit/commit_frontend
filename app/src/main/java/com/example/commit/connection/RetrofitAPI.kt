@@ -133,4 +133,12 @@ interface RetrofitAPI {
         @Body req: RetrofitClient.BookmarkBulkDeleteRequest
     ): Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkBulkDeleteSuccess>>
 
+    // 팔로잉 작가 커미션 조회
+    @GET("/api/home/following")
+    fun getFollowing(
+        @retrofit2.http.Query("page") page: Int = 1,
+        @retrofit2.http.Query("limit") limit: Int = 10
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.FollowingResponseData>>
+
+
 }

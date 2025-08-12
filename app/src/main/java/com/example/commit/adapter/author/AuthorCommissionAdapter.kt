@@ -82,13 +82,19 @@ class AuthorCommissionAdapter(
                     )
                 )
                 background = ContextCompat.getDrawable(
-                    context, if (index == 0) R.drawable.tag_background_cyan else R.drawable.tag_background_gray
+                    context,
+                    if (index == 0) R.drawable.tag_background_cyan else R.drawable.tag_background_gray
                 )
                 textSize = 8f
                 includeFontPadding = false
                 gravity = Gravity.CENTER
                 typeface = ResourcesCompat.getFont(context, R.font.notosanskr_medium)
-                setPadding(dpToPx(context, 6), dpToPx(context, 2), dpToPx(context, 6), dpToPx(context, 2))
+                setPadding(
+                    dpToPx(context, 6),
+                    dpToPx(context, 2),
+                    dpToPx(context, 6),
+                    dpToPx(context, 2)
+                )
                 minWidth = dpToPx(context, 26)
                 maxHeight = dpToPx(context, 16)
             }
@@ -102,11 +108,13 @@ class AuthorCommissionAdapter(
             holder.tagsLayout.addView(tagView)
         }
 
-        // 초기 북마크 아이콘 (세션 캐시 기준)
+        // 초기 북마크 아이콘 (서버 값 기반으로 세팅)
         val cId = item.id.toLongOrNull()
-        val isOn = cId != null && bookmarked.contains(cId)
+        val initiallyOn = (cId != null && item.isBookmarked)
+        if (initiallyOn) cId?.let { bookmarked.add(it) }
+
         holder.ivBookmark.setImageResource(
-            if (isOn) R.drawable.ic_home_bookmark_on else R.drawable.ic_home_bookmark
+            if (initiallyOn) R.drawable.ic_home_bookmark_on else R.drawable.ic_home_bookmark
         )
 
         // 클릭 리스너
@@ -139,17 +147,24 @@ class AuthorCommissionAdapter(
                         holder.ivBookmark.isEnabled = true
 
                         val body = resp.body()
-                        val ok = resp.isSuccessful && body?.resultType == "SUCCESS" && body.success != null
+                        val ok =
+                            resp.isSuccessful && body?.resultType == "SUCCESS" && body.success != null
                         val already =
-                            resp.code() == 409 || body?.error?.reason?.contains("이미", ignoreCase = true) == true
+                            resp.code() == 409 || body?.error?.reason?.contains(
+                                "이미",
+                                ignoreCase = true
+                            ) == true
 
                         if (ok || already) {
                             val bookmarkId = body?.success?.bookmarkId
                             if (bookmarkId != null) bookmarkIdMap[commissionId] = bookmarkId
+                            if (already && !bookmarkIdMap.containsKey(commissionId)) {
+                                resolveBookmarkId(ctx, commissionId) { bid ->
+                                    if (bid != null) bookmarkIdMap[commissionId] = bid
+                                }
+                            }
                             bookmarked.add(commissionId)
                             holder.ivBookmark.setImageResource(R.drawable.ic_home_bookmark_on)
-                            Log.d(TAG, body?.success?.message ?: "북마크가 추가되었습니다.")
-                            // 북마크 탭 새로고침
                             ctx.sendBroadcast(Intent("ACTION_BOOKMARK_CHANGED").setPackage(ctx.packageName))
                         } else {
                             Log.d(TAG, body?.error?.reason ?: "북마크 추가 실패")
@@ -169,45 +184,71 @@ class AuthorCommissionAdapter(
                 // ON -> OFF : 삭제
                 val bookmarkId = bookmarkIdMap[commissionId]
                 if (bookmarkId == null) {
-                    Log.d(TAG, "bookmarkId 없음 → 삭제 불가 (목록 응답에 bookmarkId가 없으면 카드 추가 시 받은 값 캐시 필요)")
+                    resolveBookmarkId(ctx, commissionId) { bid ->
+                        if (bid == null) return@resolveBookmarkId
+                        bookmarkIdMap[commissionId] = bid
+                        bookmarking.add(commissionId)
+                        holder.ivBookmark.isEnabled = false
+                        service.deleteBookmark(commissionId, bid).enqueue(object :
+                            Callback<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>> {
+                            override fun onResponse(
+                                call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
+                                resp: Response<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>
+                            ) {
+                                bookmarking.remove(commissionId)
+                                holder.ivBookmark.isEnabled = true
+                                val ok2 = resp.isSuccessful && resp.body()?.success != null
+                                if (ok2) {
+                                    bookmarked.remove(commissionId)
+                                    bookmarkIdMap.remove(commissionId)
+                                    holder.ivBookmark.setImageResource(R.drawable.ic_home_bookmark)
+                                    ctx.sendBroadcast(
+                                        Intent("ACTION_BOOKMARK_CHANGED").setPackage(
+                                            ctx.packageName
+                                        )
+                                    )
+                                }
+                            }
+
+                            override fun onFailure(
+                                call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
+                                t: Throwable
+                            ) {
+                                bookmarking.remove(commissionId)
+                                holder.ivBookmark.isEnabled = true
+                            }
+                        })
+                    }
                     return@setOnClickListener
-                }
-
-                bookmarking.add(commissionId)
-                holder.ivBookmark.isEnabled = false
-
-                service.deleteBookmark(commissionId, bookmarkId).enqueue(object :
-                    Callback<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>> {
-                    override fun onResponse(
-                        call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
-                        resp: Response<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>
-                    ) {
-                        bookmarking.remove(commissionId)
-                        holder.ivBookmark.isEnabled = true
-
-                        val body = resp.body()
-                        val ok = resp.isSuccessful && body?.resultType == "SUCCESS" && body.success != null
-                        if (ok) {
-                            bookmarked.remove(commissionId)
-                            bookmarkIdMap.remove(commissionId)
-                            holder.ivBookmark.setImageResource(R.drawable.ic_home_bookmark)
-                            Log.d(TAG, body!!.success!!.message)
-                            // 북마크 탭 새로고침
-                            ctx.sendBroadcast(Intent("ACTION_BOOKMARK_CHANGED").setPackage(ctx.packageName))
-                        } else {
-                            Log.d(TAG, body?.error?.reason ?: "북마크 삭제 실패")
+                } else {
+                    bookmarking.add(commissionId)
+                    holder.ivBookmark.isEnabled = false
+                    service.deleteBookmark(commissionId, bookmarkId).enqueue(object :
+                        Callback<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>> {
+                        override fun onResponse(
+                            call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
+                            resp: Response<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>
+                        ) {
+                            bookmarking.remove(commissionId)
+                            holder.ivBookmark.isEnabled = true
+                            val ok = resp.isSuccessful && resp.body()?.success != null
+                            if (ok) {
+                                bookmarked.remove(commissionId)
+                                bookmarkIdMap.remove(commissionId)
+                                holder.ivBookmark.setImageResource(R.drawable.ic_home_bookmark)
+                                ctx.sendBroadcast(Intent("ACTION_BOOKMARK_CHANGED").setPackage(ctx.packageName))
+                            }
                         }
-                    }
 
-                    override fun onFailure(
-                        call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
-                        t: Throwable
-                    ) {
-                        bookmarking.remove(commissionId)
-                        holder.ivBookmark.isEnabled = true
-                        Log.d(TAG, "네트워크 오류(delete): ${t.message}")
-                    }
-                })
+                        override fun onFailure(
+                            call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>,
+                            t: Throwable
+                        ) {
+                            bookmarking.remove(commissionId)
+                            holder.ivBookmark.isEnabled = true
+                        }
+                    })
+                }
             }
         }
     }
@@ -219,4 +260,28 @@ class AuthorCommissionAdapter(
         TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), context.resources.displayMetrics
         ).toInt()
+
+    private fun resolveBookmarkId(
+        ctx: android.content.Context,
+        commissionId: Long,
+        onResult: (Long?) -> Unit
+    ) {
+        val service = RetrofitObject.getRetrofitService(ctx)
+        service.getBookmarks(page = 1, limit = 200, excludeFullSlots = false)
+            .enqueue(object : Callback<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>> {
+                override fun onResponse(
+                    call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>>,
+                    response: Response<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>>
+                ) {
+                    val items = response.body()?.success?.items.orEmpty()
+                    val bid = items.firstOrNull { it.id.toLong() == commissionId }?.bookmarkId
+                    onResult(bid)
+                }
+                override fun onFailure(
+                    call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>>,
+                    t: Throwable
+                ) { onResult(null) }
+            })
+    }
+
 }

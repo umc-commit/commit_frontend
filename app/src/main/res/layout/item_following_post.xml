@@ -74,8 +74,8 @@
 
     <ImageView
         android:id="@+id/iv_bookmark"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
         android:src="@drawable/ic_home_bookmark"
         android:layout_marginEnd="28dp"
         app:layout_constraintEnd_toEndOf="parent"
