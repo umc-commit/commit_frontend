@@ -3,23 +3,55 @@ package com.example.commit.ui.request.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.commit.data.model.FormItem
+import com.example.commit.connection.dto.FormItem
 import com.example.commit.ui.Theme.CommitTypography
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
 
 @Composable
 fun FormAnswerSection(
-    formSchema: List<FormItem>,
-    formAnswer: Map<String, Any>
+    formSchema: List<FormItem>
 ) {
+    // ---- 분리: "신청 폼" / "신청 내용" ----
+    val formOnly = formSchema.filterNot { item ->
+        val label = item.label
+        val text = item.value.toReadable()
+        label.contains("내용", ignoreCase = true) ||
+                label.contains("이미지", ignoreCase = true) ||
+                isImageUrl(text)
+    }
+
+    val note = formSchema
+        .firstOrNull { it.label.contains("내용", ignoreCase = true) }
+        ?.value?.toReadable()
+        ?.takeIf { it.isNotBlank() }
+
+    val allImages: List<String> = buildList {
+        addAll(formSchema.flatMap { extractImageUrls(it.value) })
+        addAll(
+            formSchema.mapNotNull {
+                it.takeIf { f -> f.label.contains("이미지", ignoreCase = true) }
+                    ?.value?.toReadable()
+                    ?.takeIf { s -> isImageUrl(s) }
+            }
+        )
+    }.distinct()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -28,18 +60,13 @@ fun FormAnswerSection(
     ) {
         Text(
             text = "신청 폼",
-            style = CommitTypography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+            style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
             color = Color.Black,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        formSchema.forEachIndexed { index, item ->
-            val answer = formAnswer[item.label]
-            val answerText = when (answer) {
-                is List<*> -> answer.joinToString(", ")
-                is String -> answer
-                else -> "응답 없음"
-            }
+        formOnly.forEachIndexed { index, item ->
+            val textValue = item.value.toReadable()
 
             Box(
                 modifier = Modifier
@@ -50,87 +77,156 @@ fun FormAnswerSection(
                     .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
                     .padding(12.dp)
             ) {
-                Column {
+                Column(
+                    modifier = Modifier
+                        .heightIn(max = 240.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
                     Text(
                         text = "${index + 1}. ${item.label}",
-                        style = CommitTypography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                        style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = Color.Black
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = answerText.toString(),
+                        text = textValue.ifBlank { "응답 없음" },
                         style = CommitTypography.labelLarge,
-                        color = Color.DarkGray
+                        color = Color(0xFF555555)
                     )
                 }
             }
         }
 
-        // 신청 내용 + 이미지
-        val note = formAnswer["신청 내용"] as? String
-        val imageUrl = formAnswer["이미지"] as? String
-
-        if (!note.isNullOrBlank() || !imageUrl.isNullOrBlank()) {
+        // ------------------ 신청 내용 ------------------
+        if (!note.isNullOrBlank() || allImages.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
-
             Text(
                 text = "신청 내용",
-                style = CommitTypography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+                style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = Color.Black,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            if (!note.isNullOrBlank()) {
-                Box(
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFFF5F5F5))
+                    .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
+                    .padding(12.dp)
+            ) {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .padding(vertical = 4.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFF5F5F5))
-                        .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
-                        .padding(12.dp)
-                )
-                {
-                    Text(
-                        text = note,
-                        style = CommitTypography.labelLarge,
-                        color = Color.Black
-                    )
+                        .heightIn(max = 240.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    if (allImages.isNotEmpty()) {
+                        ImageGallerySmall(allImages)
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+                    if (!note.isNullOrBlank()) {
+                        Text(
+                            text = note,
+                            style = CommitTypography.labelLarge,
+                            color = Color(0xFF555555)
+                        )
+                    }
                 }
-            }
-
-            if (!imageUrl.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(12.dp))
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = "첨부 이미지",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(160.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun PreviewFormAnswerSection() {
-    val dummyFormSchema = listOf(
-        FormItem(type = "radio", label = "당일마감 옵션", options = listOf()),
-        FormItem(type = "radio", label = "신청 부위", options = listOf()),
-        FormItem(type = "checkbox", label = "프로필 공지사항 확인해주세요!", options = listOf())
-    )
+private fun ImageGallerySmall(urls: List<String>) {
+    val sizeTwoStack = 96.dp
+    val sizeThumb = 80.dp
+    val gap = 6.dp
 
-    val dummyFormAnswer = mapOf(
-        "당일마감 옵션" to "O",
-        "신청 부위" to "전신",
-        "프로필 공지사항 확인해주세요!" to listOf("확인했습니다."),
-        "신청 내용" to "에렌에게가 활짝 웃는 모습을 그려주세요!!",
-        "이미지" to "https://i.namu.wiki/i/eo5nbfHMQNRzJv3_f-qY6sDXo3aZqj8DPTk09XIEAK9Ugh6J53ZYXxhFjZUBuPj_aqFaz6XWZ5eUHRoWKLHfRA.webp"
-    )
+    when (urls.size) {
+        2 -> {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(gap),
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                urls.forEach { url ->
+                    AsyncImage(
+                        model = url,
+                        contentDescription = "첨부 이미지",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(sizeTwoStack)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                }
+            }
+        }
+        else -> {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(gap),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(urls) { url ->
+                    AsyncImage(
+                        model = url,
+                        contentDescription = "첨부 이미지",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(sizeThumb)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                }
+            }
+        }
+    }
+}
 
-    FormAnswerSection(formSchema = dummyFormSchema, formAnswer = dummyFormAnswer)
+/** JsonElement → 문자열 변환 */
+private fun JsonElement?.toReadable(): String {
+    if (this == null) return ""
+    return when {
+        isJsonNull -> ""
+        isJsonPrimitive -> asJsonPrimitive.asString.orEmpty()
+        isJsonArray -> asJsonArray.joinToString(", ") { it.asString.orEmpty() }
+        isJsonObject -> asJsonObject.toString()
+        else -> toString()
+    }
+}
+
+/** JsonElement → 문자열 리스트 */
+private fun JsonElement?.asStringList(): List<String> {
+    if (this == null || isJsonNull) return emptyList()
+    return when {
+        isJsonArray -> (this as JsonArray).mapNotNull {
+            when {
+                it.isJsonPrimitive -> it.asJsonPrimitive.asString
+                else -> it.toString()
+            }
+        }
+        isJsonPrimitive -> listOf(asJsonPrimitive.asString)
+        else -> listOf(toString())
+    }.filter { it.isNotBlank() }
+}
+
+/** 이미지 URL 추출 */
+private fun extractImageUrls(value: JsonElement?): List<String> {
+    val rawList = value.asStringList()
+        .flatMap { s ->
+            s.split(',', ' ', '\n', '\t')
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+        }
+    return rawList.filter { isImageUrl(it) }
+}
+
+/** 이미지 URL 판별 */
+private fun isImageUrl(s: String): Boolean {
+    if (s.isBlank()) return false
+    val lower = s.lowercase()
+    val hasScheme = lower.startsWith("http://") || lower.startsWith("https://")
+    val looksLikeImage =
+        lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".webp") ||
+                lower.contains("=png") || lower.contains("=jpg") || lower.contains("=jpeg") || lower.contains("=webp")
+    return hasScheme && looksLikeImage
 }

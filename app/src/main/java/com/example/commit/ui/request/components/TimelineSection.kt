@@ -14,6 +14,10 @@ import androidx.compose.ui.unit.dp
 import com.example.commit.R
 import com.example.commit.connection.dto.TimelineItem
 import com.example.commit.ui.Theme.CommitTypography
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
 data class TimelineEvent(
     val iconRes: Int,
@@ -58,7 +62,7 @@ fun TimelineSection(events: List<TimelineEvent>) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = event.date,
+                        text = event.date, // "yy.MM.dd HH:mm" (KST)
                         style = CommitTypography.labelSmall,
                         color = Color.Gray
                     )
@@ -68,34 +72,57 @@ fun TimelineSection(events: List<TimelineEvent>) {
     }
 }
 
-// API에서 받은 DTO(TimelineItem)를 UI용 TimelineEvent로 변환하는 확장 함수
+/** 여러 ISO 포맷을 SDF로 파싱해서 KST 'yy.MM.dd HH:mm'로 변환 */
+private fun parseIsoWithSdfToKst(iso: String?): String {
+    if (iso.isNullOrBlank()) return "-"
+    val patterns = arrayOf(
+        "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+        "yyyy-MM-dd'T'HH:mm:ssX",
+        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+        "yyyy-MM-dd'T'HH:mm:ss'Z'"
+    )
+    val out = SimpleDateFormat("yy.MM.dd HH:mm", Locale.KOREA).apply {
+        timeZone = TimeZone.getTimeZone("Asia/Seoul")
+    }
+    for (p in patterns) {
+        try {
+            val sdf = SimpleDateFormat(p, Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+            val date = sdf.parse(iso)
+            if (date != null) return out.format(date)
+        } catch (_: ParseException) {
+        }
+    }
+    return "-"
+}
+
+// API DTO(TimelineItem) → UI 모델 변환
 fun TimelineItem.toEvent(): TimelineEvent {
-    val iconRes = when (status) {
+    val clean = status.trim()
+    val iconRes = when (clean) {
         "COMPLETED" -> R.drawable.timeline_complete
-        "CONFIRMED" -> R.drawable.timeline_confirm
-        "SUBMITTED " -> R.drawable.timeline_delivery
-        "STARTED" -> R.drawable.timeline_start
-        "ACCEPTED" -> R.drawable.timeline_accept
-        "APPROVED" -> R.drawable.timeline_confirm
+        "SUBMITTED" -> R.drawable.timeline_confirm
+        "IN_PROGRESS" -> R.drawable.timeline_delivery
+        "PAID" -> R.drawable.timeline_start
+        "APPROVED" -> R.drawable.timeline_accept
         else -> R.drawable.timeline_complete
     }
     return TimelineEvent(
         iconRes = iconRes,
-        description = getStatusLabel(status),
-        date = this.timestamp
+        description = getStatusLabel(clean),
+        date = parseIsoWithSdfToKst(this.timestamp)
     )
 }
 
-// 상태값에 따른 설명 텍스트 반환 함수
+// 상태값 → 설명 문구
 fun getStatusLabel(status: String): String {
-    return when (status) {
-        "COMPLETED" -> "작업이 완료 되었어요."
-        "CONFIRMED" -> "작업물을 확인했어요."
-        "SUBMITTED " -> "작업물이 전달되었어요."
-        "STARTED" -> "작가가 작업을 시작했어요."
-        "APPROVED" -> "작가가 작업을 수락했어요."
-        "APPROVED" -> "결제가 승인되었어요."
+    return when (status.trim()) {
+        "COMPLETED" -> "거래가 완료됐어요."
+        "SUBMITTED" -> "작업물이 전달되었어요."
+        "IN_PROGRESS" -> "작업을 시작했어요."
+        "PAID" -> "커미션 결제가 완료됐어요."
+        "APPROVED" -> "작업을 수락했어요."
         else -> "알 수 없는 상태입니다."
     }
 }
-

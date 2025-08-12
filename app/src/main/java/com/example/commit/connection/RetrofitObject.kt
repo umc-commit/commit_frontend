@@ -14,7 +14,7 @@ object RetrofitObject {
     private const val BASE_URL = "https://commit.n-e.kr"
 
     // 하드코딩된 토큰
-    private const val HARDCODED_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwibmlja25hbWUiOiJ1c2VyX29uZSIsImFjY291bnRJZCI6IjEiLCJwcm92aWRlciI6Imtha2FvIiwicm9sZSI6ImNsaWVudCIsImlhdCI6MTc1NDk4NjQ3NiwiZXhwIjoxNzU1MDcyODc2fQ.sj6VqQRko4XGWYkvkFF-Ey3yWU5wsBn1bkqWPaIw_Ns"
+    private const val HARDCODED_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwibmlja25hbWUiOiJ1c2VyX29uZSIsImFjY291bnRJZCI6IjEiLCJwcm92aWRlciI6Imtha2FvIiwicm9sZSI6ImNsaWVudCIsImlhdCI6MTc1NDk5NTY3OSwiZXhwIjoxNzU1MDgyMDc5fQ.umHqJ3Z6Y2T_0DOR6UDWgv3B8GTiC34SihbAf7Ogqyk"
 
     // context는 받지만, SharedPreferences 무시하고 무조건 HARDCODED_TOKEN 사용
     fun getRetrofitService(context: Context): RetrofitAPI {

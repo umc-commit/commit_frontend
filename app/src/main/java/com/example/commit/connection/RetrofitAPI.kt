@@ -83,7 +83,9 @@ interface RetrofitAPI {
     //신청함 목록
     @GET("/api/requests")
     suspend fun getRequestList(
-    ):  ApiResponse<RequestListResponse>
+        @Query("page") page: Int,
+        @Query("limit") limit: Int? = null
+    ): ApiResponse<RequestListResponse>
 
     //신청함 상세 조회
     @GET("/api/requests/{requestId}")
