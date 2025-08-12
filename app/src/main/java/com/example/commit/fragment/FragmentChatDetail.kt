@@ -8,8 +8,10 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.commit.R
 import com.example.commit.activity.MainActivity
 import com.example.commit.activity.author.AuthorProfileActivity
@@ -22,6 +24,7 @@ import com.example.commit.ui.FormCheck.FormCheckBottomSheet
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.data.model.FormItem
 import com.example.commit.data.model.RequestItem
+import com.example.commit.viewmodel.ChatViewModel
 
 class FragmentChatDetail : Fragment() {
     override fun onResume() {
@@ -34,12 +37,21 @@ class FragmentChatDetail : Fragment() {
     ): View {
         val chatName = arguments?.getString("chatName") ?: "채팅방"
         val authorName = arguments?.getString("authorName") ?: "익명"
+        val chatroomId = arguments?.getInt("chatroomId", 1) ?: 1 // 기본값 1
 
         return ComposeView(requireContext()).apply {
             setContent {
                 CommitTheme {
                     val showBottomSheet = remember { mutableStateOf(false) }
                     val showFormCheckSheet = remember { mutableStateOf(false) }
+                    val chatViewModel: ChatViewModel = viewModel()
+                    
+                    // 채팅방 초기화
+                    LaunchedEffect(chatroomId) {
+                        chatViewModel.initializeChatroom(chatroomId)
+                        // 기존 메시지 로드 시도 (실패하면 빈 상태로 시작)
+                        chatViewModel.loadMessages(requireContext(), chatroomId)
+                    }
                     
                     // FormCheck 데이터 준비
               /*      val requestItem = RequestItem(
@@ -54,6 +66,7 @@ class FragmentChatDetail : Fragment() {
                     
                     val formSchema = listOf(
                         FormItem(
+                            id = 1,
                             label = "신청 내용",
                             type = "text",
                             options = emptyList()
@@ -76,6 +89,7 @@ class FragmentChatDetail : Fragment() {
                     ChatRoomScreen(
                         commissionTitle = chatName,
                         authorName = authorName,
+                        chatViewModel = chatViewModel, // ChatViewModel 전달
                         onPayClick = {
                             if (isAdded && !isDetached) {
                                 parentFragmentManager.popBackStack()

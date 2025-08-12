@@ -23,6 +23,8 @@ fun CommissionOptionSection(
     onOptionSelected: (String) -> Unit
 ) {
     val primaryColor = Color(0xFF17D5C6)
+    
+    Log.d("FormDebug", "CommissionOptionSection 렌더링 - index: $index, title: $title, options: $options, selectedOption: $selectedOption")
 
     CommissionSectionWrapper(
         index = index,

@@ -25,7 +25,7 @@ fun ChatListScreen(
 ) {
     var query by remember { mutableStateOf("") }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -86,9 +86,7 @@ fun ChatListScreen(
                     }
                 }
             }
-
         }
-
     }
 
 }

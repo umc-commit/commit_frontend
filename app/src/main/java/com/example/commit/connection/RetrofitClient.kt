@@ -342,27 +342,26 @@ class RetrofitClient {
         val chatrooms: List<ChatroomItem>
     )
 
+    // 채팅방 목록 DTO (새로운 API 스펙)
     data class ChatroomItem(
-        @SerializedName("id")
-        val id: Int,
-        @SerializedName("consumerId")
-        val consumerId: Int,
-        @SerializedName("artistId")
-        val artistId: Int,
-        @SerializedName("requestId")
-        val requestId: Int,
-        @SerializedName("lastMessage")
+        @SerializedName("chatroom_id")
+        val chatroomId: String,
+        @SerializedName("artist_id")
+        val artistId: String,
+        @SerializedName("artist_nickname")
+        val artistNickname: String,
+        @SerializedName("artist_profile_image")
+        val artistProfileImage: String?,
+        @SerializedName("request_id")
+        val requestId: String,
+        @SerializedName("request_title")
+        val requestTitle: String,
+        @SerializedName("last_message")
         val lastMessage: String?,
-        @SerializedName("lastMessageTime")
+        @SerializedName("last_message_time")
         val lastMessageTime: String?,
-        @SerializedName("unreadCount")
-        val unreadCount: Int,
-        @SerializedName("artist")
-        val artist: ChatroomArtist?,
-        @SerializedName("consumer")
-        val consumer: ChatroomConsumer?,
-        @SerializedName("request")
-        val request: ChatroomRequest?
+        @SerializedName("has_unread")
+        val hasUnread: Int
     )
 
     data class ChatroomArtist(
@@ -390,6 +389,29 @@ class RetrofitClient {
         val title: String
     )
 
+    // 채팅 메시지 DTO (실제 API 스펙에 맞춤)
+    data class ChatMessage(
+        @SerializedName("messageId")
+        val messageId: Int,
+        @SerializedName("sender_id")
+        val senderId: Int,
+        @SerializedName("content")
+        val content: String,
+        @SerializedName("image_id")
+        val imageId: Int? = null,
+        @SerializedName("created_at")
+        val createdAt: String
+    )
+
+    // 제출된 신청서 데이터 DTO
+    data class SubmittedFormData(
+        @SerializedName("commission")
+        val commission: com.example.commit.data.model.CommissionInfo,
+        @SerializedName("formSchema")
+        val formSchema: Map<String, Any>,
+        @SerializedName("formAnswer")
+        val formAnswer: Map<String, Any>
+    )
     data class FollowSuccess(
         @SerializedName("message") val message: String,
         @SerializedName("artistId") val artistId: String

@@ -27,9 +27,20 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class FragmentChat : Fragment() {
+    
+    // 채팅방 목록 새로고침을 위한 콜백
+    private var refreshCallback: (() -> Unit)? = null
+    
     override fun onResume() {
         super.onResume()
         (activity as? MainActivity)?.showBottomNav(true)
+        // 화면이 다시 보여질 때 채팅방 목록 새로고침
+        refreshCallback?.invoke()
+    }
+    
+    // 외부에서 채팅방 목록 새로고침을 요청할 수 있는 메서드
+    fun refreshChatroomList() {
+        refreshCallback?.invoke()
     }
 
     override fun onCreateView(
@@ -53,17 +64,38 @@ class FragmentChat : Fragment() {
                             isLoadingState.value = false
                         }
                     }
+                    
+                    // 새로고침 콜백 설정
+                    refreshCallback = {
+                        Log.d("FragmentChat", "채팅방 목록 새로고침 시작")
+                        isLoadingState.value = true
+                        fetchChatroomList { chatItems ->
+                            Log.d("FragmentChat", "새로고침 완료, 채팅방 개수: ${chatItems.size}")
+                            chatItemsState.value = chatItems
+                            isLoadingState.value = false
+                        }
+                    }
 
                     // ChatListScreen에 onSettingClick 인자를 넘김
                     ChatListScreen(
                         chatItems = chatItemsState.value,
                         isLoading = isLoadingState.value,
                         onItemClick = { clickedItem ->
+                            // 실제 채팅방 ID를 찾아서 전달
+                            val chatroomData = chatItemsState.value?.find { 
+                                it.title == clickedItem.title && it.name == clickedItem.name 
+                            }
+                            val actualChatroomId = chatroomData?.let { 
+                                // chatItems에서 원본 데이터 찾기 (추후 개선 필요)
+                                1 // 임시로 1 사용, 실제로는 매핑 테이블 필요
+                            } ?: 1
+                            
                             parentFragmentManager.beginTransaction()
                                 .replace(R.id.Nav_Frame, FragmentChatDetail().apply {
                                     arguments = bundleOf(
                                         "chatName" to clickedItem.title,     // 커미션 제목
-                                        "authorName" to clickedItem.name       // 작가 이름
+                                        "authorName" to clickedItem.name,     // 작가 이름
+                                        "chatroomId" to actualChatroomId      // 실제 채팅방 ID
                                     )
                                 })
                                 .addToBackStack(null)
@@ -97,6 +129,7 @@ class FragmentChat : Fragment() {
     private fun fetchChatroomList(onSuccess: (List<ChatItem>) -> Unit) {
         Log.d("ChatAPI", "채팅방 목록 조회 시작")
         val api = RetrofitObject.getRetrofitService(requireContext())
+        Log.d("ChatAPI", "API 서비스 생성됨: $api")
         
         api.getChatroomList().enqueue(object : Callback<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>> {
             override fun onResponse(
@@ -105,27 +138,25 @@ class FragmentChat : Fragment() {
             ) {
                 Log.d("ChatAPI", "API 응답 받음: ${response.code()}")
                 Log.d("ChatAPI", "응답 바디: ${response.body()}")
+                Log.d("ChatAPI", "응답 원시 데이터: ${response.raw()}")
                 
                 if (response.isSuccessful) {
                     try {
                         val data = response.body()?.success
                         if (data != null) {
                             Log.d("ChatAPI", "채팅방 개수: ${data.size}")
+                            Log.d("ChatAPI", "채팅방 원시 데이터: $data")
                             val chatItems = data.mapNotNull { chatroom ->
                                 try {
-                                    // 필수 정보가 없는 경우 null 반환 (채팅방 목록에서 제외)
-                                    if (chatroom.artist == null || chatroom.request == null) {
-                                        Log.d("ChatAPI", "유효하지 않은 채팅방 데이터 제외: ${chatroom.id}")
-                                        return@mapNotNull null
-                                    }
+                                    Log.d("ChatAPI", "채팅방 데이터 확인: id=${chatroom.chatroomId}, artist=${chatroom.artistNickname}, request=${chatroom.requestTitle}")
                                     
                                     ChatItem(
                                         profileImageRes = R.drawable.ic_profile,
-                                        name = chatroom.artist.nickname,
+                                        name = chatroom.artistNickname,
                                         message = chatroom.lastMessage ?: "새로운 메시지가 없습니다",
                                         time = formatTime(chatroom.lastMessageTime),
-                                        isNew = chatroom.unreadCount > 0,
-                                        title = chatroom.request.title
+                                        isNew = chatroom.hasUnread > 0,
+                                        title = chatroom.requestTitle
                                     )
                                 } catch (e: Exception) {
                                     Log.e("ChatAPI", "채팅방 데이터 매핑 실패: ${e.message}")
@@ -137,6 +168,7 @@ class FragmentChat : Fragment() {
                         } else {
                             Log.e("ChatAPI", "success 데이터가 없음")
                             Log.e("ChatAPI", "전체 응답: ${response.body()}")
+                            Log.e("ChatAPI", "응답 상세: resultType=${response.body()?.resultType}, error=${response.body()?.error}")
                             // 기본 데이터로 폴백
                             onSuccess(getDefaultChatItems())
                         }
@@ -178,6 +210,7 @@ class FragmentChat : Fragment() {
         return "방금 전"
     }
 
+    
     // 채팅방 생성 함수
     fun createChatroom(consumerId: Int, artistId: Int, requestId: Int, onSuccess: (Int) -> Unit, onError: (String) -> Unit) {
         val api = RetrofitObject.getRetrofitService(requireContext())

@@ -108,3 +108,41 @@ fun FormCheckTopBar(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun FormCheckTopBarPreview() {
+    CommitTheme {
+        val dummyChatItem = ChatItem(
+            profileImageRes = com.example.commit.R.drawable.ic_profile,
+            name = "키르",
+            message = "최근 메시지",
+            time = "2시간 전",
+            isNew = false,
+            title = "낙서 타임 커미션"
+        )
+        
+        val dummyRequestItem = RequestItem(
+            requestId = 1,
+            status = "진행중",
+            title = "낙서 타임 커미션",
+            price = 50000,
+            thumbnailImageUrl = "",
+            progressPercent = 50,
+            createdAt = "2023-12-01",
+            artist = com.example.commit.data.model.Artist(
+                id = 1,
+                nickname = "키르"
+            ),
+            commission = com.example.commit.data.model.Commission(
+                id = 1
+            )
+        )
+        
+        FormCheckTopBar(
+            onBackClick = {},
+            chatItem = dummyChatItem,
+            requestItem = dummyRequestItem
+        )
+    }
+}
+

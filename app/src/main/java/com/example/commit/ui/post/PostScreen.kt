@@ -44,7 +44,11 @@ fun PostScreen(
     isBookmarked: Boolean,
     imageCount: Int = images.size,
     currentIndex: Int = 0,
-    onReviewListClick: () -> Unit
+    commissionId: Int = -1, // 기본값 추가
+    artistId: Int = 1, // 임시 하드코딩 - 나중에 API에서 받아와야 함
+    artistName: String = "키르", // 임시 하드코딩 - 나중에 API에서 받아와야 함
+    onReviewListClick: () -> Unit,
+    onChatClick: () -> Unit = {} // 기본값 추가
 ) {
     val context = LocalContext.current
     var selectedImageIndex by remember { mutableStateOf(currentIndex) }
@@ -228,31 +232,11 @@ fun PostScreen(
             remainingSlots = 11,
             onApplyClick = {
                 val intent = Intent(context, CommissionFormActivity::class.java)
+                intent.putExtra("commissionId", commissionId.toString())
+                Log.d("PostScreen", "신청하기 버튼 클릭 - commissionId: $commissionId")
                 context.startActivity(intent)
             },
-            onChatClick = {
-                try {
-                    val fragment = FragmentPostChatDetail().apply {
-                        arguments = Bundle().apply {
-                            putString("chatName", title)
-                            putString("authorName", "키르")
-                        }
-                    }
-                    if (context is FragmentActivity) {
-                        context.supportFragmentManager.beginTransaction()
-                            .replace(R.id.Nav_Frame, fragment)
-                            .addToBackStack(null)
-                            .commit()
-                    }
-                } catch (e: Exception) {
-                    Log.e("PostScreen", "채팅방 전환 실패", e)
-                    Toast.makeText(
-                        context,
-                        "채팅방 전환에 실패했습니다",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            },
+            onChatClick = onChatClick,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()

@@ -37,7 +37,6 @@ fun FormCheckSection(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .background(Color.White)
             .padding(16.dp)
     ) {
@@ -179,26 +178,5 @@ fun FormCheckSection(
         }
 
         Spacer(modifier = Modifier.height(30.dp))
-
-        // 취소 버튼
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4D4D4D),
-                contentColor = Color.White
-            ),
-            onClick = { /* TODO */ }
-        ) {
-            Text(
-                text = "취소하기",
-                fontSize = 16.sp,
-                style = CommitTypography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White
-            )
-        }
     }
 }
