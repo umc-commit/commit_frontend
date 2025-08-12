@@ -50,9 +50,9 @@ interface RetrofitAPI {
     ): Call<RetrofitClient.AuthorProfileResponse>
 
     @GET("/api/commissions/{commissionId}/forms")
-    fun getSubmittedCommissionForm(
+    suspend fun getCommissionForm(
         @Path("commissionId") commissionId: Int
-    ): Call<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>
+    ): Response<CommissionFormResponse>
 
     @Multipart
     @POST("/api/commissions/request-images/upload")

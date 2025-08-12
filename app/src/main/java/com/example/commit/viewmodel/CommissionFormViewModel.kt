@@ -46,7 +46,7 @@ class CommissionFormViewModel : ViewModel() {
      * Form API
      * ------------------------------------------- */
 
-    fun getCommissionForm(commissionId: String, context: Context) {
+    fun getCommissionForm(commissionId: Int, context: Context) {
         viewModelScope.launch {
             try {
                 _commissionFormState.value = CommissionFormState.Loading
