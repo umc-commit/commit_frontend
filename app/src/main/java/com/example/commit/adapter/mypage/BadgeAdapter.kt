@@ -30,26 +30,24 @@ class BadgeAdapter(
 
     override fun onBindViewHolder(holder: BadgeViewHolder, position: Int) {
         val userBadge = badgeList[position]
-        val badge = userBadge.badge.firstOrNull()
 
         Glide.with(holder.itemView.context)
-            .load(badge?.badgeImage ?: R.drawable.ic_profile)
+            .load(userBadge.badge.badgeImage)
             .placeholder(R.drawable.ic_profile)
             .error(R.drawable.ic_profile)
             .into(holder.ivBadge)
 
         holder.ivBadge.setOnClickListener {
-            badge ?: return@setOnClickListener
-            val dialog = createBadgeDialog(badge)
+            val dialog = createBadgeDialog(userBadge)
             onPopupRequested(dialog)
         }
     }
 
     override fun getItemCount(): Int = badgeList.size
 
-    // 기존: private fun createBadgeDialog(userBadge: RetrofitClient.UserBadge): Dialog
-    private fun createBadgeDialog(badge: RetrofitClient.BadgeDetail): Dialog {  // 배지 단일 객체 받기
+    private fun createBadgeDialog(userBadge: RetrofitClient.UserBadge): Dialog {
         val popupView = LayoutInflater.from(context).inflate(R.layout.badge_popup, null)
+
 
         val tvTitle = popupView.findViewById<TextView>(R.id.tv_badge_popup_text)
         val tvCondition = popupView.findViewById<TextView>(R.id.tv_badge_popup_text2)
@@ -63,8 +61,8 @@ class BadgeAdapter(
             else -> ""
         }
 
-        val grade = getGrade(badge.threshold)
-        val titleText = when (badge.type) {
+        val grade = getGrade(userBadge.badge.threshold)
+        val titleText = when (userBadge.badge.type) {
             "comm_finish" -> "커미션 완료 배지 ($grade)"
             "follow" -> "팔로워 배지 ($grade)"
             "comm_request" -> "커미션 신청 배지 ($grade)"
@@ -72,11 +70,11 @@ class BadgeAdapter(
             else -> "가입 1주년 배지"
         }
 
-        val conditionText = when (badge.type) {
-            "comm_finish" -> "조건 : 커미션 완료 ${badge.threshold}회 달성"
-            "follow" -> "조건 : 팔로워 ${badge.threshold}명 달성"
-            "comm_request" -> "조건 : 커미션 신청 ${badge.threshold}회 달성"
-            "review" -> "조건 : 후기 작성 ${badge.threshold}회 달성"
+        val conditionText = when (userBadge.badge.type) {
+            "comm_finish" -> "조건 : 커미션 완료 ${userBadge.badge.threshold}회 달성"
+            "follow" -> "조건 : 팔로워 ${userBadge.badge.threshold}명 달성"
+            "comm_request" -> "조건 : 커미션 신청 ${userBadge.badge.threshold}회 달성"
+            "review" -> "조건 : 후기 작성 ${userBadge.badge.threshold}회 달성"
             else -> "회원가입 후 1주년 달성"
         }
 
@@ -84,7 +82,7 @@ class BadgeAdapter(
         tvCondition.text = conditionText
 
         Glide.with(context)
-            .load(badge.badgeImage)
+            .load(userBadge.badge.badgeImage)
             .placeholder(R.drawable.ic_profile)
             .error(R.drawable.ic_profile)
             .into(ivBadge)
@@ -94,8 +92,10 @@ class BadgeAdapter(
             window?.apply {
                 setBackgroundDrawableResource(android.R.color.transparent)
                 setDimAmount(0.6f)
-                // 기존 레이아웃 계산이 복잡하면 WIDTH은 WRAP_CONTENT로 두셔도 됩니다.
-                setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                setLayout(
+                    (context.resources.displayMetrics.widthPixels - (92 * context.resources.displayMetrics.density).toInt() * 2),
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
                 setGravity(Gravity.CENTER)
             }
         }
