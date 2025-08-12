@@ -88,7 +88,7 @@ class RetrofitClient {
         @SerializedName("earnedAt")
         val earnedAt: String,
         @SerializedName("badge")
-        val badge: BadgeDetail
+        val badge: List<BadgeDetail>
     )
 
     data class BadgeDetail(
@@ -296,13 +296,15 @@ class RetrofitClient {
         val summary: String,
         val minPrice: Int,
         val category: String,
-        val tags: List<String>
+        val tags: List<String>,
+        @SerializedName("commission_img") val commission_img: String?,
+        @SerializedName("bookmark") val isBookmarked: Boolean = false
     )
 
     data class AuthorBadgeItem(
         val id: String,
         val earnedAt: String,
-        val badge: BadgeInfo
+        val badge: List<BadgeInfo>
     )
 
     data class BadgeInfo(
@@ -400,7 +402,7 @@ class RetrofitClient {
         @SerializedName("created_at")
         val createdAt: String
     )
-    
+
     // 제출된 신청서 데이터 DTO
     data class SubmittedFormData(
         @SerializedName("commission")
@@ -410,4 +412,109 @@ class RetrofitClient {
         @SerializedName("formAnswer")
         val formAnswer: Map<String, Any>
     )
+    data class FollowSuccess(
+        @SerializedName("message") val message: String,
+        @SerializedName("artistId") val artistId: String
+    )
+
+    // 북마크 추가 응답
+    data class BookmarkAddSuccess(
+        @SerializedName("bookmarkId") val bookmarkId: Long,
+        @SerializedName("commissionId") val commissionId: Long,
+        @SerializedName("message") val message: String
+    )
+
+    // 북마크 삭제 응답
+    data class BookmarkDeleteSuccess(
+        @SerializedName("bookmarkId") val bookmarkId: Long,
+        @SerializedName("commissionId") val commissionId: Long,
+        @SerializedName("message") val message: String
+    )
+
+    // 북마크 목록 조회
+    data class BookmarkListSuccess(
+        @SerializedName("items") val items: List<BookmarkCommissionItem>,
+        @SerializedName("pagination") val pagination: BookmarkPagination
+    )
+
+    data class BookmarkPagination(
+        @SerializedName("page") val page: Int,
+        @SerializedName("limit") val limit: Int,
+        @SerializedName("totalCount") val totalCount: Int,
+        @SerializedName("totalPages") val totalPages: Int
+    )
+
+    data class BookmarkCommissionItem(
+        @SerializedName("id") val id: Int, // commissionId
+        @SerializedName("bookmarkId") val bookmarkId: Long?, // 선택삭제용(서버가 주면 채워짐)
+        @SerializedName("title") val title: String,
+        @SerializedName("minPrice") val minPrice: Int?,
+        @SerializedName("category") val category: BookmarkCategory,
+        @SerializedName("tags") val tags: List<BookmarkTag>,
+        @SerializedName("thumbnailImageUrl") val thumbnailImageUrl: String?,
+        @SerializedName("remainingSlots") val remainingSlots: Int,
+        @SerializedName("artist") val artist: CommissionArtist // 기존 타입 재사용(id, nickname, profileImageUrl)
+    )
+
+    data class BookmarkCategory(
+        @SerializedName("id") val id: String,
+        @SerializedName("name") val name: String
+    )
+
+    data class BookmarkTag(
+        @SerializedName("id") val id: String,
+        @SerializedName("name") val name: String
+    )
+
+    // 북마크 선택삭제
+    data class BookmarkBulkDeleteRequest(
+        @SerializedName("bookmarkIds") val bookmarkIds: List<Long>
+    )
+
+    data class BookmarkBulkDeleteSuccess(
+        @SerializedName("bookmarkIds") val bookmarkIds: List<Long>?, // 서버가 주는 배열
+        @SerializedName("message") val message: String?
+    )
+
+    // 팔로잉 작가 커미션 조회
+    data class FollowingResponseData(
+        @SerializedName("items") val items: List<FollowingPostItem>,
+        @SerializedName("pagination") val pagination: FollowingPagination
+    )
+
+    data class FollowingPagination(
+        @SerializedName("page") val page: Int,
+        @SerializedName("limit") val limit: Int,
+        @SerializedName("totalCount") val totalCount: Int,
+        @SerializedName("totalPages") val totalPages: Int
+    )
+
+    data class FollowingPostItem(
+        @SerializedName("id") val id: Long,
+        @SerializedName("title") val title: String,
+        @SerializedName("summary") val summary: String,
+        @SerializedName("images") val images: List<FollowingImage>,
+        @SerializedName("timeAgo") val timeAgo: String,
+        @SerializedName("createdAt") val createdAt: String,
+        @SerializedName("isBookmarked") val isBookmarked: Boolean,
+        @SerializedName("artist") val artist: FollowingArtist
+    )
+
+    data class FollowingImage(
+        @SerializedName("id") val id: Long,
+        @SerializedName("imageUrl") val imageUrl: String,
+        @SerializedName("orderIndex") val orderIndex: Int
+    )
+
+    data class FollowingArtist(
+        @SerializedName("id") val id: Long,
+        @SerializedName("nickname") val nickname: String,
+        @SerializedName("profileImageUrl") val profileImageUrl: String?,
+        @SerializedName("followCount") val followCount: Int
+    )
+
+
+
+
+
 }

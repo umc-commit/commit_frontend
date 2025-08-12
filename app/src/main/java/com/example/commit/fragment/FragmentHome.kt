@@ -55,8 +55,8 @@ class FragmentHome : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-
     private val postViewModel: PostViewModel by viewModels()
+    private var followingLoaded = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,6 +66,9 @@ class FragmentHome : Fragment() {
 
         setBannerTransactionCount(4257)
         fetchHomeData()
+
+        binding.rvFollowingPosts.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvFollowingPosts.setHasFixedSize(true)
 
         val commissionId = arguments?.getInt("commission_id") ?: -1
         val showPostDetail = arguments?.getBoolean("show_post_detail", false) ?: false
@@ -110,21 +113,45 @@ class FragmentHome : Fragment() {
             binding.indicatorRecommend.visibility = View.GONE
             binding.indicatorFollowing?.visibility = View.VISIBLE
 
-            val dummyList = listOf("타임글1", "타임글2", "타임글3", "타입글4", "타입글5")
-            binding.rvFollowingPosts.apply {
-                adapter = FollowingPostAdapter(dummyList) {
-                    val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_post_more, null)
-                    val bottomSheetDialog = BottomSheetDialog(requireContext())
-                    bottomSheetDialog.setContentView(bottomSheetView)
-
-                    bottomSheetDialog.window?.apply {
-                        setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                        setDimAmount(0.6f)
-                    }
-                    bottomSheetDialog.show()
-                }
-                layoutManager = LinearLayoutManager(requireContext())
+            if (followingLoaded) {
+                // 탭 전환만
+                binding.rvFollowingPosts.visibility = View.VISIBLE
+                binding.nestedScrollView.visibility = View.GONE
+                return@setOnClickListener
             }
+
+            val api = RetrofitObject.getRetrofitService(requireContext())
+            api.getFollowing(page = 1, limit = 10)
+                .enqueue(object : Callback<RetrofitClient.ApiResponse<RetrofitClient.FollowingResponseData>> {
+                    override fun onResponse(
+                        call: Call<RetrofitClient.ApiResponse<RetrofitClient.FollowingResponseData>>,
+                        response: Response<RetrofitClient.ApiResponse<RetrofitClient.FollowingResponseData>>
+                    ) {
+                        followingLoaded = true
+                        val items = response.body()?.success?.items ?: emptyList()
+
+                        // 어댑터 생성/세팅
+                        binding.rvFollowingPosts.adapter = FollowingPostAdapter(
+                            postList = items,
+                            onMoreClick = {
+                                val view = layoutInflater.inflate(R.layout.bottom_sheet_post_more, null)
+                                val dialog = BottomSheetDialog(requireContext())
+                                dialog.setContentView(view)
+                                dialog.window?.apply {
+                                    setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                                    setDimAmount(0.6f)
+                                }
+                                dialog.show()
+                            }
+                        )
+                    }
+                    override fun onFailure(
+                        call: Call<RetrofitClient.ApiResponse<RetrofitClient.FollowingResponseData>>,
+                        t: Throwable
+                    ) {
+                        Log.d("FragmentHome", "팔로잉 목록 실패: ${t.message}")
+                    }
+                })
         }
 
         binding.tvRecommend.setOnClickListener {

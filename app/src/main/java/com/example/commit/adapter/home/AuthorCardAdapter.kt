@@ -28,8 +28,10 @@ class AuthorCardAdapter(
             itemView.setOnClickListener {
                 val context = binding.root.context
                 val intent = Intent(context, AuthorProfileActivity::class.java)
+                intent.putExtra("artistId", item.id) // 작가 ID 전달 (HomeAuthorItem.id)
                 context.startActivity(intent)
             }
+
         }
     }
 
