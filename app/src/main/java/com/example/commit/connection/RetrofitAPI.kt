@@ -94,9 +94,14 @@ interface RetrofitAPI {
     //검색 결과 조회
     @GET("/api/search")
     suspend fun getSearchResults(
-        @Query("q") q: String? = null,
-        @Query("category") category: String? = null,
-        @Query("page") page: Int? = 1,
-        @Query("limit") limit: Int? = 12
+        @Query("keyword") keyword: String,
+        @Query("categoryId") categoryId: Int?,
+        @Query("sort") sort: String? = "latest",
+        @Query("minPrice") minPrice: Int? = null,
+        @Query("maxPrice") maxPrice: Int? = null,
+        @Query("deadline") deadline: String? = "all",
+        @Query("followingOnly") followingOnly: Boolean? = null,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 12
     ): ApiResponse<SearchSuccess>
 }
