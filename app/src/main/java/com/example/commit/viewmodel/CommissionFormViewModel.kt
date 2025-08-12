@@ -136,12 +136,13 @@ class CommissionFormViewModel : ViewModel() {
                 // Swagger 기준 필드명: "image"
                 val part = MultipartBody.Part.createFormData("image", file.name, reqBody)
 
-                val response = retrofitAPI!!.uploadRequestImage(part)
+                // 호출부 수정
+                val response = retrofitAPI!!.uploadImage(part)
                 if (response.isSuccessful) {
                     val body = response.body()
                     val imageUrl = body?.success?.image_url
                     if (imageUrl != null) {
-                        _uploadedImageUrls.value = _uploadedImageUrls.value + imageUrl
+                        _uploadedImageUrls.value = _uploadedImageUrls.value + listOf(imageUrl)
                         _imageUploadState.value = ImageUploadState.Success(body)
                         Log.d("ImageUpload", "업로드 성공: $imageUrl (mime=$mime, name=${file.name})")
                     } else {

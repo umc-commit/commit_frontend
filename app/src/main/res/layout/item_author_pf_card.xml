@@ -27,8 +27,8 @@
         <!-- 북마크 아이콘 -->
         <ImageView
             android:id="@+id/iv_bookmark"
-            android:layout_width="17dp"
-            android:layout_height="17dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:layout_marginTop="5dp"
             android:src="@drawable/ic_home_bookmark"
             app:layout_constraintTop_toTopOf="@id/image_thumbnail"

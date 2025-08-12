@@ -15,7 +15,9 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Header
+import retrofit2.http.DELETE
 import com.example.commit.connection.dto.*
+import retrofit2.http.HTTP
 
 
 interface RetrofitAPI {
@@ -48,13 +50,13 @@ interface RetrofitAPI {
     ): Call<RetrofitClient.AuthorProfileResponse>
 
     @GET("/api/commissions/{commissionId}/forms")
-    suspend fun getCommissionForm(
-        @Path("commissionId") commissionId: String
-    ): Response<CommissionFormResponse>
+    fun getSubmittedCommissionForm(
+        @Path("commissionId") commissionId: Int
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>
 
     @Multipart
     @POST("/api/commissions/request-images/upload")
-    suspend fun uploadRequestImage(
+    suspend fun uploadImage(
         @Part image: MultipartBody.Part
     ): Response<ImageUploadResponse>
 
@@ -73,7 +75,7 @@ interface RetrofitAPI {
     // 채팅방 목록 조회
     @GET("/api/chatrooms/list")
     fun getChatroomList(): Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>
-    
+
     // 채팅방 메시지 조회 API
     @GET("/api/chatrooms/{chatroomId}/messages")
     fun getChatroomMessages(
@@ -82,17 +84,12 @@ interface RetrofitAPI {
         @retrofit2.http.Query("offset") offset: Int = 0
     ): Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatMessage>>>
 
+
     // 커미션 상세보기 (postScreen)
     @GET("/api/commissions/{commissionId}")
     suspend fun getCommissionDetail(
         @Path("commissionId") commissionId: Int
     ): CommissionDetailResponse
-    
-    // 커미션 신청폼 조회 (제출된 신청서 확인)
-    @GET("/api/commissions/{commissionId}/forms")
-    fun getSubmittedCommissionForm(
-        @Path("commissionId") commissionId: Int
-    ): Call<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>
 
     //신청함 목록
     @GET("/api/requests")
@@ -104,5 +101,53 @@ interface RetrofitAPI {
     suspend fun getRequestDetail(
         @Path("requestId") requestId: Int
     ): ApiResponse<RequestDetailResponse>
+
+    // 작가 팔로우
+    @POST("/api/users/follows/{artistId}")
+    fun followArtist(
+        @Path("artistId") artistId: Int
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>
+
+    // 작가 팔로우 취소
+    @DELETE("/api/users/follows/{artistId}")
+    fun unfollowArtist(
+        @Path("artistId") artistId: Int
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>
+
+    // 북마크 추가
+    @POST("/api/commissions/{commissionId}/bookmarks")
+    fun addBookmark(
+        @Path("commissionId") commissionId: Long
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkAddSuccess>>
+
+    // 북마크 목록
+    @GET("/api/bookmarks")
+    fun getBookmarks(
+        @retrofit2.http.Query("sort") sort: String = "latest",
+        @retrofit2.http.Query("page") page: Int = 1,
+        @retrofit2.http.Query("limit") limit: Int = 12,
+        @retrofit2.http.Query("excludeFullSlots") excludeFullSlots: Boolean = false
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>>
+
+    // 북마크 단일삭제
+    @DELETE("/api/commissions/{commissionId}/bookmarks/{bookmarkId}")
+    fun deleteBookmark(
+        @Path("commissionId") commissionId: Long,
+        @Path("bookmarkId") bookmarkId: Long
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkDeleteSuccess>>
+
+    //북마크 선택삭제
+    @HTTP(method = "DELETE", path = "/api/bookmarks", hasBody = true)
+    fun deleteBookmarksBulk(
+        @Body req: RetrofitClient.BookmarkBulkDeleteRequest
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkBulkDeleteSuccess>>
+
+    // 팔로잉 작가 커미션 조회
+    @GET("/api/home/following")
+    fun getFollowing(
+        @retrofit2.http.Query("page") page: Int = 1,
+        @retrofit2.http.Query("limit") limit: Int = 10
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.FollowingResponseData>>
+
 
 }
