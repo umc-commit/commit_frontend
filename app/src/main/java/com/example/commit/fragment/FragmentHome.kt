@@ -142,6 +142,9 @@ class FragmentHome : Fragment() {
                                     setDimAmount(0.6f)
                                 }
                                 dialog.show()
+                            },
+                            onItemClick = { clickedCommissionId ->
+                                showPostScreen(clickedCommissionId.toInt())
                             }
                         )
                     }
@@ -331,13 +334,13 @@ class FragmentHome : Fragment() {
     private fun createChatroomFromHome(commissionId: Int, commissionTitle: String) {
         Log.d("FragmentHome", "createChatroomFromHome 메서드 호출됨 - commissionId: $commissionId, title: $commissionTitle")
         val api = RetrofitObject.getRetrofitService(requireContext())
-        
+
         // 임시 값들 (실제로는 SharedPreferences나 다른 방법으로 가져와야 함)
         val currentUserId = 1
         // commissionId에 따라 다른 artistId 사용하여 새 채팅방 생성 시도
         val artistId = if (commissionId % 2 == 0) 2 else 1 // 커미션 ID에 따라 다른 작가
         val artistName = if (artistId == 1) "키르" else "작가2" // 작가에 따른 이름
-        
+
         // 임시: 실제로는 커미션 신청 후 생성되는 requestId를 사용해야 함
         // 일단 기존에 존재하는 requestId 사용 (3번이 존재함을 로그에서 확인)
         val tempRequestId = 3 // 기존 존재하는 request ID 사용
@@ -356,12 +359,12 @@ class FragmentHome : Fragment() {
             ) {
                 Log.d("FragmentHome", "API 응답 받음: code=${response.code()}, isSuccessful=${response.isSuccessful}")
                 Log.d("FragmentHome", "응답 바디: ${response.body()}")
-                
+
                 if (response.isSuccessful) {
                     val data = response.body()?.success
                     if (data != null) {
                         Log.d("FragmentHome", "채팅방 생성 성공: ${data.id}")
-                        
+
                         // 생성된 채팅방으로 이동
                         val fragment = FragmentPostChatDetail().apply {
                             arguments = bundleOf(
@@ -372,12 +375,12 @@ class FragmentHome : Fragment() {
                                 "commissionId" to commissionId
                             )
                         }
-                        
+
                         parentFragmentManager.beginTransaction()
                             .replace(R.id.Nav_Frame, fragment)
                             .addToBackStack(null)
                             .commit()
-                        
+
                         Toast.makeText(
                             requireContext(),
                             "채팅방이 생성되었습니다",
