@@ -13,7 +13,7 @@ class ImageListAdapter(
 ) : RecyclerView.Adapter<ImageListAdapter.ImageViewHolder>() {
 
     inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageView: ImageView = itemView.findViewById(R.id.image_thumbnail)
+        val imageView: ImageView = itemView.findViewById(R.id.iv_thumbnail)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
@@ -27,9 +27,14 @@ class ImageListAdapter(
             .load(imageUrls[position])
             .placeholder(R.drawable.image_placeholder)
             .error(R.drawable.image_placeholder)
+            .fallback(R.drawable.image_placeholder)
             .centerCrop()
             .into(holder.imageView)
     }
 
     override fun getItemCount(): Int = imageUrls.size
+    override fun onViewRecycled(holder: ImageViewHolder) {
+        super.onViewRecycled(holder)
+        Glide.with(holder.itemView.context).clear(holder.imageView)
+    }
 }

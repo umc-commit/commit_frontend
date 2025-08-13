@@ -142,6 +142,10 @@ class FragmentHome : Fragment() {
                                     setDimAmount(0.6f)
                                 }
                                 dialog.show()
+                            },
+                            onItemClick = { commissionId ->
+                                // 추천 탭과 동일하게 상세로 진입
+                                showPostScreen(commissionId.toInt())
                             }
                         )
                     }

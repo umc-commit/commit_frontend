@@ -79,7 +79,9 @@ class RetrofitClient {
         @SerializedName("description")
         val description: String?,
         @SerializedName("badges")
-        val badges: List<UserBadge>
+        val badges: List<UserBadge>,
+        @SerializedName("reviews")
+        val reviews: List<UserReview>
     )
 
     data class UserBadge(
@@ -102,6 +104,23 @@ class RetrofitClient {
         val name: String,
         @SerializedName("badgeImage")
         val badgeImage: String
+    )
+
+    data class UserReview(
+        @SerializedName("id")
+        val id: String,
+        @SerializedName("requestId")
+        val requestId: String,
+        @SerializedName("rate")
+        val rate: Int,
+        @SerializedName("content")
+        val content: String,
+        @SerializedName("createdAt")
+        val createdAt: String,
+        @SerializedName("updatedAt")
+        val updatedAt: String,
+        @SerializedName("reviewThumbnail")
+        val reviewThumbnail: String?
     )
 
     data class NotificationResponseData(
@@ -267,52 +286,53 @@ class RetrofitClient {
     )
 
     data class AuthorProfileData(
-        val nickname: String,
-        val description: String,
-        val profileImage: String?,
-        val slot: Int,
-        val reviews: List<AuthorReviewItem>,
-        val commissions: List<AuthorCommissionItem>,
-        val badges: List<AuthorBadgeItem>
+        @SerializedName("nickname") val nickname: String,
+        @SerializedName("description") val description: String,
+        @SerializedName("profileImage") val profileImage: String?,
+        @SerializedName("slot") val slot: Int,
+        @SerializedName("reviews") val reviews: List<AuthorReviewItem>,
+        @SerializedName("commissions") val commissions: List<AuthorCommissionItem>,
+        @SerializedName("badges") val badges: List<AuthorBadgeItem>
     )
 
     data class AuthorReviewItem(
-        val id: String,
-        val rate: Double,
-        val content: String,
-        val createdAt: String,
-        val commissionTitle: String,
-        val workingTime: String?,
-        val writer: Writer
+        @SerializedName("id") val id: String,
+        @SerializedName("rate") val rate: Int,
+        @SerializedName("content") val content: String,
+        @SerializedName("createdAt") val createdAt: String,
+        @SerializedName("commissionTitle") val commissionTitle: String,
+        @SerializedName("workingTime") val workingTime: String?,
+        @SerializedName("review_thumbnail") val reviewThumbnail: String?,
+        @SerializedName("writer") val writer: Writer
     )
 
     data class Writer(
-        val nickname: String
+        @SerializedName("nickname") val nickname: String
     )
 
     data class AuthorCommissionItem(
-        val id: String,
-        val title: String,
-        val summary: String,
-        val minPrice: Int,
-        val category: String,
-        val tags: List<String>,
+        @SerializedName("id") val id: String,
+        @SerializedName("title") val title: String,
+        @SerializedName("summary") val summary: String,
+        @SerializedName("minPrice") val minPrice: Int,
+        @SerializedName("category") val category: String,
+        @SerializedName("tags") val tags: List<String>,
         @SerializedName("commission_img") val commission_img: String?,
         @SerializedName("bookmark") val isBookmarked: Boolean = false
     )
 
     data class AuthorBadgeItem(
-        val id: String,
-        val earnedAt: String,
-        val badge: List<BadgeInfo>
+        @SerializedName("id") val id: String,
+        @SerializedName("earnedAt") val earnedAt: String,
+        @SerializedName("badge") val badge: List<BadgeInfo>
     )
 
     data class BadgeInfo(
-        val id: String,
-        val type: String,
-        val threshold: Int,
-        val name: String,
-        val badgeImage: String
+        @SerializedName("id") val id: String,
+        @SerializedName("type") val type: String,
+        @SerializedName("threshold") val threshold: Int,
+        @SerializedName("name") val name: String,
+        @SerializedName("badgeImage") val badgeImage: String
     )
 
     // 채팅방 생성 요청 DTO

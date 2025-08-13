@@ -12,6 +12,7 @@ import com.example.commit.fragment.FragmentBookmark
 import com.example.commit.fragment.FragmentChat
 import com.example.commit.fragment.FragmentHome
 import com.example.commit.fragment.FragmentMypage
+import com.example.commit.fragment.FragmentPostChatDetail
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
@@ -29,16 +30,16 @@ class MainActivity : AppCompatActivity() {
 
         // 액티비티가 처음 생성될 때만 초기 프래그먼트를 로드하고 바텀 시트 인자를 전달
         if (savedInstanceState == null) {
-            if (openFragment == "chat") {
-                // 채팅 프래그먼트 바로 열기
-                supportFragmentManager
-                    .beginTransaction()
+            if (openFragment == "postChatDetail") {
+                // 1:1 채팅 상세로 바로 진입
+                openPostChatDetailFromIntent(intent)
+                showBottomNav(false) // 상세 화면이므로 바텀바 숨김 (원하면 유지해도 됨)
+            } else if (openFragment == "chat") {
+                // 기존: 채팅 탭 열기
+                supportFragmentManager.beginTransaction()
                     .replace(binding.NavFrame.id, FragmentChat())
                     .commitAllowingStateLoss()
-
-                // 하단 네비게이션 채팅 탭 선택
                 binding.BottomNavi.selectedItemId = R.id.nav_chat
-
             } else {
                 // 기본 홈 프래그먼트 로드
                 val initialFragment = FragmentHome().apply {
@@ -58,12 +59,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         initBottomNavigation()
+
+        supportFragmentManager.addOnBackStackChangedListener {
+            val top = supportFragmentManager.findFragmentById(binding.NavFrame.id)
+            // 상세 화면이면 숨기고, 아니면 보이기
+            showBottomNav(top !is FragmentPostChatDetail)
+        }
     }
 
     private fun initBottomNavigation() {
         bottomNavigationView = binding.BottomNavi
-        // onCreate에서 이미 초기 프래그먼트를 로드했으므로, 여기서 다시 R.id.nav_home을 선택할 필요는 없습니다.
-        // bottomNavigationView.selectedItemId = R.id.nav_home // 이 줄은 제거하거나 주석 처리
 
         bottomNavigationView.setOnItemSelectedListener { menuItem ->
             // 닉네임 화면에서 넘어온 경우에만 바텀 시트를 띄우도록 인자를 전달
@@ -123,5 +128,48 @@ class MainActivity : AppCompatActivity() {
     // 바텀바 숨기기/보이기 메서드
     fun showBottomNav(isVisible: Boolean) {
         binding.BottomNavi.visibility = if (isVisible) View.VISIBLE else View.GONE
+    }
+
+    private fun openPostChatDetailFromIntent(srcIntent: android.content.Intent) {
+        val chatroomId = srcIntent.getIntExtra("chatroomId", -1)
+        if (chatroomId == -1) {
+            supportFragmentManager.beginTransaction()
+                .replace(binding.NavFrame.id, FragmentChat())
+                .commitAllowingStateLoss()
+            binding.BottomNavi.selectedItemId = R.id.nav_chat
+            return
+        }
+
+        // 기저 프래그먼트가 없으면 먼저 채팅 탭 깔기 (백스택 X)
+        if (supportFragmentManager.findFragmentById(binding.NavFrame.id) == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(binding.NavFrame.id, FragmentChat())
+                .commitNowAllowingStateLoss() // 바로 깔아두기
+            binding.BottomNavi.selectedItemId = R.id.nav_chat
+        }
+
+        val chatName = srcIntent.getStringExtra("chatName") ?: "채팅"
+        val authorName = srcIntent.getStringExtra("authorName") ?: ""
+        val commissionId = srcIntent.getIntExtra("commissionId", -1)
+        val source = srcIntent.getStringExtra("sourceFragment") ?: "MainActivity"
+
+        val frag = FragmentPostChatDetail().apply {
+            arguments = Bundle().apply {
+                putString("chatName", chatName)
+                putString("authorName", authorName)
+                putInt("chatroomId", chatroomId)
+                putInt("commissionId", commissionId)
+                putString("sourceFragment", source)
+            }
+        }
+
+        // 채팅 상세는 백스택에 올리기
+        supportFragmentManager.beginTransaction()
+            .replace(binding.NavFrame.id, frag)
+            .addToBackStack("postChatDetail")
+            .commitAllowingStateLoss()
+
+        // 상세 진입 시 바텀바 숨김
+        showBottomNav(false)
     }
 }
