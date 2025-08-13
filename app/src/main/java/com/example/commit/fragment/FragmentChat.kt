@@ -25,6 +25,7 @@ import com.example.commit.ui.chatlist.DeleteOptionBottomSheet
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.content.Context
 
 class FragmentChat : Fragment() {
     
@@ -127,6 +128,12 @@ class FragmentChat : Fragment() {
     }
 
     private fun fetchChatroomList(onSuccess: (List<ChatItem>) -> Unit) {
+        // 현재 저장된 토큰 상태 확인
+        val prefs = requireContext().getSharedPreferences("auth", Context.MODE_PRIVATE)
+        val token = prefs.getString("accessToken", "토큰 없음")
+        Log.d("FragmentChat", "현재 저장된 토큰: $token")
+        Log.d("FragmentChat", "토큰 길이: ${token?.length ?: 0}")
+        
         Log.d("ChatAPI", "채팅방 목록 조회 시작")
         val api = RetrofitObject.getRetrofitService(requireContext())
         Log.d("ChatAPI", "API 서비스 생성됨: $api")
