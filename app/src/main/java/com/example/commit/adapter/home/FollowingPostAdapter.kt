@@ -19,7 +19,8 @@ import retrofit2.Response
 
 class FollowingPostAdapter(
     private val postList: List<RetrofitClient.FollowingPostItem>,
-    private val onMoreClick: () -> Unit
+    private val onMoreClick: () -> Unit,
+    private val onItemClick: (Long) -> Unit
 ) : RecyclerView.Adapter<FollowingPostAdapter.FollowingPostViewHolder>() {
 
     companion object {
@@ -79,6 +80,13 @@ class FollowingPostAdapter(
         )
 
         holder.ivMore.setOnClickListener { onMoreClick() }
+
+        // 아이템 전체 클릭 시 상세로 이동
+        holder.itemView.setOnClickListener {
+            onItemClick(cId)
+        }
+        holder.tvPostTitle.setOnClickListener { onItemClick(cId) }
+        holder.tvPostSummary.setOnClickListener { onItemClick(cId) }
 
         // 토글
         holder.ivBookmark.setOnClickListener {
