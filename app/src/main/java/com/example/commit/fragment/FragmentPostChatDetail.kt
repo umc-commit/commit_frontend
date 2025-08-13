@@ -64,7 +64,8 @@ class FragmentPostChatDetail : Fragment() {
                     
                     // 채팅방 초기화 (동적으로 신청서 제출 상태 설정)
                     LaunchedEffect(chatroomId) {
-                        chatViewModel.initializeChatroom(chatroomId, hasSubmittedApplication = hasSubmittedApplication)
+                        chatViewModel.setChatroomId(chatroomId)
+                        chatViewModel.setApplicationStatus(hasSubmittedApplication)
                         chatViewModel.loadMessages(requireContext(), chatroomId)
                     }
                     

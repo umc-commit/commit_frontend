@@ -93,36 +93,44 @@ fun CommissionFormScreen(
     val formSchema = when (commissionFormState) {
         is CommissionFormState.Success -> {
             val response = (commissionFormState as CommissionFormState.Success).data
-            val formSchemaData = response.success?.formSchema
+            val formSchemaData = response?.success?.formSchema
             Log.d("FormDebug", "API 응답 받음 - formSchema: $formSchemaData")
 
             if (formSchemaData?.fields != null) {
                 runCatching {
-                                    // API 응답 + 기본 라디오/체크박스 옵션 병합
-                val apiFields = formSchemaData.fields.map { f ->
-                    FormItem(
-                        id = f.id.toIntOrNull(),
-                        type = f.type,
-                        label = f.label,
-                        options = f.options?.map { OptionItem(it.label) } ?: emptyList()
-                    )
-                }
-                
-                val merged = mutableListOf<FormItem>()
-                // 기본 라디오/체크박스 먼저 추가
-                merged += defaultFormSchema.filter { it.type in listOf("radio", "check") }
-                // API 응답 필드 추가 (중복 라벨 제외)
-                apiFields.forEach { apiItem ->
-                    if (merged.none { it.label == apiItem.label }) {
-                        merged += apiItem
+                    // API 응답 + 기본 라디오/체크박스 옵션 병합
+                    val apiFields = formSchemaData.fields.map { f ->
+                        FormItem(
+                            id = f.id.toIntOrNull(),
+                            type = f.type,
+                            label = f.label,
+                            options = f.options?.map { OptionItem(it.label) } ?: emptyList()
+                        )
                     }
-                }
-                merged
+                    
+                    val merged = mutableListOf<FormItem>()
+                    // 기본 라디오/체크박스 먼저 추가
+                    merged += defaultFormSchema.filter { it.type in listOf("radio", "check") }
+                    // API 응답 필드 추가 (중복 라벨 제외)
+                    apiFields.forEach { apiItem ->
+                        if (merged.none { it.label == apiItem.label }) {
+                            merged += apiItem
+                        }
+                    }
+                    merged
                 }.getOrElse {
                     Log.e("FormSchema", "formSchema 파싱 오류: ${it.message}")
                     defaultFormSchema
                 }
             } else defaultFormSchema
+        }
+        is CommissionFormState.Error -> {
+            Log.w("CommissionFormScreen", "API 오류 발생, 기본 폼 사용: ${(commissionFormState as CommissionFormState.Error).message}")
+            defaultFormSchema
+        }
+        is CommissionFormState.Loading -> {
+            Log.d("CommissionFormScreen", "API 로딩 중, 기본 폼 사용")
+            defaultFormSchema
         }
         else -> defaultFormSchema
     }

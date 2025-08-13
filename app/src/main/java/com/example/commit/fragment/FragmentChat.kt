@@ -25,6 +25,7 @@ import com.example.commit.ui.chatlist.DeleteOptionBottomSheet
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.content.Context
 
 class FragmentChat : Fragment() {
     
@@ -127,6 +128,12 @@ class FragmentChat : Fragment() {
     }
 
     private fun fetchChatroomList(onSuccess: (List<ChatItem>) -> Unit) {
+        // 현재 저장된 토큰 상태 확인
+        val prefs = requireContext().getSharedPreferences("auth", Context.MODE_PRIVATE)
+        val token = prefs.getString("accessToken", "토큰 없음")
+        Log.d("FragmentChat", "현재 저장된 토큰: $token")
+        Log.d("FragmentChat", "토큰 길이: ${token?.length ?: 0}")
+        
         Log.d("ChatAPI", "채팅방 목록 조회 시작")
         val api = RetrofitObject.getRetrofitService(requireContext())
         Log.d("ChatAPI", "API 서비스 생성됨: $api")
@@ -169,18 +176,19 @@ class FragmentChat : Fragment() {
                             Log.e("ChatAPI", "success 데이터가 없음")
                             Log.e("ChatAPI", "전체 응답: ${response.body()}")
                             Log.e("ChatAPI", "응답 상세: resultType=${response.body()?.resultType}, error=${response.body()?.error}")
-                            // 기본 데이터로 폴백
-                            onSuccess(getDefaultChatItems())
+                            // 빈 목록 반환 (더미 데이터 사용하지 않음)
+                            onSuccess(emptyList())
                         }
                     } catch (e: Exception) {
                         Log.e("ChatAPI", "API 응답 처리 중 오류: ${e.message}")
-                        onSuccess(getDefaultChatItems())
+                        // 빈 목록 반환 (더미 데이터 사용하지 않음)
+                        onSuccess(emptyList())
                     }
                 } else {
                     Log.e("ChatAPI", "API 실패: ${response.code()}")
                     Log.e("ChatAPI", "에러 응답: ${response.errorBody()?.string()}")
-                    // 기본 데이터로 폴백
-                    onSuccess(getDefaultChatItems())
+                    // 빈 목록 반환 (더미 데이터 사용하지 않음)
+                    onSuccess(emptyList())
                 }
             }
 
@@ -191,17 +199,15 @@ class FragmentChat : Fragment() {
                 Log.e("ChatAPI", "네트워크 오류", t)
                 Log.e("ChatAPI", "오류 메시지: ${t.message}")
                 
-                // 기본 데이터로 폴백
-                onSuccess(getDefaultChatItems())
+                // 빈 목록 반환 (더미 데이터 사용하지 않음)
+                onSuccess(emptyList())
             }
         })
     }
 
     private fun getDefaultChatItems(): List<ChatItem> {
-        return listOf(
-            ChatItem(R.drawable.ic_profile, "키르", "[결제 요청] 낙서 타임 커미션", "방금 전", true, "낙서 타입 커미션"),
-            ChatItem(R.drawable.ic_profile, "브로콜리", "[커미션 완료] 일러스트 타입", "2일 전", false, "일러스트 타입 커미션")
-        )
+        // 더미 데이터 대신 빈 목록 반환
+        return emptyList()
     }
 
     private fun formatTime(timeString: String?): String {
@@ -229,6 +235,8 @@ class FragmentChat : Fragment() {
                     val data = response.body()?.success
                     if (data != null) {
                         Log.d("ChatAPI", "채팅방 생성 성공: ${data.id}")
+                        // 채팅방 생성 성공 시 목록 새로고침
+                        refreshChatroomList()
                         onSuccess(data.id)
                     } else {
                         Log.e("ChatAPI", "채팅방 생성 실패: success 데이터가 없음")

@@ -142,10 +142,6 @@ class FragmentHome : Fragment() {
                                     setDimAmount(0.6f)
                                 }
                                 dialog.show()
-                            },
-                            onItemClick = { commissionId ->
-                                // 추천 탭과 동일하게 상세로 진입
-                                showPostScreen(commissionId.toInt())
                             }
                         )
                     }
@@ -331,7 +327,7 @@ class FragmentHome : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-    
+
     private fun createChatroomFromHome(commissionId: Int, commissionTitle: String) {
         Log.d("FragmentHome", "createChatroomFromHome 메서드 호출됨 - commissionId: $commissionId, title: $commissionTitle")
         val api = RetrofitObject.getRetrofitService(requireContext())

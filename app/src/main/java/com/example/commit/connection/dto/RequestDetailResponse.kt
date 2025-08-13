@@ -22,6 +22,20 @@ data class RequestItemDetail(
 ) : Parcelable
 
 @Parcelize
+data class CommissionRef(
+    @SerializedName("id")                val id: Int,
+    @SerializedName("title")             val title: String,
+    @SerializedName("thumbnailImageUrl") val thumbnailImageUrl: String,
+    @SerializedName("artist")            val artist: ArtistMini
+) : Parcelable
+
+@Parcelize
+data class ArtistMini(
+    @SerializedName("id")       val id: Int,
+    @SerializedName("nickname") val nickname: String
+) : Parcelable
+
+@Parcelize
 data class CommissionItem(
     @SerializedName("id") val id: Int,
     @SerializedName("title") val title: String,

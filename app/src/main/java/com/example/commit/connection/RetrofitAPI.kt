@@ -86,9 +86,9 @@ interface RetrofitAPI {
 
     // 커미션 상세보기 (postScreen)
     @GET("/api/commissions/{commissionId}")
-    suspend fun getCommissionDetail(
+    fun getCommissionDetail(
         @Path("commissionId") commissionId: Int
-    ): CommissionDetailResponse
+    ): Call<CommissionDetailResponse>
     
     // 커미션 신청폼 조회 (제출된 신청서 확인)
     @GET("/api/commissions/{commissionId}/forms")
