@@ -42,6 +42,11 @@ fun ChatRoomScreen(
         mutableStateOf(chatViewModel.chatMessages)
     }
 
+    // 채팅방 ID 설정 (더미데이터 로드를 위해)
+    LaunchedEffect(Unit) {
+        chatViewModel.setChatroomId(1) // 임시 ID, 실제로는 전달받은 ID 사용
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,7 +73,7 @@ fun ChatRoomScreen(
             currentUserId = chatViewModel.currentUserId,
             onPayClick = {
                 // 결제 완료 시스템 메시지 표시
-                chatViewModel.showPaymentCompleteMessage()
+                chatViewModel.addNewMessage("결제가 완료되었어요. 24시간 이내로 작업을 시작해주세요.", MessageType.PAYMENT_COMPLETE)
                 // 기존 onPayClick도 실행 (필요한 경우)
                 onPayClick()
             },

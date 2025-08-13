@@ -48,8 +48,8 @@ class FragmentChatDetail : Fragment() {
                     
                     // 채팅방 초기화
                     LaunchedEffect(chatroomId) {
-                        chatViewModel.initializeChatroom(chatroomId)
-                        // 기존 메시지 로드 시도 (실패하면 빈 상태로 시작)
+                        chatViewModel.setChatroomId(chatroomId)
+                        // 기존 메시지 로드 시도 (실패하면 더미데이터 사용)
                         chatViewModel.loadMessages(requireContext(), chatroomId)
                     }
                     
