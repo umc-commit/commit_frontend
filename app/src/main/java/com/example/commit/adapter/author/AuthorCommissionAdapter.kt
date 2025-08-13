@@ -22,7 +22,8 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class AuthorCommissionAdapter(
-    private val items: MutableList<RetrofitClient.AuthorCommissionItem>
+    private val items: MutableList<RetrofitClient.AuthorCommissionItem>,
+    private val onItemClick: (Int) -> Unit
 ) : RecyclerView.Adapter<AuthorCommissionAdapter.ViewHolder>() {
 
     companion object {
@@ -51,6 +52,15 @@ class AuthorCommissionAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
+
+        // 카드/썸네일/텍스트 클릭 시 상세로 이동
+        val idInt = item.id.toIntOrNull()
+        val fireClick: (() -> Unit)? = idInt?.let { cid -> { onItemClick(cid) } }
+
+        holder.itemView.setOnClickListener { fireClick?.invoke() }
+        holder.thumbnail.setOnClickListener { fireClick?.invoke() }
+        holder.tvTitle.setOnClickListener { fireClick?.invoke() }
+        holder.tvDescription.setOnClickListener { fireClick?.invoke() }
 
         // 썸네일
         val imgUrl = item.commission_img?.takeIf { it.isNotBlank() }

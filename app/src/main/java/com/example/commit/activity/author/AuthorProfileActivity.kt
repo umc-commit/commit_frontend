@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -20,12 +21,25 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import android.widget.FrameLayout
+import androidx.activity.OnBackPressedCallback
+import androidx.lifecycle.ViewModelProvider
+import com.example.commit.ui.post.PostScreen
+import com.example.commit.viewmodel.PostViewModel
+
 
 class AuthorProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAuthorProfileBinding
     private var isFollowing = false
     private var isFollowLoading = false
     private var artistIdFromIntent: Int = -1
+    private lateinit var postViewModel: PostViewModel
+    private var composeOverlay: FrameLayout? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,6 +95,21 @@ class AuthorProfileActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+
+        postViewModel = ViewModelProvider(this).get(PostViewModel::class.java)
+
+        // 뒤로가기: 상세 오버레이가 떠 있으면 닫기
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (composeOverlay != null && composeOverlay!!.parent != null) {
+                    (composeOverlay!!.parent as ViewGroup).removeView(composeOverlay)
+                    composeOverlay = null
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     // 버튼 이미지/상태만 바꾸는 함수 (팔로워 수 변동 없음)
@@ -117,7 +146,7 @@ class AuthorProfileActivity : AppCompatActivity() {
 
         // 커미션 RecyclerView
         binding.recyclerCard.layoutManager = LinearLayoutManager(this)
-        binding.recyclerCard.adapter = AuthorCommissionAdapter(mutableListOf())
+        binding.recyclerCard.adapter = AuthorCommissionAdapter(mutableListOf()) { }
 
         // 리뷰 RecyclerView
         binding.recyclerReviews.layoutManager = LinearLayoutManager(this)
@@ -212,8 +241,11 @@ class AuthorProfileActivity : AppCompatActivity() {
 
 
                     // 커미션
-                    binding.recyclerCard.adapter =
-                        AuthorCommissionAdapter(data.commissions.toMutableList())
+                    binding.recyclerCard.adapter = AuthorCommissionAdapter(
+                        data.commissions.toMutableList()
+                    ) { commissionId ->
+                        showPostScreen(commissionId)   // 상세화면 진입
+                    }
 
                     // 리뷰
                     binding.recyclerReviews.adapter =
@@ -250,6 +282,9 @@ class AuthorProfileActivity : AppCompatActivity() {
                 call: Call<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>,
                 response: Response<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>
             ) {
+                Log.d("AuthorProfileActivity", "follow code=${response.code()} isOk=${response.isSuccessful}")
+                Log.d("AuthorProfileActivity", "body=${response.body()}")
+                Log.d("AuthorProfileActivity", "error=${response.errorBody()?.string()}")
                 setFollowLoading(false)
                 val body = response.body()
                 val ok = response.isSuccessful && body?.resultType == "SUCCESS" && body.success != null
@@ -266,6 +301,7 @@ class AuthorProfileActivity : AppCompatActivity() {
                     applyFollowState(true)
                 } else {
                     showLog(body?.error?.reason ?: "팔로우에 실패했습니다.")
+                    Log.d("AuthorProfileActivity", "팔로우 실패(서버): ${response.code()}")
                 }
             }
 
@@ -345,5 +381,106 @@ class AuthorProfileActivity : AppCompatActivity() {
 
     private fun showLog(msg: String) {
         Log.d("AuthorProfileActivity", msg)
+    }
+
+    private fun showPostScreen(commissionId: Int) {
+        // 오버레이 컨테이너 생성(최상단에 덮어쓰기)
+        if (composeOverlay == null) {
+            composeOverlay = FrameLayout(this).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                setBackgroundColor(android.graphics.Color.WHITE) // 필요시 반투명/투명 조정
+            }
+        } else {
+            (composeOverlay!!.parent as? ViewGroup)?.removeView(composeOverlay)
+        }
+
+        val composeView = ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            setContent {
+                val commission by postViewModel.commissionDetail.collectAsState()
+
+                LaunchedEffect(commissionId) {
+                    postViewModel.loadCommissionDetail(this@AuthorProfileActivity, commissionId)
+                }
+
+                commission?.let { itDetail ->
+                    PostScreen(
+                        title = itDetail.title,
+                        tags = listOf(itDetail.category) + itDetail.tags,
+                        minPrice = itDetail.minPrice,
+                        summary = itDetail.summary,
+                        content = itDetail.content,
+                        images = itDetail.images.map { img -> img.imageUrl },
+                        isBookmarked = itDetail.isBookmarked,
+                        imageCount = itDetail.images.size,
+                        currentIndex = 0,
+                        commissionId = itDetail.id,
+                        onReviewListClick = {
+                            startActivity(Intent(this@AuthorProfileActivity, com.example.commit.activity.WrittenReviewsActivity::class.java))
+                        },
+                        onChatClick = {
+                            createChatroomFromProfile(itDetail.id, itDetail.title)
+                        }
+                    )
+                }
+            }
+        }
+
+        composeOverlay!!.removeAllViews()
+        composeOverlay!!.addView(composeView)
+        (binding.root as ViewGroup).addView(composeOverlay)
+    }
+
+    private fun createChatroomFromProfile(commissionId: Int, commissionTitle: String) {
+        val api = RetrofitObject.getRetrofitService(this)
+        val currentUserId = 1
+        val artistId = artistIdFromIntent.takeIf { it != -1 } ?: 1
+        val artistName = binding.tvUsername.text?.toString().orEmpty()
+        val tempRequestId = 3
+
+        val req = RetrofitClient.CreateChatroomRequest(
+            consumerId = currentUserId,
+            artistId = artistId,
+            requestId = tempRequestId
+        )
+
+        api.createChatroom(req).enqueue(object :
+            Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
+            ) {
+                if (!response.isSuccessful) {
+                    Log.d("AuthorProfileActivity", "채팅방 생성 실패(${response.code()})")
+                    return
+                }
+                val data = response.body()?.success ?: run {
+                    Log.d("AuthorProfileActivity", "채팅방 생성 실패(응답 없음)")
+                    return
+                }
+
+                Log.d("AuthorProfileActivity", "채팅방 생성 성공: ${data.id}")
+
+                val intent = Intent(this@AuthorProfileActivity, MainActivity::class.java).apply {
+                    putExtra("openFragment", "postChatDetail")
+                    putExtra("chatName", commissionTitle)
+                    putExtra("authorName", artistName)
+                    putExtra("chatroomId", data.id)
+                    putExtra("sourceFragment", "AuthorProfileActivity")
+                    putExtra("commissionId", commissionId)
+                }
+                startActivity(intent)
+            }
+
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
+                t: Throwable
+            ) {
+                Log.d("AuthorProfileActivity", "네트워크 오류: ${t.message}")
+            }
+        })
     }
 }

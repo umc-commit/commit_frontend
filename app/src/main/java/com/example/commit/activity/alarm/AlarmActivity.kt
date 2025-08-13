@@ -1,6 +1,7 @@
 package com.example.commit.activity.alarm
 
 import android.app.Dialog
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -13,10 +14,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.commit.adapter.alarm.AlarmAdapter
 import com.example.commit.R
+import com.example.commit.activity.MainActivity
 import com.example.commit.connection.RetrofitClient
 import com.example.commit.connection.RetrofitObject
 import retrofit2.Call
 import retrofit2.Response
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import androidx.activity.OnBackPressedCallback
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.lifecycle.ViewModelProvider
+import com.example.commit.ui.post.PostScreen
+import com.example.commit.viewmodel.PostViewModel
 
 class AlarmActivity : AppCompatActivity() {
 
@@ -29,6 +42,9 @@ class AlarmActivity : AppCompatActivity() {
 
     private val alarmList = mutableListOf<RetrofitClient.NotificationItem>()
     private lateinit var alarmAdapter: AlarmAdapter
+
+    private lateinit var postViewModel: PostViewModel
+    private var composeOverlay: FrameLayout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,10 +65,23 @@ class AlarmActivity : AppCompatActivity() {
             }
         }
 
-        alarmAdapter = AlarmAdapter(alarmList) { position ->
-            alarmList.removeAt(position)
-            alarmAdapter.notifyItemRemoved(position)
-        }
+        alarmAdapter = AlarmAdapter(
+            alarmList,
+            onItemDelete = { position ->
+                alarmList.removeAt(position)
+                alarmAdapter.notifyItemRemoved(position)
+            },
+            onOpenChat = { _ ->
+                // 채팅 탭(목록)으로 바로 이동
+                val intent = Intent(this, MainActivity::class.java).apply {
+                    putExtra("openFragment", "chat")
+                }
+                startActivity(intent)
+            },
+            onOpenPostDetail = { commissionId ->
+                showPostScreen(commissionId) // ↓ 아래 구현
+            }
+        )
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_alarm_list)
         recyclerView.adapter = alarmAdapter
@@ -61,6 +90,18 @@ class AlarmActivity : AppCompatActivity() {
         // API 호출
         loadNotifications()
 
+        postViewModel = ViewModelProvider(this).get(PostViewModel::class.java)
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (composeOverlay != null && composeOverlay!!.parent != null) {
+                    (composeOverlay!!.parent as ViewGroup).removeView(composeOverlay)
+                    composeOverlay = null
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     private fun loadNotifications() {
@@ -153,5 +194,57 @@ class AlarmActivity : AppCompatActivity() {
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_alarm_list)
         (recyclerView.adapter as? AlarmAdapter)?.enableDeleteMode(false)
+    }
+
+    private fun showPostScreen(commissionId: Int) {
+        if (composeOverlay == null) {
+            composeOverlay = FrameLayout(this).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                setBackgroundColor(android.graphics.Color.WHITE)
+            }
+        } else {
+            (composeOverlay!!.parent as? ViewGroup)?.removeView(composeOverlay)
+        }
+
+        val composeView = ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            setContent {
+                val commission by postViewModel.commissionDetail.collectAsState()
+
+                LaunchedEffect(commissionId) {
+                    postViewModel.loadCommissionDetail(this@AlarmActivity, commissionId)
+                }
+
+                commission?.let { itDetail ->
+                    PostScreen(
+                        title = itDetail.title,
+                        tags = listOf(itDetail.category) + itDetail.tags,
+                        minPrice = itDetail.minPrice,
+                        summary = itDetail.summary,
+                        content = itDetail.content,
+                        images = itDetail.images.map { img -> img.imageUrl },
+                        isBookmarked = itDetail.isBookmarked,
+                        imageCount = itDetail.images.size,
+                        currentIndex = 0,
+                        commissionId = itDetail.id,
+                        onReviewListClick = { /* 필요 시 리뷰 화면 이동 */ },
+                        onChatClick = {
+                            // 알림 화면에서는 채팅 탭으로 이동(간단 버전)
+                            val intent = Intent(this@AlarmActivity, MainActivity::class.java).apply {
+                                putExtra("openFragment", "chat")
+                            }
+                            startActivity(intent)
+                        }
+                    )
+                }
+            }
+        }
+
+        composeOverlay!!.removeAllViews()
+        composeOverlay!!.addView(composeView)
+        (findViewById<ViewGroup>(android.R.id.content)).addView(composeOverlay)
     }
 }

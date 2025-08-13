@@ -14,7 +14,9 @@ import java.util.concurrent.TimeUnit
 
 class AlarmAdapter(
     private val alarmList: MutableList<RetrofitClient.NotificationItem>,
-    private val onItemDelete: (Int) -> Unit
+    private val onItemDelete: (Int) -> Unit,
+    private val onOpenChat: (RetrofitClient.NotificationItem) -> Unit,
+    private val onOpenPostDetail: (Int) -> Unit
 ) : RecyclerView.Adapter<AlarmAdapter.AlarmViewHolder>() {
 
     private var isDeleteMode = false
@@ -49,6 +51,20 @@ class AlarmAdapter(
         }
         holder.binding.tvAction.text = actionText
         holder.binding.tvAction.visibility = if (actionText.isEmpty()) View.GONE else View.VISIBLE
+
+        // actionText 클릭 → 타입별 이동
+        holder.binding.tvAction.setOnClickListener {
+            when (item.type) {
+                "payment_request", "work_completed" -> {
+                    onOpenChat(item) // 채팅방(채팅 탭)으로
+                }
+                "artist_new_post" -> {
+                    // relatedData에서 commissionId 안전 파싱
+                    val commissionId = anyToInt(item.relatedData["commissionId"])
+                    commissionId?.let { onOpenPostDetail(it) }
+                }
+            }
+        }
 
         // 아이콘 type별 변경
         val iconRes = when (item.type) {
@@ -124,6 +140,12 @@ class AlarmAdapter(
     companion object {
         private val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
         private val outputFormat = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
+    }
+
+    private fun anyToInt(v: Any?): Int? = when (v) {
+        is Number -> v.toInt()
+        is String -> v.toIntOrNull()
+        else -> null
     }
 }
 

@@ -65,13 +65,6 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
 
-        val photoReviewList = List(5) { R.drawable.sample_review }
-        val photoReviewAdapter = PhotoReviewAdapter(this, photoReviewList)
-        binding.recyclerReviews.apply {
-            adapter = photoReviewAdapter
-            layoutManager = LinearLayoutManager(this@ProfileActivity, LinearLayoutManager.HORIZONTAL, false)
-        }
-
         binding.tvBadgeSetting.paintFlags = binding.tvBadgeSetting.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
         binding.ivReviewBtn.setOnClickListener {
@@ -146,41 +139,32 @@ class ProfileActivity : AppCompatActivity() {
 
         binding.tvUsername.text = user.nickname
         binding.tvIntroContent.text = user.description ?: "입력된 소개가 없습니다."
-
-        // 신청자 / 작가 태그 표시
         binding.tvBadge.text = if (user.artistId != null) "작가" else "신청자"
 
-        // 프로필 이미지 로드
         Glide.with(this)
-            .load(user.profileImage?.takeIf { it.isNotBlank() } ?: R.drawable.ic_profile) // null이면 기본 이미지
+            .load(user.profileImage?.takeIf { it.isNotBlank() } ?: R.drawable.ic_profile)
             .placeholder(R.drawable.ic_profile)
             .error(R.drawable.ic_profile)
             .into(binding.ivProfile)
 
-        // SharedPreferences 저장 (FragmentMypage도 읽을 수 있도록)
-        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
-        prefs.edit()
-            .putString("nickname", user.nickname)
-            .putString("imageUri", user.profileImage ?: "") // URL 그대로 저장
-            .apply()
-
-        // 배지 RecyclerView 초기화
+        // 배지 어댑터
         binding.recyclerBadges.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         latestUserBadges = user.badges
-
-
-        // 배지 표시
-        val badgeAdapter = BadgeAdapter(
-            badgeList = user.badges,
-            context = this
-        ) { dialog ->
-            dialog.show() // 팝업 띄우는 건 여기서만
-        }
-
+        val badgeAdapter = BadgeAdapter(badgeList = user.badges, context = this) { dialog -> dialog.show() }
         binding.recyclerBadges.adapter = badgeAdapter
-    }
 
+        // 포토후기 어댑터: 서버 리뷰의 썸네일만 필터링 후 세팅
+        val thumbnailReviews = user.reviews.filter { !it.reviewThumbnail.isNullOrBlank() }
+        binding.recyclerReviews.apply {
+            layoutManager = LinearLayoutManager(this@ProfileActivity, LinearLayoutManager.HORIZONTAL, false)
+            adapter = PhotoReviewAdapter(
+                context = this@ProfileActivity,
+                items = thumbnailReviews,
+                reviewerName = user.nickname // PhotoReview 화면에서 사용
+            )
+        }
+    }
 
     private fun updateFollowingCount() {
         binding.btnFollowing.text = "팔로잉 ${followingUsersData.size}"
