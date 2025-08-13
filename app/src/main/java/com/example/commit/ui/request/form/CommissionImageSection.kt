@@ -80,7 +80,7 @@ fun CommissionImageSection(
         // 번호와 제목 표시
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "${index}. 참고 이미지",
+                text = "${index}. 신청 내용",
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,

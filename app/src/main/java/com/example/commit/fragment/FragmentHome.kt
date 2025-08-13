@@ -418,6 +418,4 @@ class FragmentHome : Fragment() {
             }
         })
     }
-
-
 }
