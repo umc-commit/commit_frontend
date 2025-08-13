@@ -8,43 +8,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-
-object RetrofitObject {
-
-    private const val BASE_URL = "https://commit.n-e.kr"
-
-    // 하드코딩된 토큰
-    private const val HARDCODED_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwibmlja25hbWUiOiJ1c2VyX29uZSIsImFjY291bnRJZCI6IjEiLCJwcm92aWRlciI6Imtha2FvIiwicm9sZSI6ImNsaWVudCIsImlhdCI6MTc1NDk5NTY3OSwiZXhwIjoxNzU1MDgyMDc5fQ.umHqJ3Z6Y2T_0DOR6UDWgv3B8GTiC34SihbAf7Ogqyk"
-
-    // context는 받지만, SharedPreferences 무시하고 무조건 HARDCODED_TOKEN 사용
-    fun getRetrofitService(context: Context): RetrofitAPI {
-        val authInterceptor = Interceptor { chain ->
-            Log.d("RetrofitObject", "요청에 사용된 accessToken = $HARDCODED_TOKEN")
-
-            val requestBuilder = chain.request().newBuilder()
-            requestBuilder.addHeader("Authorization", HARDCODED_TOKEN)
-            chain.proceed(requestBuilder.build())
-        }
-
-
-        val client = OkHttpClient.Builder()
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor(authInterceptor)
-            .build()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        return retrofit.create(RetrofitAPI::class.java)
-    }
-}
-
-
-/*
 object RetrofitObject {
 
     private const val BASE_URL = "https://commit.n-e.kr"
@@ -81,5 +44,5 @@ object RetrofitObject {
         return retrofit.create(RetrofitAPI::class.java)
     }
 }
-*/
+
 
