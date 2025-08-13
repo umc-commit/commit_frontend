@@ -243,24 +243,28 @@ fun CommissionFormScreen(
 
 
 
+                    // 전체 인덱스를 연속적으로 관리
+                    var currentIndex = 1
+                    
                     // 먼저 라디오/체크박스 필드들 처리
-                    formSchema.filter { it.type in listOf("radio", "check") }.forEachIndexed { index, item ->
-                        Log.d("FormDebug", "라디오/체크박스 처리 - index: $index, item: $item")
+                    formSchema.filter { it.type in listOf("radio", "check") }.forEach { item ->
+                        Log.d("FormDebug", "라디오/체크박스 처리 - index: $currentIndex, item: $item")
                         Spacer(Modifier.height(12.dp))
                         
                         val selectedOption = formAnswer[item.label] as? String ?: ""
                         CommissionOptionSection(
-                            index = index + 1,
+                            index = currentIndex,
                             title = item.label,
                             options = item.options.map { it.label },
                             selectedOption = selectedOption,
                             onOptionSelected = { formAnswer[item.label] = it }
                         )
+                        currentIndex++
                     }
 
                     // 그 다음 이미지 필드들 처리
-                    formSchema.filter { it.type in listOf("image", "file") }.forEachIndexed { index, item ->
-                        Log.d("FormDebug", "이미지 필드 처리 - index: $index, item: $item")
+                    formSchema.filter { it.type in listOf("image", "file") }.forEach { item ->
+                        Log.d("FormDebug", "이미지 필드 처리 - index: $currentIndex, item: $item")
                         Spacer(Modifier.height(12.dp))
                         
                         when (imageUploadState) {
@@ -273,7 +277,7 @@ fun CommissionFormScreen(
                         }
 
                         CommissionImageSection(
-                            index = index + 1,
+                            index = currentIndex,
                             images = images,
                             onAddClick = { /* 필요시 부가동작 */ },
                             onRemoveClick = { removeIndex -> images.removeAt(removeIndex) },
@@ -284,18 +288,20 @@ fun CommissionFormScreen(
                                 viewModel.uploadImage(imageUri, context)
                             }
                         )
+                        currentIndex++
                     }
 
                     // 마지막에 텍스트박스 필드들 처리
-                    formSchema.filter { it.type == "textarea" }.forEachIndexed { index, item ->
-                        Log.d("FormDebug", "텍스트박스 처리 - index: $index, item: $item")
+                    formSchema.filter { it.type == "textarea" }.forEach { item ->
+                        Log.d("FormDebug", "텍스트박스 처리 - index: $currentIndex, item: $item")
                         Spacer(Modifier.height(12.dp))
                         
                         CommissionTextareaSection(
-                            index = index + 1,
+                            index = currentIndex,
                             text = formAnswer[item.label] as? String ?: "",
                             onTextChange = { formAnswer[item.label] = it }
                         )
+                        currentIndex++
                     }
 
                     Spacer(Modifier.height(20.dp))

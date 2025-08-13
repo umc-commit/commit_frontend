@@ -24,7 +24,7 @@ fun CommissionTextareaSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .padding(horizontal = 20.dp)
     ) {
         // 텍스트 입력 + 글자수 표시를 감싸는 박스
         Box(
