@@ -241,84 +241,61 @@ fun CommissionFormScreen(
                     val isUploading by viewModel.isUploading.collectAsState()
                     val uploadedImageUrls by viewModel.uploadedImageUrls.collectAsState()
 
-                    if (isUploading) {
-                        Text(
-                            text = "이미지 업로드 중...",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    if (uploadedImageUrls.isNotEmpty()) {
-                        Text(
-                            text = "업로드된 이미지: ${uploadedImageUrls.size}개",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
 
-                    formSchema.forEachIndexed { index, item ->
-                        Log.d("FormDebug", "폼 아이템 처리 시작 - index: $index, item: $item")
+
+                    // 먼저 라디오/체크박스 필드들 처리
+                    formSchema.filter { it.type in listOf("radio", "check") }.forEachIndexed { index, item ->
+                        Log.d("FormDebug", "라디오/체크박스 처리 - index: $index, item: $item")
                         Spacer(Modifier.height(12.dp))
+                        
+                        val selectedOption = formAnswer[item.label] as? String ?: ""
+                        CommissionOptionSection(
+                            index = index + 1,
+                            title = item.label,
+                            options = item.options.map { it.label },
+                            selectedOption = selectedOption,
+                            onOptionSelected = { formAnswer[item.label] = it }
+                        )
+                    }
 
-                        when (item.type) {
-                            "radio", "check" -> {
-                                val selectedOption = formAnswer[item.label] as? String ?: ""
-                                CommissionOptionSection(
-                                    index = index + 1,
-                                    title = item.label,
-                                    options = item.options.map { it.label },
-                                    selectedOption = selectedOption,
-                                    onOptionSelected = { formAnswer[item.label] = it }
-                                )
-                            }
-
-                            "image", "file" -> {
-                                // 이미지 박스 전용 (텍스트 절대 추가하지 않음)
-                                when (imageUploadState) {
-                                    is ImageUploadState.Loading -> {
-                                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                            CircularProgressIndicator()
-                                        }
-                                    }
-                                    is ImageUploadState.Error -> {
-                                        Text(
-                                            text = (imageUploadState as ImageUploadState.Error).message,
-                                            color = Color.Red,
-                                            fontSize = 12.sp
-                                        )
-                                    }
-                                    is ImageUploadState.Success -> {
-                                        Text(
-                                            text = "이미지 업로드 성공: ${(imageUploadState as ImageUploadState.Success).data.success?.image_url}",
-                                            color = Color.Green,
-                                            fontSize = 12.sp
-                                        )
-                                    }
-                                    else -> {}
+                    // 그 다음 이미지 필드들 처리
+                    formSchema.filter { it.type in listOf("image", "file") }.forEachIndexed { index, item ->
+                        Log.d("FormDebug", "이미지 필드 처리 - index: $index, item: $item")
+                        Spacer(Modifier.height(12.dp))
+                        
+                        when (imageUploadState) {
+                            is ImageUploadState.Loading -> {
+                                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator()
                                 }
-
-                                CommissionImageSection(
-                                    index = index + 1,
-                                    images = images,
-                                    onAddClick = { /* 필요시 부가동작 */ },
-                                    onRemoveClick = { removeIndex -> images.removeAt(removeIndex) },
-                                    onImageUpload = { uri -> viewModel.uploadImage(uri, context) },
-                                    onImageAdded = { bitmap ->
-                                        images.add(bitmap)
-                                        val imageUri = bitmapToUri(bitmap, context)
-                                        viewModel.uploadImage(imageUri, context)
-                                    }
-                                )
                             }
-                            "textarea" -> {
-                                // 텍스트 박스 전용
-                                CommissionTextareaSection(
-                                    index = index + 1,
-                                    text = formAnswer[item.label] as? String ?: "",
-                                    onTextChange = { formAnswer[item.label] = it }
-                                )
-                            }
+                            else -> {}
                         }
+
+                        CommissionImageSection(
+                            index = index + 1,
+                            images = images,
+                            onAddClick = { /* 필요시 부가동작 */ },
+                            onRemoveClick = { removeIndex -> images.removeAt(removeIndex) },
+                            onImageUpload = { uri -> viewModel.uploadImage(uri, context) },
+                            onImageAdded = { bitmap ->
+                                images.add(bitmap)
+                                val imageUri = bitmapToUri(bitmap, context)
+                                viewModel.uploadImage(imageUri, context)
+                            }
+                        )
+                    }
+
+                    // 마지막에 텍스트박스 필드들 처리
+                    formSchema.filter { it.type == "textarea" }.forEachIndexed { index, item ->
+                        Log.d("FormDebug", "텍스트박스 처리 - index: $index, item: $item")
+                        Spacer(Modifier.height(12.dp))
+                        
+                        CommissionTextareaSection(
+                            index = index + 1,
+                            text = formAnswer[item.label] as? String ?: "",
+                            onTextChange = { formAnswer[item.label] = it }
+                        )
                     }
 
                     Spacer(Modifier.height(20.dp))
@@ -331,36 +308,25 @@ fun CommissionFormScreen(
                         }
                         is SubmitState.Error -> {
                             val errorMessage = (submitState as SubmitState.Error).message
-                            Text(
-                                text = errorMessage,
-                                color = Color.Red,
-                                fontSize = 14.sp,
-                                modifier = Modifier.padding(horizontal = 20.dp)
-                            )
                             if (errorMessage.contains("이미 신청한 커미션")) {
-                                Spacer(Modifier.height(8.dp))
-                                Button(
-                                    onClick = {
-                                        val fragment = FragmentPostChatDetail.newInstance(
-                                            chatName = (commissionFormState as? CommissionFormState.Success)
-                                                ?.data?.success?.commission?.artist?.nickname ?: "작가",
-                                            authorName = (commissionFormState as? CommissionFormState.Success)
-                                                ?.data?.success?.commission?.title ?: "커미션",
-                                            commissionId = commissionId.toIntOrNull() ?: 1,
-                                            hasSubmittedApplication = true
-                                        )
-                                        if (context is FragmentActivity) {
-                                            context.supportFragmentManager.beginTransaction()
-                                                .replace(android.R.id.content, fragment)
-                                                .addToBackStack(null)
-                                                .commit()
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 20.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C5CE7))
-                                ) { Text("채팅방으로 이동", color = Color.White) }
+                                // 이미 신청한 경우: 토스트 메시지만 표시
+                                LaunchedEffect(Unit) {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "이미 신청한 커미션입니다",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                    
+                                    // 잠시 후 이전 페이지로 돌아가기
+                                    kotlinx.coroutines.delay(1000)
+                                    if (context is FragmentActivity) {
+                                        context.supportFragmentManager.popBackStack()
+                                    } else if (context is androidx.activity.ComponentActivity) {
+                                        context.finish()
+                                    }
+                                }
+                            } else {
+                                // 일반적인 오류는 표시하지 않음
                             }
                         }
                         is SubmitState.Success -> {
@@ -402,15 +368,8 @@ fun CommissionFormScreen(
                                         context.finish()
                                     }
                                 }
-                            } else {
-                                // 일반적인 오류
-                                Text(
-                                    text = errorMessage ?: "알 수 없는 오류가 발생했습니다",
-                                    color = Color.Red,
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(horizontal = 20.dp)
-                                )
                             }
+                            // 일반적인 오류는 표시하지 않음
                         }
                         else -> {}
                     }
