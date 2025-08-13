@@ -17,7 +17,10 @@ import androidx.compose.ui.unit.dp
 import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTypography
 import com.example.commit.connection.dto.*
-
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
 @Composable
 fun RequestDetailSectionList(
@@ -52,7 +55,7 @@ fun RequestDetailSectionList(
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "${paymentInfo.paidAt} 결제완료",
+                    text = "${parseIsoWithSdfToKst(paymentInfo.paidAt)} 결제완료",
                     style = CommitTypography.labelSmall.copy(color = Color.Gray)
                 )
 
@@ -67,7 +70,7 @@ fun RequestDetailSectionList(
                         style = CommitTypography.bodyMedium.copy(color = Color.Gray)
                     )
                     Text(
-                         text = "${"%,d".format(paymentInfo.minPrice)}P",
+                        text = "${"%,d".format(paymentInfo.minPrice)}P",
                         style = CommitTypography.bodyMedium.copy(color = Color.Black)
                     )
                 }
@@ -111,10 +114,9 @@ fun RequestDetailSectionList(
             expanded = isFormExpanded,
             onToggle = { isFormExpanded = !isFormExpanded }
         ) {
-          /*  FormAnswerSection(
-                formSchema = formSchema,
-                formAnswer = formAnswer
-            )*/
+            FormAnswerSection(
+                    formSchema = formSchema
+                )
         }
     }
 }
@@ -155,4 +157,30 @@ fun ExpandableItem(
             content()
         }
     }
+}
+
+/** 여러 ISO 포맷을 SDF로 파싱해서 KST 'yy.MM.dd HH:mm'로 변환 */
+private fun parseIsoWithSdfToKst(iso: String?): String {
+    if (iso.isNullOrBlank()) return "-"
+    val patterns = arrayOf(
+        "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+        "yyyy-MM-dd'T'HH:mm:ssX",
+        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+        "yyyy-MM-dd'T'HH:mm:ss'Z'"
+    )
+    val out = SimpleDateFormat("yy.MM.dd HH:mm", Locale.KOREA).apply {
+        timeZone = TimeZone.getTimeZone("Asia/Seoul")
+    }
+    for (p in patterns) {
+        try {
+            val sdf = SimpleDateFormat(p, Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+            val date = sdf.parse(iso)
+            if (date != null) return out.format(date)
+        } catch (_: ParseException) {
+            // 다음 패턴 시도
+        }
+    }
+    return "-"
 }

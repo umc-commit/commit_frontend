@@ -181,7 +181,8 @@ fun RequestDetailItem(
                     .fillMaxWidth()
                     .height(40.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFF4D4D4D))
+                    .background(  if (isInProgress) Color(0xFFF1F1F1)
+                    else Color(0xFF4D4D4D))
                     .clickable {
                         // TODO: 작업물 확인 동작
                     },
@@ -190,7 +191,8 @@ fun RequestDetailItem(
                 Text(
                     text = "작업물 확인",
                     style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White
+                    color =  if (isInProgress) Color(0xFFB0B0B0)
+                    else Color.White
                 )
             }
 
