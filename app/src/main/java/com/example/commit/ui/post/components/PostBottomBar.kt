@@ -1,5 +1,6 @@
 package com.example.commit.ui.post.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -120,7 +121,10 @@ fun PostBottomBar(
                     .weight(1f)
                     .height(48.dp)
                     .background(Color(0xFF333333), RoundedCornerShape(12.dp))
-                    .clickable { onChatClick() },
+                    .clickable { 
+                        Log.d("PostBottomBar", "채팅하기 버튼 클릭됨!")
+                        onChatClick() 
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

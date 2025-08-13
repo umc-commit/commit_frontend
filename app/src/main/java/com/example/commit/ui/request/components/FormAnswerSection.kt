@@ -27,7 +27,6 @@ import com.google.gson.JsonElement
 fun FormAnswerSection(
     formSchema: List<FormItem>
 ) {
-    // ---- 분리: "신청 폼" / "신청 내용" ----
     val formOnly = formSchema.filterNot { item ->
         val label = item.label
         val text = item.value.toReadable()

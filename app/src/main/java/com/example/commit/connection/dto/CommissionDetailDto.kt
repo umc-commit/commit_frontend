@@ -27,7 +27,9 @@ data class CommissionDetail(
     @SerializedName("isBookmarked")
     val isBookmarked: Boolean,
     @SerializedName("createdAt")
-    val createdAt: String
+    val createdAt: String,
+    @SerializedName("artistId")
+    val artistId: Int
 )
 
 data class CommissionImage(

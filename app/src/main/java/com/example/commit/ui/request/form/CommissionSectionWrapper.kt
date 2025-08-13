@@ -1,5 +1,6 @@
 package com.example.commit.ui.request.form
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,6 +18,8 @@ fun CommissionSectionWrapper(
     isRequired: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    Log.d("FormDebug", "CommissionSectionWrapper 렌더링 - index: $index, title: $title, isRequired: $isRequired")
+    
     Column(
         modifier = Modifier
             .fillMaxWidth()

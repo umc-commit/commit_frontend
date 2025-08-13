@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -18,6 +19,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.commit.ui.chatroom.ChatroomTopBar
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -29,13 +32,19 @@ fun ChatRoomScreen(
     onBackClick: () -> Unit,
     onSettingClick: () -> Unit,
     onProfileClick: () -> Unit,
-    viewModel: ChatViewModel = viewModel()
+    chatViewModel: ChatViewModel = viewModel()
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     // 메시지 목록을 안전하게 관리
-    val messages by remember(viewModel.chatMessages) {
-        mutableStateOf(viewModel.chatMessages)
+    val messages by remember(chatViewModel.chatMessages) {
+        mutableStateOf(chatViewModel.chatMessages)
+    }
+
+    // 채팅방 ID 설정 (더미데이터 로드를 위해)
+    LaunchedEffect(Unit) {
+        chatViewModel.setChatroomId(1) // 임시 ID, 실제로는 전달받은 ID 사용
     }
 
     Column(
@@ -61,8 +70,13 @@ fun ChatRoomScreen(
         // 메시지 목록
         ChatMessageList(
             messages = messages,
-            currentUserId = viewModel.currentUserId,
-            onPayClick = onPayClick,
+            currentUserId = chatViewModel.currentUserId,
+            onPayClick = {
+                // 결제 완료 시스템 메시지 표시
+                chatViewModel.addNewMessage("결제가 완료되었어요. 24시간 이내로 작업을 시작해주세요.", MessageType.PAYMENT_COMPLETE)
+                // 기존 onPayClick도 실행 (필요한 경우)
+                onPayClick()
+            },
             onFormCheckClick = onFormCheckClick,
             modifier = Modifier
                 .weight(1f)
@@ -70,10 +84,27 @@ fun ChatRoomScreen(
         )
 
         // 입력창
+        val context = LocalContext.current
         ChatBottomSection(
-            message = viewModel.message,
-            onMessageChange = viewModel::onMessageChange,
-            onSendMessage = viewModel::sendMessage,
+            message = chatViewModel.message,
+            onMessageChange = chatViewModel::onMessageChange,
+            onSendMessage = { 
+                chatViewModel.sendMessage(context)
+                // 랜덤하게 더미 응답도 생성 (50% 확률)
+                if (Math.random() < 0.5) {
+                    chatViewModel.generateDummyResponse()
+                }
+                
+                // 신청서가 제출된 경우 커미션 수락 메시지 생성 (임시 테스트용)
+                if (chatViewModel.hasSubmittedApplication && Math.random() < 0.3) {
+                    coroutineScope.launch {
+                        delay(3000L) // 3초 후
+                        chatViewModel.showCommissionAcceptedMessage()
+                        delay(2000L) // 2초 후
+                        chatViewModel.showPaymentRequestMessage(50000)
+                    }
+                }
+            },
             isMenuOpen = isMenuOpen,
             onToggleMenu = { isMenuOpen = !isMenuOpen }
         )
