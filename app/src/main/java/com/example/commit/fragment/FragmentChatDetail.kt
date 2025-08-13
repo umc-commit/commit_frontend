@@ -31,6 +31,12 @@ class FragmentChatDetail : Fragment() {
         super.onResume()
         (activity as? MainActivity)?.showBottomNav(false)
     }
+    
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Fragment가 제거될 때 BottomNavigation 다시 보이기
+        (activity as? MainActivity)?.showBottomNav(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -101,6 +107,8 @@ class FragmentChatDetail : Fragment() {
                         onBackClick = {
                             // 채팅리스트로 돌아가기
                             if (isAdded && !isDetached) {
+                                // BottomNavigation 다시 보이기
+                                (activity as? MainActivity)?.showBottomNav(true)
                                 parentFragmentManager.popBackStack()
                             }
                         },

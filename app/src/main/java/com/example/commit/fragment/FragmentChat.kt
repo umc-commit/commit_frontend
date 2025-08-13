@@ -91,15 +91,20 @@ class FragmentChat : Fragment() {
                                 1 // 임시로 1 사용, 실제로는 매핑 테이블 필요
                             } ?: 1
                             
+                            // 채팅방 상세로 이동 시 BottomNavigation 숨기기
+                            (activity as? MainActivity)?.showBottomNav(false)
+                            
                             parentFragmentManager.beginTransaction()
-                                .replace(R.id.Nav_Frame, FragmentChatDetail().apply {
+                                .replace(R.id.Nav_Frame, FragmentPostChatDetail().apply {
                                     arguments = bundleOf(
                                         "chatName" to clickedItem.title,     // 커미션 제목
                                         "authorName" to clickedItem.name,     // 작가 이름
-                                        "chatroomId" to actualChatroomId      // 실제 채팅방 ID
+                                        "chatroomId" to actualChatroomId,     // 실제 채팅방 ID
+                                        "commissionId" to actualChatroomId,   // 커미션 ID (동일하게 설정)
+                                        "hasSubmittedApplication" to false   // 신청서 제출 여부
                                     )
                                 })
-                                .addToBackStack(null)
+                                .addToBackStack("chatDetail")
                                 .commit()
                         },
                         onSettingClick = {

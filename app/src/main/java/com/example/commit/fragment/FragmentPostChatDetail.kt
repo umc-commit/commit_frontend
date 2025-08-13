@@ -40,6 +40,8 @@ class FragmentPostChatDetail : Fragment() {
     
     override fun onDestroyView() {
         super.onDestroyView()
+        // Fragment가 제거될 때 BottomNavigation 다시 보이기
+        (activity as? MainActivity)?.showBottomNav(true)
         _binding = null
     }
 
