@@ -282,6 +282,9 @@ class AuthorProfileActivity : AppCompatActivity() {
                 call: Call<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>,
                 response: Response<RetrofitClient.ApiResponse<RetrofitClient.FollowSuccess>>
             ) {
+                Log.d("AuthorProfileActivity", "follow code=${response.code()} isOk=${response.isSuccessful}")
+                Log.d("AuthorProfileActivity", "body=${response.body()}")
+                Log.d("AuthorProfileActivity", "error=${response.errorBody()?.string()}")
                 setFollowLoading(false)
                 val body = response.body()
                 val ok = response.isSuccessful && body?.resultType == "SUCCESS" && body.success != null
@@ -298,6 +301,7 @@ class AuthorProfileActivity : AppCompatActivity() {
                     applyFollowState(true)
                 } else {
                     showLog(body?.error?.reason ?: "팔로우에 실패했습니다.")
+                    Log.d("AuthorProfileActivity", "팔로우 실패(서버): ${response.code()}")
                 }
             }
 

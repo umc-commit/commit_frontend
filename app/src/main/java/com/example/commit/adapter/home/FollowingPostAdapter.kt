@@ -28,6 +28,7 @@ class FollowingPostAdapter(
         private const val ACTION_BOOKMARK_CHANGED = "ACTION_BOOKMARK_CHANGED"
     }
 
+    // 북마크 상태/진행 플래그
     private val bookmarking = hashSetOf<Long>()
     private val bookmarked = hashSetOf<Long>()
     private val bookmarkIdMap = hashMapOf<Long, Long>()
@@ -42,10 +43,19 @@ class FollowingPostAdapter(
         val divider: View = itemView.findViewById(R.id.view_divider)
         val ivMore: ImageView = itemView.findViewById(R.id.iv_more)
         val ivProfile: ImageView = itemView.findViewById(R.id.iv_profile)
+
+        init {
+            // 가로 썸네일 RecyclerView는 한 번만 초기화
+            rvPostImages.layoutManager =
+                LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
+            rvPostImages.setHasFixedSize(true)
+            rvPostImages.isNestedScrollingEnabled = false
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FollowingPostViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_following_post, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_following_post, parent, false)
         return FollowingPostViewHolder(view)
     }
 
@@ -66,32 +76,32 @@ class FollowingPostAdapter(
         holder.tvPostTitle.text = item.title
         holder.tvPostSummary.text = item.summary
 
-        // 이미지 리스트
+        // 이미지 목록 (정렬 후 어댑터만 교체)
         val urls = item.images.sortedBy { it.orderIndex }.map { it.imageUrl }
-        holder.rvPostImages.apply {
-            adapter = ImageListAdapter(urls)
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        }
+        holder.rvPostImages.adapter = ImageListAdapter(urls)
 
-        // 초기 북마크 아이콘 (서버값 반영)
+        // 초기 북마크 아이콘
         if (item.isBookmarked) bookmarked.add(cId)
         holder.ivBookmark.setImageResource(
-            if (bookmarked.contains(cId)) R.drawable.ic_home_bookmark_on else R.drawable.ic_home_bookmark
+            if (bookmarked.contains(cId)) R.drawable.ic_home_bookmark_on
+            else R.drawable.ic_home_bookmark
         )
 
         holder.ivMore.setOnClickListener { onMoreClick() }
 
-        // 아이템 전체 클릭 시 상세로 이동
-        holder.itemView.setOnClickListener {
-            onItemClick(cId)
-        }
-        holder.tvPostTitle.setOnClickListener { onItemClick(cId) }
-        holder.tvPostSummary.setOnClickListener { onItemClick(cId) }
+        // 상세 진입
+        val goDetail: (Long) -> Unit = { onItemClick(it) }
+        holder.itemView.setOnClickListener { goDetail(cId) }
+        holder.tvPostTitle.setOnClickListener { goDetail(cId) }
+        holder.tvPostSummary.setOnClickListener { goDetail(cId) }
 
-        // 토글
+        // 북마크 토글
         holder.ivBookmark.setOnClickListener {
             val ctx = holder.itemView.context
-            if (bookmarking.contains(cId)) { Log.d(TAG, "중복요청 차단: $cId"); return@setOnClickListener }
+            if (bookmarking.contains(cId)) {
+                Log.d(TAG, "중복요청 차단: $cId")
+                return@setOnClickListener
+            }
             val service = RetrofitObject.getRetrofitService(ctx)
 
             if (!bookmarked.contains(cId)) {
@@ -110,7 +120,9 @@ class FollowingPostAdapter(
                         if (ok || already) {
                             b?.success?.bookmarkId?.let { bid -> bookmarkIdMap[cId] = bid }
                             if (already && !bookmarkIdMap.containsKey(cId)) {
-                                resolveBookmarkId(ctx, cId) { bid -> if (bid != null) bookmarkIdMap[cId] = bid }
+                                resolveBookmarkId(ctx, cId) { bid ->
+                                    if (bid != null) bookmarkIdMap[cId] = bid
+                                }
                             }
                             bookmarked.add(cId)
                             holder.ivBookmark.setImageResource(R.drawable.ic_home_bookmark_on)
@@ -158,7 +170,6 @@ class FollowingPostAdapter(
                             }
                         })
                     }
-                    return@setOnClickListener
                 } else {
                     bookmarking.add(cId); holder.ivBookmark.isEnabled = false
                     service.deleteBookmark(cId, bookmarkId).enqueue(object :
@@ -187,7 +198,21 @@ class FollowingPostAdapter(
             }
         }
 
+        // 마지막 아이템 구분선 숨김
         holder.divider.visibility = if (position == itemCount - 1) View.GONE else View.VISIBLE
+    }
+
+    override fun onViewRecycled(holder: FollowingPostViewHolder) {
+        super.onViewRecycled(holder)
+        // 프로필 이미지 clear
+        Glide.with(holder.itemView.context).clear(holder.ivProfile)
+        // 내부 썸네일 clear (현재 구조에서 자식 뷰의 ImageView를 찾아 정리)
+        val count = holder.rvPostImages.childCount
+        for (i in 0 until count) {
+            val child = holder.rvPostImages.getChildAt(i)
+            val iv = child?.findViewById<ImageView>(R.id.iv_thumbnail)
+            if (iv != null) Glide.with(holder.itemView.context).clear(iv)
+        }
     }
 
     override fun getItemCount(): Int = postList.size
@@ -211,7 +236,9 @@ class FollowingPostAdapter(
                 override fun onFailure(
                     call: Call<RetrofitClient.ApiResponse<RetrofitClient.BookmarkListSuccess>>,
                     t: Throwable
-                ) { onResult(null) }
+                ) {
+                    onResult(null)
+                }
             })
     }
 }
