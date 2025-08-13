@@ -14,6 +14,8 @@ import com.example.commit.connection.dto.CommissionSummary
 import com.example.commit.ui.post.FragmentPostScreen
 import com.example.commit.ui.request.components.Commission
 import com.example.commit.viewmodel.SearchViewModel
+import com.example.commit.activity.MainActivity
+
 
 class FragmentSearchResult : Fragment() {
 
@@ -113,6 +115,7 @@ class FragmentSearchResult : Fragment() {
                     onClearClick = { searchQuery = "" },
                     onHomeClick = { /* TODO */ },
                     onCommissionClick = { item ->
+                        (requireActivity() as? MainActivity)?.showBottomNav(false)
                         parentFragmentManager.beginTransaction()
                             .replace(R.id.Nav_Frame, FragmentPostScreen.newInstance(item.commissionId))
                             .addToBackStack(null)

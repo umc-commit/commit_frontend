@@ -146,16 +146,4 @@ fun PostBottomBar(
     }
 }
 
-@Preview
-@Composable
-fun PreviewPostBottomBar() {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Spacer(modifier = Modifier.weight(1f))
-        PostBottomBar(
-            isRecruiting = true,
-            remainingSlots = 3,
-            onApplyClick = {},
-            onChatClick = {}
-        )
-    }
-}
+

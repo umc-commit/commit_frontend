@@ -46,6 +46,7 @@ class AlarmActivity : AppCompatActivity() {
     private lateinit var postViewModel: PostViewModel
     private var composeOverlay: FrameLayout? = null
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alarm)
@@ -196,6 +197,7 @@ class AlarmActivity : AppCompatActivity() {
         (recyclerView.adapter as? AlarmAdapter)?.enableDeleteMode(false)
     }
 
+
     private fun showPostScreen(commissionId: Int) {
         if (composeOverlay == null) {
             composeOverlay = FrameLayout(this).apply {
@@ -209,42 +211,42 @@ class AlarmActivity : AppCompatActivity() {
             (composeOverlay!!.parent as? ViewGroup)?.removeView(composeOverlay)
         }
 
-        val composeView = ComposeView(this).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-            setContent {
-                val commission by postViewModel.commissionDetail.collectAsState()
+            val composeView = ComposeView(this).apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+                setContent {
+                    val commission by postViewModel.commissionDetail.collectAsState()
 
-                LaunchedEffect(commissionId) {
-                    postViewModel.loadCommissionDetail(this@AlarmActivity, commissionId)
-                }
+                    LaunchedEffect(commissionId) {
+                        postViewModel.loadCommissionDetail(this@AlarmActivity, commissionId)
+                    }
 
-                commission?.let { itDetail ->
-                    PostScreen(
-                        title = itDetail.title,
-                        tags = listOf(itDetail.category) + itDetail.tags,
-                        minPrice = itDetail.minPrice,
-                        summary = itDetail.summary,
-                        content = itDetail.content,
-                        images = itDetail.images.map { img -> img.imageUrl },
-                        isBookmarked = itDetail.isBookmarked,
-                        imageCount = itDetail.images.size,
-                        currentIndex = 0,
-                        commissionId = itDetail.id,
-                        onReviewListClick = { /* 필요 시 리뷰 화면 이동 */ },
-                        onChatClick = {
-                            // 알림 화면에서는 채팅 탭으로 이동(간단 버전)
-                            val intent = Intent(this@AlarmActivity, MainActivity::class.java).apply {
-                                putExtra("openFragment", "chat")
+                    commission?.let { itDetail ->
+                        PostScreen(
+                            title = itDetail.title,
+                            tags = listOf(itDetail.category) + itDetail.tags,
+                            minPrice = itDetail.minPrice,
+                            summary = itDetail.summary,
+                            content = itDetail.content,
+                            images = itDetail.images.map { img -> img.imageUrl },
+                            isBookmarked = itDetail.isBookmarked,
+                            imageCount = itDetail.images.size,
+                            currentIndex = 0,
+                            commissionId = itDetail.id,
+                            onReviewListClick = { /* 필요 시 리뷰 화면 이동 */ },
+                            onChatClick = {
+                                val intent = Intent(context, MainActivity::class.java).apply {
+                                    putExtra("openFragment", "chat")
+                                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                }
+                                context.startActivity(intent)
                             }
-                            startActivity(intent)
-                        }
-                    )
+                        )
+
+                    }
                 }
             }
+            composeOverlay!!.removeAllViews()
+            composeOverlay!!.addView(composeView)
+            (findViewById<ViewGroup>(android.R.id.content)).addView(composeOverlay)
         }
-
-        composeOverlay!!.removeAllViews()
-        composeOverlay!!.addView(composeView)
-        (findViewById<ViewGroup>(android.R.id.content)).addView(composeOverlay)
     }
-}

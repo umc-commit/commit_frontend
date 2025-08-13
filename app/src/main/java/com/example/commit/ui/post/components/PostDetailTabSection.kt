@@ -12,16 +12,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.commit.connection.dto.CommissionArtistResponse
 import com.example.commit.ui.Theme.CommitTypography
 
-enum class TabType {
-    DETAIL, ARTIST
-}
+enum class TabType { DETAIL, ARTIST }
 
 @Composable
 fun PostDetailTabSection(
     onTabSelected: (TabType) -> Unit,
-    onReviewListClick: () -> Unit
+    onReviewListClick: () -> Unit,
+    artistBlock: CommissionArtistResponse?,
+    artistError: String?,
+    detailContent: String,
 ) {
     var selectedTab by remember { mutableStateOf(TabType.DETAIL) }
 
@@ -44,10 +46,7 @@ fun PostDetailTabSection(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = when (tab) {
-                            TabType.DETAIL -> "상세글"
-                            TabType.ARTIST -> "작가정보"
-                        },
+                        text = if (tab == TabType.DETAIL) "상세글" else "작가정보",
                         style = CommitTypography.bodyMedium.copy(
                             fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal
                         ),
@@ -58,16 +57,13 @@ fun PostDetailTabSection(
                         modifier = Modifier
                             .width(70.dp)
                             .height(2.dp)
-                            .background(
-                                if (selectedTab == tab) Color(0xFF17D5C6)
-                                else Color.Transparent
-                            )
+                            .background(if (selectedTab == tab) Color(0xFF17D5C6) else Color.Transparent)
                     )
                 }
             }
         }
 
-        // 탭 내용
+        // 탭 콘텐츠
         when (selectedTab) {
             TabType.DETAIL -> {
                 Column(
@@ -77,10 +73,7 @@ fun PostDetailTabSection(
                 ) {
                     Spacer(modifier = Modifier.height(25.dp))
                     Text(
-                        text = "당일 내로 작업 가능합니다!\n" +
-                                "빠르게 받아보시고 싶은 분들은 편하게 문의 주세요 :)\n\n" +
-                                "신청 시에 캐릭터 참고 이미지 첨부해 주시면 되고,\n" +
-                                "추가로 원하시는 포즈나 표정 함께 말씀해 주세요!",
+                        text = if (detailContent.isBlank()) " " else detailContent,
                         style = CommitTypography.bodyMedium,
                         fontSize = 12.sp,
                         color = Color(0xFF333333)
@@ -89,41 +82,59 @@ fun PostDetailTabSection(
             }
 
             TabType.ARTIST -> {
-                ArtistInfoSection(
-                    artistName = "위시",
-                    followerCount = 1200,
-                    workCount = 35,
-                    rating = 4.8f,
-                    recommendRate = 96,
-                    reviewCount = 43,
-                    onFollowClick = { /* 팔로우 버튼 클릭 시 처리 */ },
-                    onReviewListClick = onReviewListClick
-                )
+                when {
+                    artistError != null -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "작가 정보를 불러오지 못했습니다.\n$artistError",
+                                style = CommitTypography.bodyMedium,
+                                color = Color(0xFFDD3333)
+                            )
+                        }
+                    }
+                    artistBlock == null -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "작가 정보를 불러오는 중...",
+                                style = CommitTypography.bodyMedium,
+                                color = Color(0xFF666666)
+                            )
+                        }
+                    }
+                    else -> {
+                        ArtistInfoSection(
+                            artistName = artistBlock.artist.nickname,
+                            followerCount = artistBlock.artist.follower,
+                            workCount = artistBlock.artist.completedworks,
+                            rating = artistBlock.reviewStatistics.averageRate.toFloat(),
+                            recommendRate = artistBlock.reviewStatistics.recommendationRate,
+                            reviewCount = artistBlock.reviewStatistics.totalReviews,
+                            onFollowClick = { /* TODO: 팔로우 토글 */ },
+                            onReviewListClick = onReviewListClick
+                        )
+                    }
+                }
             }
         }
-    }
-}
-
-@Composable
-fun TabItem(title: String, selected: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .clickable { onClick() }
-            .padding(vertical = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = title,
-            style = CommitTypography.bodyMedium.copy(
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-            ),
-            color = if (selected) Color.Black else Color(0xFFB0B0B0)
-        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewPostDetailTabSection() {
-    PostDetailTabSection(onTabSelected = {}, onReviewListClick = {})
+    PostDetailTabSection(
+        onTabSelected = {},
+        onReviewListClick = {},
+        artistBlock = null,
+        artistError = null,
+        detailContent = "프리뷰용 상세 내용입니다."   // ★ 추가
+    )
 }

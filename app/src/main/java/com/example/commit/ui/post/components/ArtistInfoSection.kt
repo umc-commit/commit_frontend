@@ -11,10 +11,15 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTypography
 
@@ -63,22 +68,53 @@ fun ArtistInfoSection(
     recommendRate: Int,
     reviewCount: Int,
     onFollowClick: () -> Unit,
-    onReviewListClick: () -> Unit
+    onReviewListClick: () -> Unit,
+    profileImageUrl: String? = null
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    var isFollowing by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
-
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 16.dp)
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(Color.Gray, CircleShape)
-                    .border(1.dp, Color.LightGray, CircleShape)
-            )
+            // 아바타 공통 모디파이어
+            val avatarModifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .border(1.dp, Color.LightGray, CircleShape)
+
+            // URL 있으면 로드, 없거나 실패/로딩 중이면 회색 원으로 대체
+            if (!profileImageUrl.isNullOrBlank()) {
+                SubcomposeAsyncImage(
+                    model = profileImageUrl,
+                    contentDescription = "artist profile",
+                    contentScale = ContentScale.Crop,
+                    modifier = avatarModifier
+                ) {
+                    when (painter.state) {
+                        is AsyncImagePainter.State.Success -> {
+                            SubcomposeAsyncImageContent()
+                        }
+                        else -> {
+                            Box(
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .background(Color.Gray, CircleShape)
+                            )
+                        }
+                    }
+                }
+            } else {
+                Box(
+                    modifier = avatarModifier.background(Color.Gray, CircleShape)
+                )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -86,7 +122,9 @@ fun ArtistInfoSection(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = artistName,
-                        style = CommitTypography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                        style = CommitTypography.bodyMedium.copy(
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        ),
                         color = Color.Black
                     )
                     Spacer(modifier = Modifier.width(6.dp))
@@ -105,22 +143,35 @@ fun ArtistInfoSection(
                     )
                     Text(
                         text = "${workCount}건",
-                        style = CommitTypography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
+                        style = CommitTypography.labelSmall.copy(
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                        ),
                         color = Color(0xFF17D5C6)
                     )
                 }
             }
 
+
+            val followBg = if (!isFollowing) Color(0xFF4D4D4D) else Color.White
+            val followBorder = if (!isFollowing) Color(0xFF4D4D4D) else Color.LightGray
+            val followTextColor = if (!isFollowing) Color.White else Color.Black
+
             Box(
                 modifier = Modifier
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(20.dp))
-                    .clickable { onFollowClick() }
+                    .border(1.dp, followBorder, RoundedCornerShape(20.dp))
+                    .background(followBg, RoundedCornerShape(20.dp))
+                    .clickable {
+                        isFollowing = !isFollowing
+                        onFollowClick()
+                    }
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
                     text = "팔로우",
-                    style = CommitTypography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
-                    color = Color.Black
+                    style = CommitTypography.labelSmall.copy(
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                    ),
+                    color = followTextColor
                 )
             }
         }
@@ -162,7 +213,9 @@ fun ArtistInfoSection(
                 )
                 Text(
                     text = "${reviewCount}개",
-                    style = CommitTypography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
+                    style = CommitTypography.labelSmall.copy(
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                    ),
                     color = Color(0xFF17D5C6)
                 )
             }
@@ -180,7 +233,9 @@ fun ArtistInfoSection(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = String.format("%.1f", rating),
-                        style = CommitTypography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                        style = CommitTypography.titleMedium.copy(
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        ),
                         color = Color.Black
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -206,7 +261,9 @@ fun ArtistInfoSection(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "$recommendRate%",
-                        style = CommitTypography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                        style = CommitTypography.titleMedium.copy(
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        ),
                         color = Color.Black
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -224,65 +281,12 @@ fun ArtistInfoSection(
         ExpandableItem(
             title = "전체 후기 보기",
             expanded = isExpanded,
-            onToggle = { 
-                if (!isExpanded) {
-                    // 펼칠 때만 ReviewListScreen으로 이동
-                    onReviewListClick()
-                }
-                isExpanded = !isExpanded 
+            onToggle = {
+                if (!isExpanded) onReviewListClick()
+                isExpanded = !isExpanded
             }
         ) {
-            if (reviewCount == 0) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(12.dp))
-                        .background(Color.White),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "아직 남겨진 후기가 없어요.",
-                        style = CommitTypography.bodyMedium,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row {
-                        repeat(5) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_star),
-                                contentDescription = null,
-                                tint = Color(0xFFD3D3D3),
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                }
-            } else {
-                ReviewItem(
-                    rating = 5.0f,
-                    title = "낚서 타임 커미션",
-                    duration = "12시간",
-                    content = "친절하게 응대해주셨습니다. 감사해요!",
-                    writer = "워시",
-                    date = "2일 전"
-                )
-            }
+
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewArtistInfoSection() {
-    ArtistInfoSection(
-        artistName = "키르",
-        followerCount = 32,
-        workCount = 11,
-        rating = 5.0f,
-        recommendRate = 100,
-        reviewCount = 0,
-        onFollowClick = { },
-        onReviewListClick = { }
-    )
 }

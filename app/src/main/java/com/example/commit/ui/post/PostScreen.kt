@@ -1,20 +1,18 @@
 package com.example.commit.ui.post
 
 import android.content.Intent
-import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,14 +22,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.commit.R
 import com.example.commit.activity.CommissionFormActivity
-import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.ui.Theme.CommitTypography
 import com.example.commit.ui.post.components.PostBottomBar
 import com.example.commit.ui.post.components.PostDetailTabSection
+import com.example.commit.ui.post.components.TabType
+import com.example.commit.viewmodel.ArtistViewModel
 
 @Composable
 fun PostScreen(
@@ -44,24 +43,28 @@ fun PostScreen(
     isBookmarked: Boolean,
     imageCount: Int = images.size,
     currentIndex: Int = 0,
-    commissionId: Int = -1, // 기본값 추가
-    artistId: Int = 1, // 임시 하드코딩 - 나중에 API에서 받아와야 함
-    artistName: String = "키르", // 임시 하드코딩 - 나중에 API에서 받아와야 함
+    commissionId: Int = -1,
     onReviewListClick: () -> Unit,
-    onChatClick: () -> Unit = {} // 기본값 추가
+    onChatClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var selectedImageIndex by remember { mutableStateOf(currentIndex) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    val artistViewModel: ArtistViewModel = viewModel()
+    val artistBlock by artistViewModel.artistBlock.collectAsState()
+    val artistError by artistViewModel.artistError.collectAsState()
 
+    // 북마크 토글 상태
+    var isBookmarkedState by remember { mutableStateOf(isBookmarked) }
+
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 90.dp)
         ) {
-            // 상단 바
+            // 상단바
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -69,7 +72,6 @@ fun PostScreen(
                     .background(Color.White)
             ) {
                 val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-
                 Image(
                     painter = painterResource(id = R.drawable.ic_left_vector),
                     contentDescription = "뒤로가기",
@@ -78,11 +80,8 @@ fun PostScreen(
                         .padding(start = 20.dp)
                         .offset(y = 12.dp)
                         .size(24.dp)
-                        .clickable {
-                            backDispatcher?.onBackPressed()
-                        }
+                        .clickable { backDispatcher?.onBackPressed() }
                 )
-
                 Text(
                     text = title,
                     style = CommitTypography.headlineSmall,
@@ -95,7 +94,7 @@ fun PostScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 이미지 슬라이더
+            // 이미지
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -107,9 +106,7 @@ fun PostScreen(
                         contentDescription = "썸네일 이미지",
                         modifier = Modifier
                             .fillMaxSize()
-                            .clickable {
-                                selectedImageIndex = (selectedImageIndex + 1) % imageCount
-                            }
+                            .clickable { selectedImageIndex = (selectedImageIndex + 1) % imageCount }
                     )
                 } else {
                     Box(
@@ -140,7 +137,7 @@ fun PostScreen(
                 }
             }
 
-            // 본문 영역
+            // 본문 헤더
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -157,10 +154,27 @@ fun PostScreen(
                         modifier = Modifier.weight(1f)
                     )
 
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_unselect_bookmarket),
-                        contentDescription = "북마크",
-                        modifier = Modifier.size(24.dp)
+                    // ▼ 북마크 아이콘 (토글)
+                    val bookmarkPainter = if (isBookmarkedState)
+                        painterResource(id = R.drawable.ic_select_bookmarket)
+                    else
+                        painterResource(id = R.drawable.ic_unselect_bookmarket)
+
+                    val bookmarkTint = if (isBookmarkedState) {
+                        // 선택 시 현재 UI 유지 (아이콘 고유 색 사용)
+                        Color.Unspecified
+                    } else {
+                        // 미선택 시 #222222
+                        Color(0xFF222222)
+                    }
+
+                    Icon(
+                        painter = bookmarkPainter,
+                        contentDescription = if (isBookmarkedState) "북마크 해제" else "북마크",
+                        tint = bookmarkTint,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { isBookmarkedState = !isBookmarkedState }
                     )
                 }
 
@@ -219,14 +233,26 @@ fun PostScreen(
 
             Spacer(modifier = Modifier.height(5.dp))
 
+            // ▼ 탭 섹션: 여기서 탭 클릭 시 곧바로 API 호출
             PostDetailTabSection(
-                onTabSelected = {},
-                onReviewListClick = onReviewListClick
+                onTabSelected = { tab ->
+                    if (tab == TabType.ARTIST && artistBlock == null && commissionId > 0) {
+                        artistViewModel.loadArtist(
+                            context = context,
+                            commissionId = commissionId,
+                            page = 1,
+                            limit = 10
+                        )
+                    }
+                },
+                onReviewListClick = onReviewListClick,
+                artistBlock = artistBlock,
+                artistError = artistError,
+                detailContent = content
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
+        // 하단 바
         PostBottomBar(
             isRecruiting = true,
             remainingSlots = 11,

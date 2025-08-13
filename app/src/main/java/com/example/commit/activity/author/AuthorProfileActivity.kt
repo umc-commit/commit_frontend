@@ -418,13 +418,16 @@ class AuthorProfileActivity : AppCompatActivity() {
                         imageCount = itDetail.images.size,
                         currentIndex = 0,
                         commissionId = itDetail.id,
-                        onReviewListClick = {
-                            startActivity(Intent(this@AuthorProfileActivity, com.example.commit.activity.WrittenReviewsActivity::class.java))
-                        },
+                        onReviewListClick = { /* ... */ },
                         onChatClick = {
-                            createChatroomFromProfile(itDetail.id, itDetail.title)
+                            val intent = Intent(context, MainActivity::class.java).apply {
+                                putExtra("openFragment", "chat")
+                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                            }
+                            context.startActivity(intent)
                         }
                     )
+
                 }
             }
         }
