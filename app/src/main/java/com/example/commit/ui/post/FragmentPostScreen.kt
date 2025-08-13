@@ -6,40 +6,35 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import com.example.commit.R
 import com.example.commit.activity.MainActivity
 import com.example.commit.activity.WrittenReviewsActivity
 import com.example.commit.connection.RetrofitObject
 import com.example.commit.connection.RetrofitClient
+import com.example.commit.connection.RetrofitAPI
+import com.example.commit.connection.dto.CommissionDetailResponse
 import com.example.commit.fragment.FragmentChat
 import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.viewmodel.PostViewModel
 import com.example.commit.viewmodel.CommissionFormViewModel
+import com.example.commit.viewmodel.ArtistViewModel
+import com.example.commit.ui.post.components.TabType
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import com.example.commit.connection.RetrofitAPI
-import com.example.commit.connection.dto.CommissionDetailResponse
-import com.example.commit.connection.RetrofitClient.CreateChatroomRequest
-import com.example.commit.connection.RetrofitClient.CreateChatroomResponse
-
-import com.example.commit.connection.RetrofitClient.ProfileResponseData
 
 class FragmentPostScreen : Fragment() {
 
     companion object {
         private const val ARG_COMMISSION_ID = "commission_id"
-
         fun newInstance(commissionId: Int): FragmentPostScreen {
             return FragmentPostScreen().apply {
                 arguments = Bundle().apply {
@@ -51,6 +46,7 @@ class FragmentPostScreen : Fragment() {
     }
 
     private val viewModel: PostViewModel by viewModels()
+    private val artistViewModel: ArtistViewModel by viewModels()
     private val commissionFormViewModel: CommissionFormViewModel by viewModels()
 
     override fun onCreateView(
@@ -59,7 +55,6 @@ class FragmentPostScreen : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val commissionId = arguments?.getInt(ARG_COMMISSION_ID) ?: -1
-
         Log.d("FragmentPostScreen", "넘겨받은 commissionId: $commissionId")
 
         viewModel.loadCommissionDetail(requireContext(), commissionId)
@@ -69,35 +64,37 @@ class FragmentPostScreen : Fragment() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-
             setContent {
                 val commission by viewModel.commissionDetail.collectAsState()
+                val artistBlock by artistViewModel.artistBlock.collectAsState()  // ▼ 추가
+                val artistError by artistViewModel.artistError.collectAsState()  // ▼ 추가
 
                 LaunchedEffect(commission) {
                     Log.d("FragmentPostScreen", "commission 데이터 변경됨: $commission")
                 }
-                commission?.let {
+
+                commission?.let { detail ->
                     PostScreen(
-                        title = it.title,
-                        tags = listOf(it.category) + it.tags,
-                        minPrice = it.minPrice,
-                        summary = it.summary,
-                        content = it.content,
-                        images = it.images.map { image -> image.imageUrl },
-                        isBookmarked = it.isBookmarked,
-                        imageCount = it.images.size,
+                        title = detail.title,
+                        tags = listOf(detail.category) + detail.tags,
+                        minPrice = detail.minPrice,
+                        summary = detail.summary,
+                        content = detail.content,
+                        images = detail.images.map { img -> img.imageUrl },
+                        isBookmarked = detail.isBookmarked,
+                        imageCount = detail.images.size,
                         currentIndex = 0,
-                        commissionId = it.id,
-                        onReviewListClick = {
-                            val intent = Intent(context, WrittenReviewsActivity::class.java)
-                            context.startActivity(intent)
-                        },
+                        commissionId = detail.id,
+                        onReviewListClick = { /* 리뷰 화면 이동 처리 */ },
                         onChatClick = {
-                            Log.d("FragmentPostScreen", "채팅하기 버튼 클릭 - 커미션 ID: ${it.id}, 제목: ${it.title}")
-                            // 신청서가 제출되었는지 확인
-                            checkApplicationStatus(it.id, it.title)
+                            val intent = Intent(requireContext(), MainActivity::class.java).apply {
+                                putExtra("openFragment", "chat")
+                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                            }
+                            requireContext().startActivity(intent)
                         }
                     )
+
                 }
             }
         }

@@ -197,10 +197,11 @@ class FragmentHome : Fragment() {
                         },
                         onChatClick = {
                             Log.d("FragmentHome", "채팅하기 버튼 클릭 - 커미션 ID: ${it.id}, 제목: ${it.title}")
-                            // FragmentHome에서도 채팅방 생성 기능 구현
                             createChatroomFromHome(it.id, it.title)
                         }
                     )
+
+
                 }
             }
         }

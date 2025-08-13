@@ -13,6 +13,9 @@ import com.example.commit.fragment.FragmentChat
 import com.example.commit.fragment.FragmentHome
 import com.example.commit.fragment.FragmentMypage
 import com.example.commit.fragment.FragmentPostChatDetail
+import com.example.commit.ui.post.FragmentPostScreen
+
+
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
@@ -62,9 +65,9 @@ class MainActivity : AppCompatActivity() {
 
         supportFragmentManager.addOnBackStackChangedListener {
             val top = supportFragmentManager.findFragmentById(binding.NavFrame.id)
-            // 상세 화면이면 숨기고, 아니면 보이기
-            showBottomNav(top !is FragmentPostChatDetail)
+            showBottomNav(top !is FragmentPostChatDetail && top !is FragmentPostScreen)
         }
+
     }
 
     private fun initBottomNavigation() {

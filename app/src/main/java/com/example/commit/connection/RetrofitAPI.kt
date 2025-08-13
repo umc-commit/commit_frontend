@@ -172,4 +172,12 @@ interface RetrofitAPI {
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 10
     ): Call<RetrofitClient.ApiResponse<RetrofitClient.FollowingResponseData>>
+
+     //커미션 작가 정보 조회
+    @GET("/api/commissions/{commissionId}/artist")
+    fun getCommissionArtist(
+        @Path("commissionId") commissionId: Int,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 10
+    ): Call<ApiResponse<CommissionArtistResponse>>
 }

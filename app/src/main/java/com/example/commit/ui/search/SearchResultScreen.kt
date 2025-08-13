@@ -95,7 +95,7 @@ fun SearchResultScreen(
                             modifier = Modifier.offset(y = 15.dp)
                         ) {
                             Text(
-                                text = "11건",
+                                text = "${commissions.size}건",
                                 color = Color(0xFF17D5C6),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
