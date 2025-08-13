@@ -141,6 +141,7 @@ fun RequestDetailScreen(
     val status = item.status.trim()
     val isCancel = status == "CANCELED"
     val isReject = status == "REJECTED"
+    val isPending= status == "PENDING"
 
     Column(
         modifier = Modifier
@@ -181,23 +182,10 @@ fun RequestDetailScreen(
                 item = item,
                 commission = commission,
                 totalPrice = paymentInfo.totalPrice,
-                // 필요 시 활성화
-                /*
-                onFormAnswerClick = {
-                    val newFragment = FragmentFormAnswer.newInstance(
-                        ArrayList(formSchema),
-                        HashMap(formAnswer)
-                    )
-                    (context as MainActivity).supportFragmentManager.beginTransaction()
-                        .replace(R.id.Nav_Frame, newFragment)
-                        .addToBackStack(null)
-                        .commit()
-                }
-                */
             )
 
-            // 취소 또는 거절 상태가 아니면 세부 항목 출력
-            if (!isCancel && !isReject) {
+            // 취소 또는 거절 또는 수락 대기 상태가 아니면 세부 항목 출력
+            if (!isCancel && !isReject &&!isPending) {
                 Spacer(modifier = Modifier.height(16.dp))
                 RequestDetailSectionList(
                     timeline = timeline,
