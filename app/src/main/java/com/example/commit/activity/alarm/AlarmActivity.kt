@@ -30,8 +30,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.lifecycle.ViewModelProvider
 import com.example.commit.ui.post.PostScreen
 import com.example.commit.viewmodel.PostViewModel
-import androidx.core.os.bundleOf
-import retrofit2.Callback
 
 class AlarmActivity : AppCompatActivity() {
 
@@ -73,8 +71,12 @@ class AlarmActivity : AppCompatActivity() {
                 alarmList.removeAt(position)
                 alarmAdapter.notifyItemRemoved(position)
             },
-            onOpenChat = { item ->
-                openDirectChatFromAlarm(item)
+            onOpenChat = { _ ->
+                // 채팅 탭(목록)으로 바로 이동
+                val intent = Intent(this, MainActivity::class.java).apply {
+                    putExtra("openFragment", "chat")
+                }
+                startActivity(intent)
             },
             onOpenPostDetail = { commissionId ->
                 showPostScreen(commissionId) // ↓ 아래 구현
@@ -244,88 +246,5 @@ class AlarmActivity : AppCompatActivity() {
         composeOverlay!!.removeAllViews()
         composeOverlay!!.addView(composeView)
         (findViewById<ViewGroup>(android.R.id.content)).addView(composeOverlay)
-    }
-
-    private fun openPostChatDetail(chatroomId: Int, chatName: String?, authorName: String?) {
-        val intent = Intent(this, com.example.commit.activity.MainActivity::class.java).apply {
-            putExtra("openFragment", "postChatDetail")
-            putExtra("chatName", chatName ?: "채팅")
-            putExtra("authorName", authorName ?: "")
-            putExtra("chatroomId", chatroomId)
-            putExtra("sourceFragment", "AlarmActivity")
-        }
-        startActivity(intent)
-    }
-
-    // 2) 알림 아이템 기반으로 채팅방 생성(또는 확인) 후 상세로 이동
-    private fun openDirectChatFromAlarm(item: RetrofitClient.NotificationItem) {
-        val api = RetrofitObject.getRetrofitService(this)
-
-        // relatedData 안전 파싱
-        fun anyToInt(v: Any?): Int? = when (v) {
-            is Number -> v.toInt()
-            is String -> v.toIntOrNull()
-            else -> null
-        }
-
-        val artistId = anyToInt(item.relatedData["artistId"])
-        val requestId = anyToInt(item.relatedData["requestId"])
-        val chatName = (item.relatedData["commissionTitle"] as? String) ?: item.title
-        val authorName = (item.relatedData["nickname"] as? String)
-            ?: (item.relatedData["creatorName"] as? String) ?: ""
-
-        // 서버가 알림에 chatroomId를 실어주는 경우가 있으면 바로 진입
-        val prebuiltChatroomId = anyToInt(item.relatedData["chatroomId"])
-        if (prebuiltChatroomId != null) {
-            openPostChatDetail(prebuiltChatroomId, chatName, authorName)
-            return
-        }
-
-        // 없으면 생성: consumerId는 토큰 기반 식별을 쓰는 게 이상적이나,
-        // 현재 DTO가 consumerId를 요구하므로 임시값/저장값 사용 (TODO 교체)
-        val currentUserId = 1 // TODO: /api/users/me or SharedPreferences에서 실제 userId로 교체
-
-        // 필수 키가 없으면 안전 종료
-        if (artistId == null || requestId == null) {
-            Log.d("AlarmActivity", "알림 relatedData에 artistId/requestId 없음 → 채팅 상세로 바로 이동 불가")
-            // 차선책: 채팅 탭으로 이동하거나 토스트/로그 처리
-            val intent = Intent(this, com.example.commit.activity.MainActivity::class.java).apply {
-                putExtra("openFragment", "chat")
-            }
-            startActivity(intent)
-            return
-        }
-
-        val req = RetrofitClient.CreateChatroomRequest(
-            consumerId = currentUserId,
-            artistId = artistId,
-            requestId = requestId
-        )
-
-        api.createChatroom(req).enqueue(object :
-            Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
-            override fun onResponse(
-                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
-                response: Response<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
-            ) {
-                if (!response.isSuccessful) {
-                    Log.d("AlarmActivity", "채팅방 생성 실패(${response.code()})")
-                    return
-                }
-                val data = response.body()?.success ?: run {
-                    Log.d("AlarmActivity", "채팅방 생성 실패(응답 없음)")
-                    return
-                }
-                Log.d("AlarmActivity", "채팅방 생성 성공: ${data.id}")
-                openPostChatDetail(data.id, chatName, authorName)
-            }
-
-            override fun onFailure(
-                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
-                t: Throwable
-            ) {
-                Log.d("AlarmActivity", "채팅방 생성 네트워크 오류: ${t.message}")
-            }
-        })
     }
 }
