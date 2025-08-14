@@ -47,7 +47,6 @@ class BadgeAdapter(
 
     override fun getItemCount(): Int = badgeList.size
 
-    // 기존: private fun createBadgeDialog(userBadge: RetrofitClient.UserBadge): Dialog
     private fun createBadgeDialog(badge: RetrofitClient.BadgeDetail): Dialog {  // 배지 단일 객체 받기
         val popupView = LayoutInflater.from(context).inflate(R.layout.badge_popup, null)
 
@@ -55,15 +54,7 @@ class BadgeAdapter(
         val tvCondition = popupView.findViewById<TextView>(R.id.tv_badge_popup_text2)
         val ivBadge = popupView.findViewById<ImageView>(R.id.iv_badge_popup)
 
-        fun getGrade(threshold: Int): String = when (threshold) {
-            1 -> "동"
-            5 -> "은"
-            15 -> "금"
-            50 -> "다이아"
-            else -> ""
-        }
-
-        val grade = getGrade(badge.threshold)
+        val grade = getGrade(badge.type, badge.threshold)
         val titleText = when (badge.type) {
             "comm_finish" -> "커미션 완료 배지 ($grade)"
             "follow" -> "팔로워 배지 ($grade)"
@@ -94,10 +85,30 @@ class BadgeAdapter(
             window?.apply {
                 setBackgroundDrawableResource(android.R.color.transparent)
                 setDimAmount(0.6f)
-                // 기존 레이아웃 계산이 복잡하면 WIDTH은 WRAP_CONTENT로 두셔도 됩니다.
                 setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
                 setGravity(Gravity.CENTER)
             }
         }
+    }
+
+    // 1) 공통 등급 라벨
+    private val GRADE_LABELS = listOf("동", "은", "금", "다이아")
+
+    // 2) 타입별 threshold 구간 정의
+    private val THRESHOLDS_BY_TYPE: Map<String, List<Int>> = mapOf(
+        // 기본(커미션 완료/신청/후기)은 1,5,15,50
+        "comm_finish" to listOf(1, 5, 15, 50),
+        "comm_request" to listOf(1, 5, 15, 50),
+        "review"       to listOf(1, 5, 15, 50),
+
+        // 팔로워만 5,10,20,100
+        "follow"       to listOf(5, 10, 20, 100)
+    )
+
+    // 3) 타입별 threshold에 맞춰 등급 산출
+    private fun getGrade(type: String, threshold: Int): String {
+        val thresholds = THRESHOLDS_BY_TYPE[type] ?: emptyList()
+        val idx = thresholds.indexOf(threshold)
+        return if (idx in GRADE_LABELS.indices) GRADE_LABELS[idx] else ""
     }
 }
