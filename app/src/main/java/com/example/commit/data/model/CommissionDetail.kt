@@ -15,7 +15,7 @@ data class CommissionDetail(
     val category: String,
     val tags: List<String>,
     val images: List<CommissionImage>,
-    val thumbnailImageUrl: String,
+    val thumbnailImageUrl: String?,
     val remainingSlots: Int,
     val isBookmarked: Boolean,
     val createdAt: String

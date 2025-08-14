@@ -8,7 +8,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-object RetrofitObject {
+/*object RetrofitObject {
 
     private const val BASE_URL = "https://commit.n-e.kr"
 
@@ -43,14 +43,14 @@ object RetrofitObject {
 
         return retrofit.create(RetrofitAPI::class.java)
     }
-}
+}*/
 
-/*object RetrofitObject {
+object RetrofitObject {
 
     private const val BASE_URL = "https://commit.n-e.kr"
 
     // 하드코딩된 토큰
-    private const val HARDCODED_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwibmlja25hbWUiOiJ1c2VyX29uZSIsImFjY291bnRJZCI6IjEiLCJwcm92aWRlciI6Imtha2FvIiwicm9sZSI6ImNsaWVudCIsImlhdCI6MTc1NTA4OTM2OCwiZXhwIjoxNzU1MTc1NzY4fQ.Nu4QQEN47tPwKJLUdUYBrJ_Kzl2DzfcXArR6Lv7a1Zw"
+    private const val HARDCODED_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwibmlja25hbWUiOiLtg7EiLCJhY2NvdW50SWQiOiIxIiwicHJvdmlkZXIiOiJrYWthbyIsInJvbGUiOiJjbGllbnQiLCJpYXQiOjE3NTUxNjY3MDEsImV4cCI6MTc1NTI1MzEwMX0.q0AyE_wYslW0bCkQhT9QbGhVYH2s7bDqguiQIyTT9Yg"
 
     // context는 받지만, SharedPreferences 무시하고 무조건 HARDCODED_TOKEN 사용
     fun getRetrofitService(context: Context): RetrofitAPI {
@@ -76,7 +76,7 @@ object RetrofitObject {
 
         return retrofit.create(RetrofitAPI::class.java)
     }
-}*/
+}
 
 
 

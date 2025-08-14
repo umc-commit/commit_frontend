@@ -92,8 +92,12 @@ class FragmentPostScreen : Fragment() {
                                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                             }
                             requireContext().startActivity(intent)
+                        },
+                        onBookmarkToggle = { newState ->
+                            viewModel.toggleBookmark(requireContext(), detail.id, newState)
                         }
                     )
+
 
                 }
             }

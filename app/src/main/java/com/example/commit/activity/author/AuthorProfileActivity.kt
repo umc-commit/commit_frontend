@@ -429,6 +429,9 @@ class AuthorProfileActivity : AppCompatActivity() {
                                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                             }
                             context.startActivity(intent)
+                        },
+                        onBookmarkToggle = { newState ->
+                            postViewModel.toggleBookmark(this@AuthorProfileActivity, itDetail.id, newState)
                         }
                     )
 

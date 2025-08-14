@@ -19,9 +19,10 @@ data class CommissionSummary(
     @SerializedName("thumbnailImageUrl") val thumbnailImageUrl: String?,
     @SerializedName("deadline") val deadline: Int?,
     @SerializedName("isBookmarked") val isBookmarked: Boolean,
+    @SerializedName("bookmarkId") val bookmarkId: Long?,
     @SerializedName("category") val category: CategoryDto,
     @SerializedName("artist") val artist: ArtistDto,
-    @SerializedName("tags") val tags: List<TagDto>
+    @SerializedName("tags") val tags: List<TagDto>,
 )
 
 data class CategoryDto(
