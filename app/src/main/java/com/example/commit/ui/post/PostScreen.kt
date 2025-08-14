@@ -53,7 +53,7 @@ fun PostScreen(
     var selectedImageIndex by remember { mutableStateOf(currentIndex) }
 
     // 아티스트 탭 로딩용 (기존 로직 유지)
-    val artistViewModel: ArtistViewModel = viewModel()
+    val artistViewModel: ArtistViewModel = viewModel(key = "artist-$commissionId")
     val artistBlock by artistViewModel.artistBlock.collectAsState()
     val artistError by artistViewModel.artistError.collectAsState()
 
