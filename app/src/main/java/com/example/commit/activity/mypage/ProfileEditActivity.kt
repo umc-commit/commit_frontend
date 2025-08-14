@@ -7,13 +7,20 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.commit.R
+import com.example.commit.connection.RetrofitAPI
+import com.example.commit.connection.RetrofitClient
+import com.example.commit.connection.RetrofitObject
 import com.example.commit.databinding.ActivityProfileEditBinding
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ProfileEditActivity : AppCompatActivity() {
     private lateinit var binding: ActivityProfileEditBinding
@@ -24,6 +31,28 @@ class ProfileEditActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // ProfileActivity에서 넘어온 기존 데이터 세팅
+        val currentNickname = intent.getStringExtra("nickname")
+        val currentIntro = intent.getStringExtra("intro")
+
+        if (!currentNickname.isNullOrEmpty()) {
+            binding.etNickname.setText(currentNickname)
+        }
+        if (!currentIntro.isNullOrEmpty() && currentIntro != "입력된 소개가 없습니다.") {
+            binding.etIntro.setText(currentIntro)
+            binding.tvIntroCount.text = currentIntro.length.toString()
+        }
+
+        // 프로필 이미지 URL 세팅 (있으면 미리 로드)
+        val currentProfileImageUrl = intent.getStringExtra("profileImage")
+        if (!currentProfileImageUrl.isNullOrBlank()) {
+            Glide.with(this)
+                .load(currentProfileImageUrl)
+                .placeholder(R.drawable.ic_profile)
+                .error(R.drawable.ic_profile)
+                .into(binding.ivProfile)
+        }
 
         // 초기 버튼 상태 비활성화
         setApplyButtonState(false)
@@ -64,22 +93,64 @@ class ProfileEditActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // 적용 버튼 클릭 시 결과 전달
+        // 적용 버튼 클릭 시 결과 전달, 닉네임 변경 여부
         binding.btnApply.setOnClickListener {
-            if (binding.btnApply.isEnabled) {
-                val nickname = binding.etNickname.text.toString()
-                val imageUri = selectedImageUri?.toString()
-                val intro = binding.etIntro.text.toString() // 소개글 추가
+            if (!binding.btnApply.isEnabled) return@setOnClickListener
 
-                val resultIntent = Intent().apply {
-                    putExtra("nickname", nickname)
-                    putExtra("imageUri", imageUri)
-                    putExtra("intro", intro)
-                }
-                setResult(RESULT_OK, resultIntent)
-                finish()
+            val nickname = binding.etNickname.text.toString().trim()
+            val intro = binding.etIntro.text.toString().trim()
+            val imageUri = selectedImageUri?.toString()
+
+            val api = RetrofitObject.getRetrofitService(this)
+
+            val originalNickname = intent.getStringExtra("nickname") ?: ""
+            val originalIntro = intent.getStringExtra("intro") ?: ""
+
+            // 변경된 내용이 없으면 종료
+            if (nickname == originalNickname && intro == originalIntro) {
+                Toast.makeText(this@ProfileEditActivity, "변경된 내용이 없습니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // 닉네임이 안 바뀌면 바로 PATCH
+            if (nickname == originalNickname) {
+                updateProfile(api, nickname, intro, imageUri, originalNickname, originalIntro)
+            } else {
+                api.checkNickname(nickname).enqueue(object :
+                    Callback<RetrofitClient.ApiResponse<RetrofitClient.NicknameCheckResponse>> {
+                    override fun onResponse(
+                        call: Call<RetrofitClient.ApiResponse<RetrofitClient.NicknameCheckResponse>>,
+                        response: Response<RetrofitClient.ApiResponse<RetrofitClient.NicknameCheckResponse>>
+                    ) {
+                        val body = response.body()
+                        val msg = body?.success?.message
+
+                        // 서버 스펙: 200 + "중복된 닉네임입니다." 도 존재
+                        if (msg == "중복된 닉네임입니다.") {
+                            Toast.makeText(this@ProfileEditActivity, "중복된 닉네임입니다.", Toast.LENGTH_SHORT).show()
+                            return
+                        }
+
+                        // 사용 가능(예: "사용 가능한 닉네임입니다.")이면 PATCH 진행
+                        if (response.isSuccessful) {
+                            updateProfile(api, nickname, intro, imageUri, originalNickname, originalIntro)
+                            return
+                        }
+
+                        // 그 외 에러
+                        Log.d("ProfileEdit", "닉네임 확인 실패(${response.code()})")
+                    }
+
+                    override fun onFailure(
+                        call: Call<RetrofitClient.ApiResponse<RetrofitClient.NicknameCheckResponse>>,
+                        t: Throwable
+                    ) {
+                        Log.d("ProfileEdit", "네트워크 오류: ${t.message}")
+                    }
+                })
             }
         }
+
 
         // 갤러리에서 이미지 선택하고 결과를 받아 ivProfile에 적용
         imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -138,5 +209,47 @@ class ProfileEditActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             resources.getColor(colorResId)
         }
+    }
+
+    // PATCH 호출부 — 변경된 필드만 담아서 보냄 + result 타입 네임스페이스 수정
+    private fun updateProfile(
+        api: RetrofitAPI,
+        nickname: String,
+        intro: String,
+        imageUri: String?,
+        originalNickname: String,
+        originalIntro: String
+    ) {
+        val request = RetrofitClient.ProfileUpdateRequest(
+            nickname = if (nickname != originalNickname) nickname else null,
+            description = if (intro != originalIntro) intro else null,
+            profileImage = if (imageUri != null) imageUri else null
+        )
+
+        api.updateMyProfile(request).enqueue(object :
+            Callback<RetrofitClient.ApiResponse<RetrofitClient.ProfileUpdateResponse>> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.ProfileUpdateResponse>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.ProfileUpdateResponse>>
+            ) {
+                if (response.isSuccessful && response.body()?.resultType == "SUCCESS") {
+                    val resultIntent = Intent().apply {
+                        putExtra("nickname", nickname)
+                        putExtra("imageUri", imageUri)
+                        putExtra("intro", intro)
+                    }
+                    setResult(RESULT_OK, resultIntent)
+                    finish()
+                } else {
+                    Toast.makeText(this@ProfileEditActivity, "프로필 수정 실패(${response.code()})", Toast.LENGTH_SHORT).show()
+                }
+            }
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.ProfileUpdateResponse>>,
+                t: Throwable
+            ) {
+                Log.d("ProfileEdit", "네트워크 오류: ${t.message}")
+            }
+        })
     }
 } 

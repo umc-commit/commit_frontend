@@ -533,7 +533,38 @@ class RetrofitClient {
         @SerializedName("followCount") val followCount: Int
     )
 
+    // 프로필 수정
+    data class ProfileUpdateRequest(
+        val nickname: String? = null,
+        val profileImage: String? = null,
+        val description: String? = null
+    )
 
+    data class ProfileUpdateResponse(
+        @SerializedName("message") val message: String,
+        @SerializedName("user") val user: RetrofitClient.UserProfile
+    )
+
+    // 닉네임 중복 확인
+    data class NicknameCheckResponse(
+        @SerializedName("message") val message: String,
+        @SerializedName("nickname") val nickname: String
+    )
+
+    // 사용자가 팔로우한 작가 조회
+    data class FollowedArtistsSuccess(
+        @SerializedName("message") val message: String,
+        @SerializedName("artistList") val artistList: List<FollowedArtistContainer>
+    )
+    data class FollowedArtistContainer(
+        @SerializedName("artist") val artist: FollowedArtist
+    )
+    data class FollowedArtist(
+        @SerializedName("id") val id: String,
+        @SerializedName("nickname") val nickname: String,
+        @SerializedName("profileImage") val profileImage: String?,
+        @SerializedName("followerCount") val followerCount: Int
+    )
 
 
 

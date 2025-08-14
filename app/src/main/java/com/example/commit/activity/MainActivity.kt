@@ -14,6 +14,7 @@ import com.example.commit.fragment.FragmentHome
 import com.example.commit.fragment.FragmentMypage
 import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.ui.post.FragmentPostScreen
+import android.content.Intent
 
 
 
@@ -33,18 +34,11 @@ class MainActivity : AppCompatActivity() {
 
         // 액티비티가 처음 생성될 때만 초기 프래그먼트를 로드하고 바텀 시트 인자를 전달
         if (savedInstanceState == null) {
-            if (openFragment == "postChatDetail") {
-                // 1:1 채팅 상세로 바로 진입
-                openPostChatDetailFromIntent(intent)
-                showBottomNav(false) // 상세 화면이므로 바텀바 숨김 (원하면 유지해도 됨)
-            } else if (openFragment == "chat") {
-                // 기존: 채팅 탭 열기
-                supportFragmentManager.beginTransaction()
-                    .replace(binding.NavFrame.id, FragmentChat())
-                    .commitAllowingStateLoss()
-                binding.BottomNavi.selectedItemId = R.id.nav_chat
+            if (openFragment != null) {
+                // 최초 진입도 공통 라우팅으로 처리
+                handleOpenFragment(openFragment, intent)
             } else {
-                // 기본 홈 프래그먼트 로드
+                // 기본 홈
                 val initialFragment = FragmentHome().apply {
                     arguments = Bundle().apply {
                         putBoolean("show_signup_bottom_sheet", showSignupBottomSheet)
@@ -67,7 +61,36 @@ class MainActivity : AppCompatActivity() {
             val top = supportFragmentManager.findFragmentById(binding.NavFrame.id)
             showBottomNav(top !is FragmentPostChatDetail && top !is FragmentPostScreen)
         }
+    }
 
+    // SINGLE_TOP/CLEAR_TOP로 기존 MainActivity가 재사용될 때 여기로 옴
+    override fun onNewIntent(newIntent: Intent) {
+        super.onNewIntent(newIntent)
+        setIntent(newIntent) // getIntent() 갱신
+        val openFragment = newIntent.getStringExtra("openFragment")
+        if (openFragment != null) {
+            handleOpenFragment(openFragment, newIntent)
+        }
+    }
+
+    // 공통 라우팅
+    private fun handleOpenFragment(openFragment: String, srcIntent: Intent) {
+        when (openFragment) {
+            "postChatDetail" -> {
+                openPostChatDetailFromIntent(srcIntent)
+                showBottomNav(false)
+            }
+            "chat" -> {
+                supportFragmentManager.beginTransaction()
+                    .replace(binding.NavFrame.id, FragmentChat())
+                    .commitAllowingStateLoss()
+                binding.BottomNavi.selectedItemId = R.id.nav_chat
+                showBottomNav(true)
+            }
+            // 필요 시 케이스 추가
+        }
+        // 일회성이면 제거
+        srcIntent.removeExtra("openFragment")
     }
 
     private fun initBottomNavigation() {

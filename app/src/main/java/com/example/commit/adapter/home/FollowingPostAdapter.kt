@@ -63,14 +63,26 @@ class FollowingPostAdapter(
         val item = postList[position]
         val cId = item.id
 
-        // 프로필/닉네임/시간
+        // 닉네임/시간
         holder.tvUserName.text = item.artist.nickname
         holder.tvUserInfo.text = "팔로워 ${item.artist.followCount} · ${item.timeAgo}"
         Glide.with(holder.itemView.context)
             .load(item.artist.profileImageUrl)
-            .placeholder(R.drawable.ic_pf_charac2)
-            .error(R.drawable.ic_pf_charac2)
+            .placeholder(R.drawable.ic_profile)
+            .error(R.drawable.ic_profile)
             .into(holder.ivProfile)
+
+        // 작가 프로필 화면 이동
+        holder.ivProfile.setOnClickListener {
+            val ctx = holder.itemView.context
+            try {
+                val intent = Intent(ctx, Class.forName("com.example.commit.activity.author.AuthorProfileActivity"))
+                intent.putExtra("artistId", item.artist.id.toInt())
+                ctx.startActivity(intent)
+            } catch (e: ClassNotFoundException) {
+                android.widget.Toast.makeText(ctx, "AuthorProfileActivity를 찾을 수 없어요.", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
 
         // 제목/요약
         holder.tvPostTitle.text = item.title
@@ -78,7 +90,12 @@ class FollowingPostAdapter(
 
         // 이미지 목록 (정렬 후 어댑터만 교체)
         val urls = item.images.sortedBy { it.orderIndex }.map { it.imageUrl }
-        holder.rvPostImages.adapter = ImageListAdapter(urls)
+        val goDetail: (Long) -> Unit = { onItemClick(it) }
+        // 이미지 리스트에 상세콜백 연결
+        holder.rvPostImages.adapter = ImageListAdapter(
+            imageUrls = urls,
+            onImageClick = { goDetail(cId) }
+        )
 
         // 초기 북마크 아이콘
         if (item.isBookmarked) bookmarked.add(cId)
@@ -89,8 +106,6 @@ class FollowingPostAdapter(
 
         holder.ivMore.setOnClickListener { onMoreClick() }
 
-        // 상세 진입
-        val goDetail: (Long) -> Unit = { onItemClick(it) }
         holder.itemView.setOnClickListener { goDetail(cId) }
         holder.tvPostTitle.setOnClickListener { goDetail(cId) }
         holder.tvPostSummary.setOnClickListener { goDetail(cId) }

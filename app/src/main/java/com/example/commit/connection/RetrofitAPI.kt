@@ -14,6 +14,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.HTTP
 import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
@@ -180,4 +181,22 @@ interface RetrofitAPI {
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 10
     ): Call<ApiResponse<CommissionArtistResponse>>
+
+    // 프로필 수정
+    @PATCH("/api/users/me")
+    fun updateMyProfile(
+        @Body body: RetrofitClient.ProfileUpdateRequest
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.ProfileUpdateResponse>>
+
+
+    // 닉네임 중복 확인
+    @GET("/api/users/check-nickname")
+    fun checkNickname(
+        @Query("nickname") nickname: String
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.NicknameCheckResponse>>
+
+    // 사용자가 팔로우한 작가 조회
+    @GET("/api/users/follows")
+    fun getFollowedArtists(
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>
 }

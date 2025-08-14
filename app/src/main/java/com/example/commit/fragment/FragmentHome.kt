@@ -49,6 +49,12 @@ import retrofit2.Response
 import androidx.fragment.app.viewModels
 import androidx.core.os.bundleOf
 import com.example.commit.fragment.FragmentPostChatDetail
+import androidx.core.view.doOnAttach
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.savedstate.SavedStateRegistryOwner
 
 
 class FragmentHome : Fragment() {
@@ -96,8 +102,10 @@ class FragmentHome : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (binding.frameComposeContainer.visibility == View.VISIBLE) {
+                    binding.frameComposeContainer.removeAllViews()
                     binding.frameComposeContainer.visibility = View.GONE
                     (activity as? MainActivity)?.showBottomNav(true)
+                    return
                 } else {
                     isEnabled = false
                     requireActivity().onBackPressed()
@@ -170,46 +178,53 @@ class FragmentHome : Fragment() {
     }
 
     private fun showPostScreen(commissionId: Int) {
-        val composeView = ComposeView(requireContext()).apply {
+        val cv = ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                val commission by postViewModel.commissionDetail.collectAsState()
-
-                LaunchedEffect(commissionId) {
-                    postViewModel.loadCommissionDetail(requireContext(), commissionId)
-                }
-
-                commission?.let {
-                    PostScreen(
-                        title = it.title,
-                        tags = listOf(it.category) + it.tags,
-                        minPrice = it.minPrice,
-                        summary = it.summary,
-                        content = it.content,
-                        images = it.images.map { img -> img.imageUrl },
-                        isBookmarked = it.isBookmarked,
-                        imageCount = it.images.size,
-                        currentIndex = 0,
-                        commissionId = it.id,
-                        onReviewListClick = {
-                            val intent = Intent(requireContext(), WrittenReviewsActivity::class.java)
-                            startActivity(intent)
-                        },
-                        onChatClick = {
-                            Log.d("FragmentHome", "채팅하기 버튼 클릭 - 커미션 ID: ${it.id}, 제목: ${it.title}")
-                            createChatroomFromHome(it.id, it.title)
-                        }
-                    )
-
-
-                }
-            }
         }
 
         binding.frameComposeContainer.apply {
             visibility = View.VISIBLE
             removeAllViews()
-            addView(composeView)
+            addView(cv) // 1) 먼저 attach
+        }
+
+        // 2) attach된 다음 compose 시작
+        cv.doOnAttach {
+            cv.setContent {
+                // 3) ViewTree* 대신 CompositionLocal로 오너 직접 주입
+                CompositionLocalProvider(
+                    LocalLifecycleOwner provides viewLifecycleOwner,
+                    LocalSavedStateRegistryOwner provides (viewLifecycleOwner as SavedStateRegistryOwner),
+                    LocalViewModelStoreOwner provides this@FragmentHome
+                ) {
+                    val commission by postViewModel.commissionDetail.collectAsState()
+
+                    LaunchedEffect(commissionId) {
+                        postViewModel.loadCommissionDetail(requireContext(), commissionId)
+                    }
+
+                    commission?.let { data ->
+                        PostScreen(
+                            title = data.title,
+                            tags = listOf(data.category) + data.tags,
+                            minPrice = data.minPrice,
+                            summary = data.summary,
+                            content = data.content,
+                            images = data.images.map { it.imageUrl },
+                            isBookmarked = data.isBookmarked,
+                            imageCount = data.images.size,
+                            currentIndex = 0,
+                            commissionId = data.id,
+                            onReviewListClick = {
+                                startActivity(Intent(requireContext(), WrittenReviewsActivity::class.java))
+                            },
+                            onChatClick = {
+                                createChatroomFromHome(data.id, data.title)
+                            }
+                        )
+                    }
+                }
+            }
         }
 
         (activity as? MainActivity)?.showBottomNav(false)

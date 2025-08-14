@@ -32,19 +32,14 @@ class ProfileActivity : AppCompatActivity() {
     private var isReviewOn = false
     private lateinit var profileEditLauncher: ActivityResultLauncher<Intent>
     private lateinit var latestUserBadges: List<RetrofitClient.UserBadge>
-
-    private val followingUsersData = listOf(
-        FollowingUser(R.drawable.ic_pf_charac2, "키르", 32, true),
-        FollowingUser(R.drawable.ic_pf_charac2, "곤", 15, true),
-        FollowingUser(R.drawable.ic_pf_charac2, "레오리오", 20, true)
-    )
+    private var currentProfileImageUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        updateFollowingCount()
+        fetchFollowingCount()
         loadProfileFromApi()
 
         binding.ivBack.setOnClickListener { finish() }
@@ -75,30 +70,24 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         binding.btnEditProfile.setOnClickListener {
-            profileEditLauncher.launch(Intent(this, ProfileEditActivity::class.java))
+            val intent = Intent(this, ProfileEditActivity::class.java).apply {
+                putExtra("nickname", binding.tvUsername.text.toString())
+                putExtra("intro", binding.tvIntroContent.text.toString())
+                putExtra("profileImage", currentProfileImageUrl)
+            }
+            profileEditLauncher.launch(intent)
         }
 
         binding.btnFollowing.setOnClickListener {
             startActivity(Intent(this, ProfileFollowingActivity::class.java))
         }
 
-        /*
-        val badgeList = listOf(
-            R.drawable.badge_applicant_1,
-            R.drawable.badge_applicant_5,
-            R.drawable.badge_applicant_15,
-            R.drawable.badge_applicant_50
-        )
-        val badgeAdapter = BadgeAdapter(badgeList) { showBadgePopup(it) }
-        binding.recyclerBadges.apply {
-            adapter = badgeAdapter
-            layoutManager = LinearLayoutManager(this@ProfileActivity, LinearLayoutManager.HORIZONTAL, false)
-        }
-        */
+
     }
 
     override fun onResume() {
         super.onResume()
+        fetchFollowingCount()
         loadProfileFromApi()
     }
 
@@ -140,6 +129,7 @@ class ProfileActivity : AppCompatActivity() {
         binding.tvUsername.text = user.nickname
         binding.tvIntroContent.text = user.description ?: "입력된 소개가 없습니다."
         binding.tvBadge.text = if (user.artistId != null) "작가" else "신청자"
+        currentProfileImageUrl = user.profileImage   // 현재 프로필 이미지 URL 저장
 
         Glide.with(this)
             .load(user.profileImage?.takeIf { it.isNotBlank() } ?: R.drawable.ic_profile)
@@ -166,7 +156,27 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateFollowingCount() {
-        binding.btnFollowing.text = "팔로잉 ${followingUsersData.size}"
+    // 실제 API로 팔로잉 수 가져오기
+    private fun fetchFollowingCount() {
+        val service = RetrofitObject.getRetrofitService(this)
+        service.getFollowedArtists().enqueue(object :
+            retrofit2.Callback<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>> {
+            override fun onResponse(
+                call: retrofit2.Call<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>,
+                response: retrofit2.Response<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>
+            ) {
+                val count = response.body()?.success?.artistList?.size ?: 0
+                binding.btnFollowing.text = "팔로잉 $count"
+            }
+            override fun onFailure(
+                call: retrofit2.Call<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>,
+                t: Throwable
+            ) {
+                // 실패 시 기존 텍스트 유지하거나 0으로
+                binding.btnFollowing.text = "팔로잉 0"
+            }
+        })
     }
+
+
 }
