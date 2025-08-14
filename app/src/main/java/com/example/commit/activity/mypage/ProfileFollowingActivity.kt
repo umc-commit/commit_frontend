@@ -1,41 +1,78 @@
 package com.example.commit.activity.mypage
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.commit.R
 import com.example.commit.adapter.mypage.ProfileFollowingAdapter
-import com.example.commit.data.model.entities.FollowingUser
+import com.example.commit.connection.RetrofitClient
+import com.example.commit.connection.RetrofitObject
 import com.example.commit.databinding.ActivityProfileFollowingBinding
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ProfileFollowingActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityProfileFollowingBinding // ViewBinding 인스턴스
+    private lateinit var binding: ActivityProfileFollowingBinding
+    private lateinit var adapter: ProfileFollowingAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // ViewBinding 초기화
         binding = ActivityProfileFollowingBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 뒤로가기 버튼 클릭 리스너 설정
-        binding.ivBack.setOnClickListener {
-            finish()   // 이전 화면으로 돌아가기
-        }
+        binding.ivBack.setOnClickListener { finish() }
 
-        // 팔로잉 사용자 더미 데이터 생성 (3개)
-        val followingUsers = listOf(
-            FollowingUser(R.drawable.ic_pf_charac2, "키르", 32, true), // 예시 이미지, 이름, 팔로워 수, 팔로잉 여부
-            FollowingUser(R.drawable.ic_pf_charac2, "곤", 15, true),
-            FollowingUser(R.drawable.ic_pf_charac2, "레오리오", 20, true)
+        // RecyclerView 기본 세팅
+        adapter = ProfileFollowingAdapter(
+            users = emptyList(),
+            onProfileClick = { artistId ->
+                // 👉 AuthorProfileActivity로 이동 (패키지/클래스명은 실제 프로젝트에 맞게 수정)
+                try {
+                    val intent = Intent(this, Class.forName("com.example.commit.activity.author.AuthorProfileActivity"))
+                    intent.putExtra("artistId", artistId) // Int로 쓰고 싶으면 여기서 toInt()
+                    startActivity(intent)
+                } catch (e: ClassNotFoundException) {
+                    Toast.makeText(this, "AuthorProfileActivity를 찾을 수 없어요. 경로를 확인해주세요.", Toast.LENGTH_SHORT).show()
+                }
+            }
         )
-
-        // RecyclerView 설정
         binding.rvFollowingList.apply {
-            // 레이아웃 매니저 설정 (수직 스크롤 목록)
             layoutManager = LinearLayoutManager(this@ProfileFollowingActivity)
-            // 어댑터 설정
-            adapter = ProfileFollowingAdapter(followingUsers)
+            adapter = this@ProfileFollowingActivity.adapter
         }
+
+        fetchFollowingArtists()
+    }
+
+    private fun fetchFollowingArtists() {
+        // 로딩 표시가 필요하면 여기서 보여주기
+        val service = RetrofitObject.getRetrofitService(this)
+        service.getFollowedArtists().enqueue(object :
+            Callback<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>> {
+
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>
+            ) {
+                val body = response.body()
+                val items = body?.success?.artistList?.map { it.artist }.orEmpty()
+                adapter.submit(items)
+                // 로딩 숨기기
+                if (items.isEmpty()) {
+                    Toast.makeText(this@ProfileFollowingActivity, "팔로우한 작가가 없어요.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>,
+                t: Throwable
+            ) {
+                Toast.makeText(this@ProfileFollowingActivity, "목록을 불러오지 못했어요.", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

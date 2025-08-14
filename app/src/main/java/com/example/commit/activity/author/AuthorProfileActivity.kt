@@ -47,8 +47,27 @@ class AuthorProfileActivity : AppCompatActivity() {
         binding = ActivityAuthorProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 기본 RecyclerView 초기화 (빈 어댑터)
+        // 1) 인텐트에서 artistId 안전하게 꺼내기 (String/Int 모두 대응)
+        val parsedId: Int? =
+            intent.getStringExtra("artistId")?.toIntOrNull()
+                ?: intent.getIntExtra("artistId", -1).takeIf { it != -1 }
+
+        if (parsedId == null) {
+            Log.d("AuthorProfileActivity", "artistId 없음")
+            finish()
+            return
+        }
+        artistIdFromIntent = parsedId
+
+        // 2) 리사이클러 초기화
         initRecyclerViews()
+
+        // 3) 서버에서 프로필 로드
+        loadAuthorProfile(artistIdFromIntent)
+
+        // 4) 팔로우 버튼 초기 상태(로컬 캐시) 적용
+        setFollowVisualState(loadFollowState(artistIdFromIntent))
+        loadFollowerCount(artistIdFromIntent)?.let { setFollowerCountText(it) }
 
         // 팔로우 버튼
         binding.btnFollowing.setOnClickListener {
@@ -57,20 +76,6 @@ class AuthorProfileActivity : AppCompatActivity() {
                 callUnfollow(artistIdFromIntent)
             } else {
                 callFollow(artistIdFromIntent)
-            }
-        }
-
-        artistIdFromIntent = intent.getIntExtra("artistId", -1)
-        if (artistIdFromIntent != -1) {
-            // 서버 데이터 로드
-            loadAuthorProfile(artistIdFromIntent)
-
-            // 로컬에 저장해둔 팔로우 상태로 '버튼 UI만' 먼저 맞춤 (카운트는 그대로)
-            setFollowVisualState(loadFollowState(artistIdFromIntent))
-
-            // 팔로워 수도 로컬 값 있으면 복원
-            loadFollowerCount(artistIdFromIntent)?.let { cached ->
-                setFollowerCountText(cached)
             }
         }
 
