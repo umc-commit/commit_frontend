@@ -1,17 +1,26 @@
 # commit_frontend
 
+## 📌 프로젝트 소개  
+**커미션 중개 서비스 플랫폼 어플리케이션**  
+사용자(의뢰인)와 작가(아티스트)를 연결하여 커미션을 의뢰·진행할 수 있는 플랫폼 앱입니다.  
+작품 등록, 채팅, 결제, 후기, 알림, 북마크 등 커미션 거래 전 과정을 지원합니다.  
+
+## 👥 팀원 및 담당 화면
+- **이승은** : 신청서, 후기, 채팅 
+- **전유나(팀장)** : 로그인/회원가입, 홈화면, 알림, 북마크, 마이페이지
+- **최예윤** : 게시글, 신청함, 검색창, 포인트 충전
+
 ## 🛠 기술 스택
 - 언어: Kotlin
 - 서버 연결: Retrofit
 - 알림: FCM(Firebase Cloud Messaging)
-- 결제: WebView
 - 채팅: Socket.IO client
 - 홈화면: ViewPager2+TabLayout, SearchView, RecyclerView
 - 마이페이지: SharedPreferences, Glide
 
  ## 화면 구현방식(Compose+XML)
  - Jetpack Compose : 채팅, 결제, 신청함, 신청서, 후기, 게시글, 포인트충전, 검색화면
- - XML(ConstraintLayout) : 홈화면, 마이페이지, 로그인, 북마크, 알림화면
+ - XML(ConstraintLayout) : 홈화면, 마이페이지, 로그인, 북마크, 알림화면, 작가_프로필
 
 ## 🧑‍💻 Git 브랜치 전략
 - 기능 단위 브랜치로 분리
