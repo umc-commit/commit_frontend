@@ -15,22 +15,27 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
+import androidx.core.view.doOnAttach
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.savedstate.SavedStateRegistryOwner
 import com.example.commit.R
-import com.example.commit.activity.alarm.AlarmActivity
 import com.example.commit.activity.MainActivity
-import com.example.commit.activity.mypage.ProfileActivity
 import com.example.commit.activity.WrittenReviewsActivity
+import com.example.commit.activity.alarm.AlarmActivity
+import com.example.commit.activity.mypage.ProfileActivity
 import com.example.commit.adapter.home.AuthorCardAdapter
 import com.example.commit.adapter.home.FollowingPostAdapter
 import com.example.commit.adapter.home.HomeCardAdapter
@@ -39,23 +44,15 @@ import com.example.commit.connection.RetrofitClient
 import com.example.commit.connection.RetrofitObject
 import com.example.commit.databinding.BottomSheetHomeBinding
 import com.example.commit.databinding.FragmentHomeBinding
-import com.example.commit.ui.search.FragmentSearch
+import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.ui.post.PostScreen
+import com.example.commit.ui.search.FragmentSearch
 import com.example.commit.viewmodel.PostViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import androidx.fragment.app.viewModels
-import androidx.core.os.bundleOf
-import com.example.commit.fragment.FragmentPostChatDetail
-import androidx.core.view.doOnAttach
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.savedstate.SavedStateRegistryOwner
-
+import androidx.compose.ui.platform.LocalContext
 
 class FragmentHome : Fragment() {
 
@@ -83,13 +80,11 @@ class FragmentHome : Fragment() {
         }
 
         binding.ivProfile.setOnClickListener {
-            val intent = Intent(requireContext(), ProfileActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(requireContext(), ProfileActivity::class.java))
         }
 
         binding.ivAlarm.setOnClickListener {
-            val intent = Intent(requireContext(), AlarmActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(requireContext(), AlarmActivity::class.java))
         }
 
         binding.ivSearch.setOnClickListener {
@@ -99,19 +94,22 @@ class FragmentHome : Fragment() {
                 .commit()
         }
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (binding.frameComposeContainer.visibility == View.VISIBLE) {
-                    binding.frameComposeContainer.removeAllViews()
-                    binding.frameComposeContainer.visibility = View.GONE
-                    (activity as? MainActivity)?.showBottomNav(true)
-                    return
-                } else {
-                    isEnabled = false
-                    requireActivity().onBackPressed()
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (binding.frameComposeContainer.visibility == View.VISIBLE) {
+                        binding.frameComposeContainer.removeAllViews()
+                        binding.frameComposeContainer.visibility = View.GONE
+                        (activity as? MainActivity)?.showBottomNav(true)
+                        return
+                    } else {
+                        isEnabled = false
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
                 }
             }
-        })
+        )
 
         binding.tvFollowing.setOnClickListener {
             binding.rvFollowingPosts.visibility = View.VISIBLE
@@ -122,7 +120,6 @@ class FragmentHome : Fragment() {
             binding.indicatorFollowing?.visibility = View.VISIBLE
 
             if (followingLoaded) {
-                // 탭 전환만
                 binding.rvFollowingPosts.visibility = View.VISIBLE
                 binding.nestedScrollView.visibility = View.GONE
                 return@setOnClickListener
@@ -138,7 +135,6 @@ class FragmentHome : Fragment() {
                         followingLoaded = true
                         val items = response.body()?.success?.items ?: emptyList()
 
-                        // 어댑터 생성/세팅
                         binding.rvFollowingPosts.adapter = FollowingPostAdapter(
                             postList = items,
                             onMoreClick = {
@@ -156,6 +152,7 @@ class FragmentHome : Fragment() {
                             }
                         )
                     }
+
                     override fun onFailure(
                         call: Call<RetrofitClient.ApiResponse<RetrofitClient.FollowingResponseData>>,
                         t: Throwable
@@ -185,13 +182,15 @@ class FragmentHome : Fragment() {
         binding.frameComposeContainer.apply {
             visibility = View.VISIBLE
             removeAllViews()
-            addView(cv) // 1) 먼저 attach
+            addView(cv)
         }
 
-        // 2) attach된 다음 compose 시작
         cv.doOnAttach {
             cv.setContent {
-                // 3) ViewTree* 대신 CompositionLocal로 오너 직접 주입
+                // Compose 내에서 사용할 안전한 Context
+                val context = LocalContext.current
+
+                // ViewTree owners를 명시적으로 주입
                 CompositionLocalProvider(
                     LocalLifecycleOwner provides viewLifecycleOwner,
                     LocalSavedStateRegistryOwner provides (viewLifecycleOwner as SavedStateRegistryOwner),
@@ -219,7 +218,15 @@ class FragmentHome : Fragment() {
                                 startActivity(Intent(requireContext(), WrittenReviewsActivity::class.java))
                             },
                             onChatClick = {
-                                createChatroomFromHome(data.id, data.title)
+                                val intent = Intent(context, MainActivity::class.java).apply {
+                                    putExtra("openFragment", "chat")
+                                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                }
+                                context.startActivity(intent)
+                            },
+                            onBookmarkToggle = { newState ->
+                                // Context는 Compose의 LocalContext 사용
+                                postViewModel.toggleBookmark(context, data.id, newState)
                             }
                         )
                     }
@@ -286,7 +293,7 @@ class FragmentHome : Fragment() {
                         setupHomeAdapters(data)
                         Log.d("HomeAPI", "성공")
                     } else {
-                        Log.e("HomeAPI", "success null\\ndata 없음")
+                        Log.e("HomeAPI", "success null\ndata 없음")
                     }
                 } else {
                     Log.e("HomeAPI", "API 실패: ${response.code()}")
@@ -304,35 +311,27 @@ class FragmentHome : Fragment() {
 
     private fun setupHomeAdapters(data: RetrofitClient.HomeResponseData) {
         binding.rvTodayRecommendations.apply {
-            adapter = HomeCardAdapter(data.section1) { item ->
-                showPostScreen(item.id)
-            }
+            adapter = HomeCardAdapter(data.section1) { item -> showPostScreen(item.id) }
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
         binding.rvNewRegistrations.apply {
-            adapter = HomeCardAdapter(data.section2) { item ->
-                showPostScreen(item.id)
-            }
+            adapter = HomeCardAdapter(data.section2) { item -> showPostScreen(item.id) }
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
         binding.rvHotContent.apply {
-            adapter = HomeCardAdapter(data.section3) { item ->
-                showPostScreen(item.id)
-            }
+            adapter = HomeCardAdapter(data.section3) { item -> showPostScreen(item.id) }
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
         binding.rvDeadlineContent.apply {
-            adapter = HomeCardAdapter(data.section4) { item ->
-                showPostScreen(item.id)
-            }
+            adapter = HomeCardAdapter(data.section4) { item -> showPostScreen(item.id) }
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
         binding.rvReviewContent.apply {
-            adapter = ReviewCardAdapter(data.newReview) { /* TODO: 리뷰 클릭 이벤트 정의 */ }
+            adapter = ReviewCardAdapter(data.newReview) { /* TODO */ }
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
@@ -351,37 +350,27 @@ class FragmentHome : Fragment() {
         Log.d("FragmentHome", "createChatroomFromHome 메서드 호출됨 - commissionId: $commissionId, title: $commissionTitle")
         val api = RetrofitObject.getRetrofitService(requireContext())
 
-        // 임시 값들 (실제로는 SharedPreferences나 다른 방법으로 가져와야 함)
+        // 임시 값
         val currentUserId = 1
-        // commissionId에 따라 다른 artistId 사용하여 새 채팅방 생성 시도
-        val artistId = if (commissionId % 2 == 0) 2 else 1 // 커미션 ID에 따라 다른 작가
-        val artistName = if (artistId == 1) "키르" else "작가2" // 작가에 따른 이름
+        val artistId = if (commissionId % 2 == 0) 2 else 1
+        val artistName = if (artistId == 1) "키르" else "작가2"
+        val tempRequestId = 3
 
-        // 임시: 실제로는 커미션 신청 후 생성되는 requestId를 사용해야 함
-        // 일단 기존에 존재하는 requestId 사용 (3번이 존재함을 로그에서 확인)
-        val tempRequestId = 3 // 기존 존재하는 request ID 사용
         val request = RetrofitClient.CreateChatroomRequest(
             consumerId = currentUserId,
             artistId = artistId,
             requestId = tempRequestId
         )
-        Log.d("FragmentHome", "임시 requestId 사용: $tempRequestId (원래 커미션ID: $commissionId)")
 
-        Log.d("FragmentHome", "API 호출 시작 - request: $request")
-        api.createChatroom(request).enqueue(object : Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
+        api.createChatroom(request).enqueue(object :
+            Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
             override fun onResponse(
                 call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
                 response: Response<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
             ) {
-                Log.d("FragmentHome", "API 응답 받음: code=${response.code()}, isSuccessful=${response.isSuccessful}")
-                Log.d("FragmentHome", "응답 바디: ${response.body()}")
-
                 if (response.isSuccessful) {
                     val data = response.body()?.success
                     if (data != null) {
-                        Log.d("FragmentHome", "채팅방 생성 성공: ${data.id}")
-
-                        // 생성된 채팅방으로 이동
                         val fragment = FragmentPostChatDetail().apply {
                             arguments = bundleOf(
                                 "chatName" to commissionTitle,
@@ -391,33 +380,17 @@ class FragmentHome : Fragment() {
                                 "commissionId" to commissionId
                             )
                         }
-
                         parentFragmentManager.beginTransaction()
                             .replace(R.id.Nav_Frame, fragment)
                             .addToBackStack(null)
                             .commit()
 
-                        Toast.makeText(
-                            requireContext(),
-                            "채팅방이 생성되었습니다",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(requireContext(), "채팅방이 생성되었습니다", Toast.LENGTH_SHORT).show()
                     } else {
-                        Log.e("FragmentHome", "채팅방 생성 실패: success 데이터가 없음")
-                        Toast.makeText(
-                            requireContext(),
-                            "채팅방 생성에 실패했습니다",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(requireContext(), "채팅방 생성에 실패했습니다", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Log.e("FragmentHome", "채팅방 생성 실패: ${response.code()}")
-                    Log.e("FragmentHome", "에러 응답: ${response.errorBody()?.string()}")
-                    Toast.makeText(
-                        requireContext(),
-                        "채팅방 생성에 실패했습니다",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "채팅방 생성에 실패했습니다", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -425,12 +398,7 @@ class FragmentHome : Fragment() {
                 call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
                 t: Throwable
             ) {
-                Log.e("FragmentHome", "채팅방 생성 네트워크 오류: ${t.message}", t)
-                Toast.makeText(
-                    requireContext(),
-                    "네트워크 오류가 발생했습니다: ${t.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }

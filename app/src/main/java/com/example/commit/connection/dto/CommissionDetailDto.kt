@@ -26,6 +26,8 @@ data class CommissionDetail(
     val remainingSlots: Int,
     @SerializedName("isBookmarked")
     val isBookmarked: Boolean,
+    @SerializedName("bookmarkId")
+    val bookmarkId: Long?,
     @SerializedName("createdAt")
     val createdAt: String,
     @SerializedName("artistId")

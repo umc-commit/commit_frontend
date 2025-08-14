@@ -22,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.commit.R
 import com.example.commit.activity.CommissionFormActivity
@@ -31,6 +30,7 @@ import com.example.commit.ui.post.components.PostBottomBar
 import com.example.commit.ui.post.components.PostDetailTabSection
 import com.example.commit.ui.post.components.TabType
 import com.example.commit.viewmodel.ArtistViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun PostScreen(
@@ -45,17 +45,21 @@ fun PostScreen(
     currentIndex: Int = 0,
     commissionId: Int = -1,
     onReviewListClick: () -> Unit,
-    onChatClick: () -> Unit = {}
+    onChatClick: () -> Unit = {},
+    // ✅ 상세 화면에서도 ViewModel로 위임할 북마크 토글 콜백
+    onBookmarkToggle: (newState: Boolean) -> Unit
 ) {
     val context = LocalContext.current
     var selectedImageIndex by remember { mutableStateOf(currentIndex) }
 
+    // 아티스트 탭 로딩용 (기존 로직 유지)
     val artistViewModel: ArtistViewModel = viewModel()
     val artistBlock by artistViewModel.artistBlock.collectAsState()
     val artistError by artistViewModel.artistError.collectAsState()
 
-    // 북마크 토글 상태
+    // 북마크 토글 상태(로컬) + 외부와 동기화
     var isBookmarkedState by remember { mutableStateOf(isBookmarked) }
+    LaunchedEffect(isBookmarked) { isBookmarkedState = isBookmarked }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -94,7 +98,7 @@ fun PostScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 이미지
+            // 메인 이미지
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -106,7 +110,11 @@ fun PostScreen(
                         contentDescription = "썸네일 이미지",
                         modifier = Modifier
                             .fillMaxSize()
-                            .clickable { selectedImageIndex = (selectedImageIndex + 1) % imageCount }
+                            .clickable {
+                                if (imageCount > 0) {
+                                    selectedImageIndex = (selectedImageIndex + 1) % imageCount
+                                }
+                            }
                     )
                 } else {
                     Box(
@@ -117,7 +125,7 @@ fun PostScreen(
                 }
             }
 
-            // 인디케이터
+            // 이미지 인디케이터
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -155,18 +163,12 @@ fun PostScreen(
                     )
 
                     // ▼ 북마크 아이콘 (토글)
-                    val bookmarkPainter = if (isBookmarkedState)
-                        painterResource(id = R.drawable.ic_select_bookmarket)
-                    else
-                        painterResource(id = R.drawable.ic_unselect_bookmarket)
+                    val bookmarkPainter =
+                        if (isBookmarkedState) painterResource(id = R.drawable.ic_select_bookmarket)
+                        else painterResource(id = R.drawable.ic_unselect_bookmarket)
 
-                    val bookmarkTint = if (isBookmarkedState) {
-                        // 선택 시 현재 UI 유지 (아이콘 고유 색 사용)
-                        Color.Unspecified
-                    } else {
-                        // 미선택 시 #222222
-                        Color(0xFF222222)
-                    }
+                    val bookmarkTint =
+                        if (isBookmarkedState) Color.Unspecified else Color(0xFF222222)
 
                     Icon(
                         painter = bookmarkPainter,
@@ -174,7 +176,11 @@ fun PostScreen(
                         tint = bookmarkTint,
                         modifier = Modifier
                             .size(24.dp)
-                            .clickable { isBookmarkedState = !isBookmarkedState }
+                            .clickable {
+                                val next = !isBookmarkedState
+                                isBookmarkedState = next       // 낙관적 반영
+                                onBookmarkToggle(next)         // VM로 위임(POST/DELETE 호출)
+                            }
                     )
                 }
 
@@ -233,7 +239,7 @@ fun PostScreen(
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            // ▼ 탭 섹션: 여기서 탭 클릭 시 곧바로 API 호출
+            // ▼ 탭 섹션: 탭 클릭 시 필요할 때만 API 호출
             PostDetailTabSection(
                 onTabSelected = { tab ->
                     if (tab == TabType.ARTIST && artistBlock == null && commissionId > 0) {
@@ -254,12 +260,12 @@ fun PostScreen(
 
         // 하단 바
         PostBottomBar(
-            isRecruiting = true,
-            remainingSlots = 11,
+            isRecruiting = true,         // 필요 시 실제 값으로 교체
+            remainingSlots = 11,         // 필요 시 실제 값으로 교체
             onApplyClick = {
                 val intent = Intent(context, CommissionFormActivity::class.java)
                 intent.putExtra("commissionId", commissionId.toString())
-                Log.d("PostScreen", "신청하기 버튼 클릭 - commissionId: $commissionId")
+                Log.d("PostScreen", "신청하기 클릭 - commissionId: $commissionId")
                 context.startActivity(intent)
             },
             onChatClick = onChatClick,

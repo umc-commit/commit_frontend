@@ -31,6 +31,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.commit.ui.post.PostScreen
 import com.example.commit.viewmodel.PostViewModel
 
+
 class AlarmActivity : AppCompatActivity() {
 
     private lateinit var settingButton: ImageView
@@ -239,8 +240,12 @@ class AlarmActivity : AppCompatActivity() {
                                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                                 }
                                 context.startActivity(intent)
+                            },
+                            onBookmarkToggle = { newState ->
+                                postViewModel.toggleBookmark(this@AlarmActivity, itDetail.id, newState)
                             }
                         )
+
 
                     }
                 }
