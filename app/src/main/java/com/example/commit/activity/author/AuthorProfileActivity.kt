@@ -65,9 +65,8 @@ class AuthorProfileActivity : AppCompatActivity() {
         // 3) 서버에서 프로필 로드
         loadAuthorProfile(artistIdFromIntent)
 
-        // 4) 팔로우 버튼 초기 상태(로컬 캐시) 적용
-        setFollowVisualState(loadFollowState(artistIdFromIntent))
-        loadFollowerCount(artistIdFromIntent)?.let { setFollowerCountText(it) }
+        // 서버 기준으로 버튼 초기 상태 세팅
+        preloadFollowState(artistIdFromIntent)
 
         // 팔로우 버튼
         binding.btnFollowing.setOnClickListener {
@@ -442,53 +441,29 @@ class AuthorProfileActivity : AppCompatActivity() {
         (binding.root as ViewGroup).addView(composeOverlay)
     }
 
-    private fun createChatroomFromProfile(commissionId: Int, commissionTitle: String) {
+    private fun preloadFollowState(artistId: Int) {
         val api = RetrofitObject.getRetrofitService(this)
-        val currentUserId = 1
-        val artistId = artistIdFromIntent.takeIf { it != -1 } ?: 1
-        val artistName = binding.tvUsername.text?.toString().orEmpty()
-        val tempRequestId = 3
-
-        val req = RetrofitClient.CreateChatroomRequest(
-            consumerId = currentUserId,
-            artistId = artistId,
-            requestId = tempRequestId
-        )
-
-        api.createChatroom(req).enqueue(object :
-            Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
+        api.getFollowedArtists().enqueue(object :
+            retrofit2.Callback<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>> {
             override fun onResponse(
-                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
-                response: Response<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
+                call: retrofit2.Call<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>,
+                response: retrofit2.Response<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>
             ) {
-                if (!response.isSuccessful) {
-                    Log.d("AuthorProfileActivity", "채팅방 생성 실패(${response.code()})")
-                    return
+                val list = response.body()?.success?.artistList.orEmpty()
+                list.find { it.artist.id == artistId.toString() }?.let { followedArtist ->
+                    // 버튼 아이콘 상태
+                    setFollowVisualState(true)
+                    // 팔로워 수 반영
+                    val count = followedArtist.artist.followerCount
+                    setFollowerCountText(count)
+                    saveFollowerCount(artistId, count)
                 }
-                val data = response.body()?.success ?: run {
-                    Log.d("AuthorProfileActivity", "채팅방 생성 실패(응답 없음)")
-                    return
-                }
-
-                Log.d("AuthorProfileActivity", "채팅방 생성 성공: ${data.id}")
-
-                val intent = Intent(this@AuthorProfileActivity, MainActivity::class.java).apply {
-                    putExtra("openFragment", "postChatDetail")
-                    putExtra("chatName", commissionTitle)
-                    putExtra("authorName", artistName)
-                    putExtra("chatroomId", data.id)
-                    putExtra("sourceFragment", "AuthorProfileActivity")
-                    putExtra("commissionId", commissionId)
-                }
-                startActivity(intent)
             }
 
             override fun onFailure(
-                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
+                call: retrofit2.Call<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>,
                 t: Throwable
-            ) {
-                Log.d("AuthorProfileActivity", "네트워크 오류: ${t.message}")
-            }
+            ) { /* 실패 시 기존 상태 유지 */ }
         })
     }
 }

@@ -36,18 +36,17 @@ class ProfileFollowingAdapter(
         if (!user.profileImage.isNullOrBlank()) {
             Glide.with(holder.itemView)
                 .load(user.profileImage)
-                .placeholder(R.drawable.ic_pf_charac2)
-                .error(R.drawable.ic_pf_charac2)
+                .placeholder(R.drawable.ic_profile)
+                .error(R.drawable.ic_profile)
                 .into(holder.ivProfile)
         } else {
-            holder.ivProfile.setImageResource(R.drawable.ic_pf_charac2)
+            holder.ivProfile.setImageResource(R.drawable.ic_profile)
         }
 
         // 닉네임
         holder.tvUsername.text = user.nickname
 
-        // 서버 목록 총 개수를 팔로워 수처럼 표시
-        holder.tvFollowerCount.text = "팔로워 ${users.size}"
+        holder.tvFollowerCount.text = "팔로워 ${user.followerCount}"
 
         // 프로필 버튼 클릭 → 작가 프로필 화면 이동
         holder.btnProfile.setOnClickListener {

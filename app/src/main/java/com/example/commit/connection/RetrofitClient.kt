@@ -562,7 +562,8 @@ class RetrofitClient {
     data class FollowedArtist(
         @SerializedName("id") val id: String,
         @SerializedName("nickname") val nickname: String,
-        @SerializedName("profileImage") val profileImage: String?
+        @SerializedName("profileImage") val profileImage: String?,
+        @SerializedName("followerCount") val followerCount: Int
     )
 
 

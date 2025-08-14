@@ -9,7 +9,8 @@ import com.bumptech.glide.Glide
 import com.example.commit.R
 
 class ImageListAdapter(
-    private val imageUrls: List<String>
+    private val imageUrls: List<String>,
+    private val onImageClick: (() -> Unit)? = null
 ) : RecyclerView.Adapter<ImageListAdapter.ImageViewHolder>() {
 
     inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -30,6 +31,9 @@ class ImageListAdapter(
             .fallback(R.drawable.image_placeholder)
             .centerCrop()
             .into(holder.imageView)
+
+        // 이미지 클릭 → 상세 이동
+        holder.itemView.setOnClickListener { onImageClick?.invoke() }
     }
 
     override fun getItemCount(): Int = imageUrls.size

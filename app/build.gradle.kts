@@ -102,4 +102,10 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.9.0")
 
     implementation("com.google.android.flexbox:flexbox:3.0.0")
+
+    implementation("androidx.activity:activity-compose:1.9.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
+    implementation("androidx.savedstate:savedstate-ktx:1.2.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+
 }
