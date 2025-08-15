@@ -31,6 +31,7 @@ import com.example.commit.ui.request.components.RequestDetailSectionList
 import com.example.commit.viewmodel.RequestDetailViewModel
 import android.util.Log
 import androidx.compose.runtime.getValue
+import com.google.gson.Gson
 
 class FragmentRequestDetail : Fragment() {
 
@@ -88,6 +89,10 @@ class FragmentRequestDetail : Fragment() {
                             item.label to valueStr
                         }
 
+                        val gson = remember { Gson() }
+                        val formAnswerJson = remember(formAnswer) { gson.toJson(formAnswer) }
+                        // 주의: dto.FormItem과 data.model.FormItem 구조가 달라 스키마는 보류(null 전달)
+
                         RequestDetailScreen(
                             item = request,
                             commission = commission,
@@ -95,7 +100,10 @@ class FragmentRequestDetail : Fragment() {
                             paymentInfo = payment,
                             formSchema = formSchema,
                             formAnswer = formAnswer,
-                            onBackClick = { requireActivity().onBackPressedDispatcher.onBackPressed() }
+                            onBackClick = { requireActivity().onBackPressedDispatcher.onBackPressed() },
+                            // 넘길 JSON들
+                            formSchemaJson = null,
+                            formAnswerJson = formAnswerJson
                         )
                     }
 
@@ -112,7 +120,6 @@ class FragmentRequestDetail : Fragment() {
     }
 }
 
-
 @Composable
 fun RequestDetailScreen(
     item: RequestItem,
@@ -122,26 +129,24 @@ fun RequestDetailScreen(
     formSchema: List<FormItem>,
     formAnswer: Map<String, String>,
     onBackClick: () -> Unit,
-    onFormAnswerClick: () -> Unit = {}
+    // ↓ 추가: 하위로 JSON 전달
+    formSchemaJson: String?,
+    formAnswerJson: String?
 ) {
     val context = LocalContext.current
 
-    // 바텀바 숨기기
+    /* [기능] 바텀바 숨김/복원 */
     LaunchedEffect(Unit) {
         (context as? MainActivity)?.showBottomNav(false)
     }
-
-    // 뒤로 가기 시 바텀바 다시 보이기
     DisposableEffect(Unit) {
-        onDispose {
-            (context as? MainActivity)?.showBottomNav(true)
-        }
+        onDispose { (context as? MainActivity)?.showBottomNav(true) }
     }
 
     val status = item.status.trim()
     val isCancel = status == "CANCELED"
     val isReject = status == "REJECTED"
-    val isPending= status == "PENDING"
+    val isPending = status == "PENDING"
 
     Column(
         modifier = Modifier
@@ -178,14 +183,18 @@ fun RequestDetailScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            // 여기서 '신청서 보기' 클릭 시 안전하게 Activity로 이동하도록 RequestDetailItem에 JSON/createdAt 전달
             RequestDetailItem(
                 item = item,
                 commission = commission,
                 totalPrice = paymentInfo.totalPrice,
+                formSchemaJson = formSchemaJson,
+                formAnswerJson = formAnswerJson,
+                createdAt = item.createdAt // 없으면 null 허용
             )
 
-            // 취소 또는 거절 또는 수락 대기 상태가 아니면 세부 항목 출력
-            if (!isCancel && !isReject &&!isPending) {
+            // 취소/거절/대기 상태가 아니면 세부 항목 출력
+            if (!isCancel && !isReject && !isPending) {
                 Spacer(modifier = Modifier.height(16.dp))
                 RequestDetailSectionList(
                     timeline = timeline,

@@ -1,5 +1,7 @@
 package com.example.commit.ui.request.components
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,13 +25,17 @@ import com.example.commit.activity.ReviewWriteActivity
 import com.example.commit.connection.dto.CommissionItem
 import com.example.commit.connection.dto.RequestItem
 import com.example.commit.ui.Theme.CommitTypography
+import com.example.commit.ui.FormCheck.FormCheckActivity
 
 @Composable
 fun RequestDetailItem(
     item: RequestItem,
     commission: CommissionItem,
     totalPrice: Int,
-    onFormAnswerClick: () -> Unit = {}
+    // 폼/답변을 JSON으로 넘길 때 사용(없으면 null)
+    formSchemaJson: String? = null,
+    formAnswerJson: String? = null,
+    createdAt: String? = null
 ) {
     val context = LocalContext.current
     val status = item.status.trim()
@@ -57,6 +63,29 @@ fun RequestDetailItem(
         else -> Color.Black
     }
 
+    /* [기능] FormCheck 화면 열기 (컨텍스트 유형에 따라 NEW_TASK 자동 적용) */
+    fun openFormCheckSafe(ctx: Context) {
+        val intent = Intent(ctx, FormCheckActivity::class.java).apply {
+            putExtra("requestId", item.requestId)
+            putExtra("commissionId", commission.id)
+            putExtra("title", commission.title)
+            putExtra("artistId", commission.artist.id)
+            putExtra("artistNickname", commission.artist.nickname)
+            putExtra("thumbnailUrl", commission.thumbnailImageUrl ?: "")
+            putExtra("totalPrice", totalPrice)
+            putExtra("createdAt", createdAt ?: "")
+            putExtra("formSchemaJson", formSchemaJson)
+            putExtra("formAnswerJson", formAnswerJson)
+        }
+
+        // Activity 컨텍스트면 바로 실행, 아니면 NEW_TASK로 실행
+        if (ctx is Activity) {
+            ctx.startActivity(intent)
+        } else {
+            ctx.applicationContext.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -75,7 +104,7 @@ fun RequestDetailItem(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 썸네일 + 정보
+        // 썸네일 + 기본 정보
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 model = commission.thumbnailImageUrl,
@@ -120,7 +149,7 @@ fun RequestDetailItem(
                     .height(40.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFF4D4D4D))
-                    .clickable { onFormAnswerClick() },
+                    .clickable { openFormCheckSafe(context) },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -132,7 +161,7 @@ fun RequestDetailItem(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // 신청 취소 / 문의하기
+            // 신청 취소 / 문의하기 - 임시: 문의하기도 폼 확인으로 연결
             Row(modifier = Modifier.fillMaxWidth()) {
                 listOf("신청 취소", "문의하기").forEach { label ->
                     val isCancelLabel = label == "신청 취소"
@@ -144,9 +173,7 @@ fun RequestDetailItem(
                             .padding(horizontal = 4.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color(0xFFF0F0F0))
-                            .clickable {
-                                // TODO: 클릭 동작
-                            },
+                            .clickable { openFormCheckSafe(context) },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -158,14 +185,14 @@ fun RequestDetailItem(
                 }
             }
         } else if (isCancel || isReject) {
-            // 신청서 보기
+            // 신청서 보기 (취소/거절 상태)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(40.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFF4D4D4D))
-                    .clickable { onFormAnswerClick() },
+                    .clickable { openFormCheckSafe(context) },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -175,30 +202,25 @@ fun RequestDetailItem(
                 )
             }
         } else {
-            // 작업물 확인
+            // 작업물 확인(추후 기능)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(40.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(  if (isInProgress) Color(0xFFF1F1F1)
-                    else Color(0xFF4D4D4D))
-                    .clickable {
-                        // TODO: 작업물 확인 동작
-                    },
+                    .background(if (isInProgress) Color(0xFFF1F1F1) else Color(0xFF4D4D4D)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "작업물 확인",
                     style = CommitTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color =  if (isInProgress) Color(0xFFB0B0B0)
-                    else Color.White
+                    color = if (isInProgress) Color(0xFFB0B0B0) else Color.White
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // 하단 버튼: 작업완료 / 후기작성 / 문의하기
+            // 작업완료 / 후기작성 / 문의하기
             Row(modifier = Modifier.fillMaxWidth()) {
                 listOf("작업완료", "후기작성", "문의하기").forEachIndexed { index, label ->
                     val isFirst = index == 0
@@ -225,16 +247,15 @@ fun RequestDetailItem(
                                             "후기작성" -> {
                                                 val intent = Intent(context, ReviewWriteActivity::class.java)
                                                 intent.putExtra("requestId", item.requestId)
+                                                // 여기서는 기존 로직 유지(NEW_TASK로 안전)
                                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                                 context.startActivity(intent)
                                             }
-
                                             "작업완료" -> {
                                                 // TODO: 작업완료 처리
                                             }
-
                                             "문의하기" -> {
-                                                // TODO: 문의하기 처리
+                                                openFormCheckSafe(context)
                                             }
                                         }
                                     }
