@@ -39,7 +39,8 @@ import androidx.compose.ui.text.font.FontWeight
 fun CommissionFormScreen(
     commissionId: String,
     viewModel: CommissionFormViewModel,
-    onNavigateToSuccess: () -> Unit
+    onNavigateToSuccess: () -> Unit,
+    onNavigateToFormCheck: (existingRequestId: String) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -90,50 +91,33 @@ fun CommissionFormScreen(
     )
 
     // API 스키마 or 기본 스키마
-    val formSchema = when (commissionFormState) {
+    val formSchema = when (val state = commissionFormState) {
         is CommissionFormState.Success -> {
-            val response = (commissionFormState as CommissionFormState.Success).data
-            val formSchemaData = response?.success?.formSchema
-            Log.d("FormDebug", "API 응답 받음 - formSchema: $formSchemaData")
-
-            if (formSchemaData?.fields != null) {
-                runCatching {
-                    // API 응답 + 기본 라디오/체크박스 옵션 병합
-                    val apiFields = formSchemaData.fields.map { f ->
-                        FormItem(
-                            id = f.id.toIntOrNull(),
-                            type = f.type,
-                            label = f.label,
-                            options = f.options?.map { OptionItem(it.label) } ?: emptyList()
-                        )
-                    }
-                    
-                    val merged = mutableListOf<FormItem>()
-                    // 기본 라디오/체크박스 먼저 추가
-                    merged += defaultFormSchema.filter { it.type in listOf("radio", "check") }
-                    // API 응답 필드 추가 (중복 라벨 제외)
-                    apiFields.forEach { apiItem ->
-                        if (merged.none { it.label == apiItem.label }) {
-                            merged += apiItem
-                        }
-                    }
-                    merged
-                }.getOrElse {
-                    Log.e("FormSchema", "formSchema 파싱 오류: ${it.message}")
-                    defaultFormSchema
+            val fieldsFromApi = state.data?.success?.formSchema?.fields
+            if (!fieldsFromApi.isNullOrEmpty()) {
+                fieldsFromApi.map { f ->
+                    FormItem(
+                        id = f.id.toIntOrNull(),
+                        type = f.type,
+                        label = f.label,
+                        options = f.options
+                            // label 우선, 없으면 value 사용. 공백/널은 제외
+                            ?.mapNotNull { opt ->
+                                val lbl = (opt.label ?: opt.value)?.trim()
+                                if (!lbl.isNullOrEmpty()) OptionItem(label = lbl) else null
+                            }
+                            ?: emptyList()
+                    )
                 }
-            } else defaultFormSchema
+            } else {
+                defaultFormSchema
+            }
         }
-        is CommissionFormState.Error -> {
-            Log.w("CommissionFormScreen", "API 오류 발생, 기본 폼 사용: ${(commissionFormState as CommissionFormState.Error).message}")
-            defaultFormSchema
-        }
-        is CommissionFormState.Loading -> {
-            Log.d("CommissionFormScreen", "API 로딩 중, 기본 폼 사용")
-            defaultFormSchema
-        }
+        is CommissionFormState.Error -> defaultFormSchema
+        is CommissionFormState.Loading -> defaultFormSchema
         else -> defaultFormSchema
     }
+
 
     Log.d("FormDebug", "최종 formSchema: $formSchema")
 
@@ -227,7 +211,8 @@ fun CommissionFormScreen(
 
                 CommissionHeader(
                     artistName = commissionInfo?.artist?.nickname ?: "키르",
-                    commissionTitle = commissionInfo?.title ?: "낙서 타입 커미션"
+                    commissionTitle = commissionInfo?.title ?: "낙서 타입 커미션",
+                    thumbnailImageUrl = commissionInfo?.thumbnailImageUrl
                 )
                 Spacer(Modifier.height(20.dp))
                 Divider(thickness = 8.dp, color = Color(0xFFD9D9D9))
@@ -312,39 +297,14 @@ fun CommissionFormScreen(
                                 CircularProgressIndicator()
                             }
                         }
-                        is SubmitState.Error -> {
-                            val errorMessage = (submitState as SubmitState.Error).message
-                            if (errorMessage.contains("이미 신청한 커미션")) {
-                                // 이미 신청한 경우: 토스트 메시지만 표시
-                                LaunchedEffect(Unit) {
-                                    android.widget.Toast.makeText(
-                                        context,
-                                        "이미 신청한 커미션입니다",
-                                        android.widget.Toast.LENGTH_SHORT
-                                    ).show()
-                                    
-                                    // 잠시 후 이전 페이지로 돌아가기
-                                    kotlinx.coroutines.delay(1000)
-                                    if (context is FragmentActivity) {
-                                        context.supportFragmentManager.popBackStack()
-                                    } else if (context is androidx.activity.ComponentActivity) {
-                                        context.finish()
-                                    }
-                                }
-                            } else {
-                                // 일반적인 오류는 표시하지 않음
-                            }
-                        }
+
                         is SubmitState.Success -> {
-                            LaunchedEffect(Unit) {
-                                // 제출 성공 토스트 메시지 표시
+                            LaunchedEffect("success") {
                                 android.widget.Toast.makeText(
                                     context,
-                                    "신청이 성공적으로 제출되었습니다!",
+                                    "신청에 성공했습니다",
                                     android.widget.Toast.LENGTH_SHORT
                                 ).show()
-                                
-                                // 잠시 후 이전 페이지로 돌아가기
                                 kotlinx.coroutines.delay(1000)
                                 if (context is FragmentActivity) {
                                     context.supportFragmentManager.popBackStack()
@@ -353,20 +313,34 @@ fun CommissionFormScreen(
                                 }
                             }
                         }
+
+                        is SubmitState.AlreadySubmitted -> {
+                            // 이미 신청했어도 성공 토스트
+                            LaunchedEffect("already") {
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "신청에 성공했습니다",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                                kotlinx.coroutines.delay(1000)
+                                if (context is FragmentActivity) {
+                                    context.supportFragmentManager.popBackStack()
+                                } else if (context is androidx.activity.ComponentActivity) {
+                                    context.finish()
+                                }
+                            }
+                        }
+
                         is SubmitState.Error -> {
-                            val errorMessage = (submitState as SubmitState.Error).message
-                            val isAlreadySubmitted = errorMessage.contains("이미 신청한 커미션입니다")
-                            
-                            if (isAlreadySubmitted) {
-                                // 이미 신청한 경우: 토스트 메시지 표시 후 이전 화면으로 이동
-                                LaunchedEffect(Unit) {
+                            val msg = (submitState as SubmitState.Error).message
+                            val isAlready = msg.contains("이미 신청한 커미션")
+                            if (isAlready) {
+                                LaunchedEffect("error-already") {
                                     android.widget.Toast.makeText(
                                         context,
-                                        "이미 신청한 커미션입니다",
+                                        "신청에 성공했습니다",
                                         android.widget.Toast.LENGTH_SHORT
                                     ).show()
-                                    
-                                    // 잠시 후 이전 페이지로 돌아가기
                                     kotlinx.coroutines.delay(1000)
                                     if (context is FragmentActivity) {
                                         context.supportFragmentManager.popBackStack()
@@ -375,12 +349,11 @@ fun CommissionFormScreen(
                                     }
                                 }
                             }
-                            // 일반적인 오류는 표시하지 않음
                         }
+
                         else -> {}
                     }
-
-                    Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(8.dp))
 
                     Button(
                         onClick = {
@@ -424,7 +397,8 @@ fun CommissionFormScreenPreview() {
         CommissionFormScreen(
             commissionId = "1",
             viewModel = CommissionFormViewModel(),
-            onNavigateToSuccess = {}
+            onNavigateToSuccess = {},
+            onNavigateToFormCheck = { /* no-op for preview */ }
         )
     }
 }

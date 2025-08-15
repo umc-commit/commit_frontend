@@ -7,6 +7,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -18,7 +20,8 @@ import com.example.commit.ui.Theme.CommitTheme
 @Composable
 fun CommissionHeader(
     artistName: String = "키르",
-    commissionTitle: String = "낙서 타입 커미션"
+    commissionTitle: String = "낙서 타입 커미션",
+    thumbnailImageUrl: String? = null
 ) {
     Row(
         modifier = Modifier
@@ -28,13 +31,25 @@ fun CommissionHeader(
 
     ) {
 
-        // 프로필 이미지 (회색 사각형 대체용)
-        Box(
-            modifier = Modifier
-                .size(width = 80.dp, height = 60.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(color = Color(0xFFD9D9D9))       // Figma: 4dp radius
-        )
+        // 프로필 이미지
+        if (!thumbnailImageUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = thumbnailImageUrl,
+                contentDescription = "프로필 이미지",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(width = 80.dp, height = 60.dp)
+                    .clip(RoundedCornerShape(4.dp))
+            )
+        } else {
+            // URL 없을 때 플레이스홀더
+            Box(
+                modifier = Modifier
+                    .size(width = 80.dp, height = 60.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(color = Color(0xFFD9D9D9))
+            )
+        }
 
         Spacer(modifier = Modifier.width(14.dp)) // Figma 기준 간격
 
