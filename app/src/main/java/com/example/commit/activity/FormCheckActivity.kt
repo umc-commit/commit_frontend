@@ -1,21 +1,18 @@
-package com.example.commit.ui.FormCheck
+package com.example.commit.activity
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.example.commit.R
+import com.example.commit.data.model.Artist
+import com.example.commit.data.model.Commission
+import com.example.commit.data.model.FormItem
+import com.example.commit.data.model.RequestItem
+import com.example.commit.data.model.entities.ChatItem
+import com.example.commit.ui.FormCheck.FormCheckScreen
 import com.example.commit.ui.Theme.CommitTheme
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.example.commit.R
-
-// FormCheckScreen이 기대하는 타입 (data.model 쪽)을 그대로 사용
-import com.example.commit.data.model.entities.ChatItem
-import com.example.commit.data.model.FormItem
-import com.example.commit.data.model.OptionItem
-import com.example.commit.data.model.RequestItem as DMRequestItem
-import com.example.commit.data.model.Artist as DMArtist
-import com.example.commit.data.model.Commission as DMCommission
 
 class FormCheckActivity : ComponentActivity() {
 
@@ -58,7 +55,7 @@ class FormCheckActivity : ComponentActivity() {
             title = title
         )
 
-        val requestItem = DMRequestItem(
+        val requestItem = RequestItem(
             requestId = requestId,
             status = "PENDING",
             title = title,
@@ -66,8 +63,8 @@ class FormCheckActivity : ComponentActivity() {
             thumbnailImageUrl = thumbnailUrl,
             progressPercent = 0,
             createdAt = createdAt,
-            artist = DMArtist(id = artistId, nickname = artistNickname),
-            commission = DMCommission(id = commissionId)
+            artist = Artist(id = artistId, nickname = artistNickname),
+            commission = Commission(id = commissionId)
         )
 
         setContent {
