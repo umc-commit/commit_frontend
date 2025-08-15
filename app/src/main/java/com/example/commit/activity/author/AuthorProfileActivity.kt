@@ -31,6 +31,9 @@ import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.ViewModelProvider
 import com.example.commit.ui.post.PostScreen
 import com.example.commit.viewmodel.PostViewModel
+import androidx.core.os.bundleOf
+import com.example.commit.fragment.FragmentPostChatDetail
+import android.widget.Toast
 
 
 class AuthorProfileActivity : AppCompatActivity() {
@@ -40,6 +43,7 @@ class AuthorProfileActivity : AppCompatActivity() {
     private var artistIdFromIntent: Int = -1
     private lateinit var postViewModel: PostViewModel
     private var composeOverlay: FrameLayout? = null
+    private var authorName: String = ""
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,17 +51,13 @@ class AuthorProfileActivity : AppCompatActivity() {
         binding = ActivityAuthorProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 1) 인텐트에서 artistId 안전하게 꺼내기 (String/Int 모두 대응)
-        val parsedId: Int? =
-            intent.getStringExtra("artistId")?.toIntOrNull()
-                ?: intent.getIntExtra("artistId", -1).takeIf { it != -1 }
-
-        if (parsedId == null) {
+        // Intent로부터 artistId 받기
+        artistIdFromIntent = intent.getIntExtra("artistId", -1)
+        if (artistIdFromIntent == -1) {
             Log.d("AuthorProfileActivity", "artistId 없음")
             finish()
             return
         }
-        artistIdFromIntent = parsedId
 
         // 2) 리사이클러 초기화
         initRecyclerViews()
@@ -209,6 +209,9 @@ class AuthorProfileActivity : AppCompatActivity() {
                 ) {
                     if (!response.isSuccessful) return
                     val data = response.body()?.success ?: return
+
+                    binding.tvUsername.text = data.nickname
+                    authorName = data.nickname  // 작가 이름 저장
 
                     // 프로필
                     binding.tvUsername.text = data.nickname
@@ -424,11 +427,14 @@ class AuthorProfileActivity : AppCompatActivity() {
                         commissionId = itDetail.id,
                         onReviewListClick = { /* ... */ },
                         onChatClick = {
-                            val intent = Intent(context, MainActivity::class.java).apply {
-                                putExtra("openFragment", "chat")
-                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                            }
-                            context.startActivity(intent)
+                            // commissionDetail의 artistId는 String이므로 안전 변환
+                            val artistIdInt = itDetail.artistId
+
+                            createChatroomFromProfile(
+                                commissionId = itDetail.id,
+                                commissionTitle = itDetail.title,
+                                artistId = artistIdInt
+                            )
                         },
                         onBookmarkToggle = { newState ->
                             postViewModel.toggleBookmark(this@AuthorProfileActivity, itDetail.id, newState)
@@ -467,6 +473,92 @@ class AuthorProfileActivity : AppCompatActivity() {
                 call: retrofit2.Call<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>,
                 t: Throwable
             ) { /* 실패 시 기존 상태 유지 */ }
+        })
+    }
+
+    private fun createChatroomFromProfile(
+        commissionId: Int,
+        commissionTitle: String,
+        artistId: Int
+    ) {
+        Log.d(
+            "AuthorProfileActivity",
+            "createChatroomFromProfile 호출 - commissionId: $commissionId, artistId: $artistId, title: $commissionTitle"
+        )
+
+        val api = RetrofitObject.getRetrofitService(this)
+        val request = RetrofitClient.CreateChatroomRequest(
+            artistId = artistId,
+            commissionId = commissionId
+        )
+
+        api.createChatroom(request).enqueue(object :
+            Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
+            ) {
+                if (!response.isSuccessful) {
+                    Log.e("AuthorProfileActivity", "채팅방 생성 실패 - code=${response.code()}")
+                    return
+                }
+
+                val data = response.body()?.success
+                if (data == null) {
+                    Log.e("AuthorProfileActivity", "채팅방 생성 실패 - 응답 없음")
+                    return
+                }
+
+                val chatroomIdInt = data.id.toIntOrNull() ?: -1
+
+                // 오버레이 컨테이너 준비 (없으면 생성)
+                if (composeOverlay == null) {
+                    composeOverlay = FrameLayout(this@AuthorProfileActivity).apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                        setBackgroundColor(android.graphics.Color.WHITE)
+                        id = View.generateViewId() // ★ 프래그먼트 트랜잭션용 ID
+                    }
+                    (binding.root as ViewGroup).addView(composeOverlay)
+                } else {
+                    if (composeOverlay!!.id == View.NO_ID) {
+                        composeOverlay!!.id = View.generateViewId()
+                    }
+                    // 기존 뷰가 붙어있지 않다면 루트에 부착
+                    if (composeOverlay!!.parent == null) {
+                        (binding.root as ViewGroup).addView(composeOverlay)
+                    }
+                }
+
+                // 채팅 상세 프래그먼트로 전환
+                val fragment = FragmentPostChatDetail().apply {
+                    arguments = bundleOf(
+                        "chatName" to commissionTitle,
+                        "authorName" to authorName,  // 저장된 작가 이름 전달
+                        "chatroomId" to chatroomIdInt,
+                        "sourceFragment" to "AuthorProfileActivity",
+                        "commissionId" to commissionId,
+                        "artistId" to artistId       // artistId도 같이 전달하면 프로필 버튼 연동 가능
+                    )
+                }
+
+                supportFragmentManager.beginTransaction()
+                    .replace(composeOverlay!!.id, fragment)
+                    .addToBackStack(null)
+                    .commit()
+
+                // 성공 토스트 (요청대로 이거 하나만 남김)
+                Toast.makeText(this@AuthorProfileActivity, "채팅방이 생성되었습니다", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
+                t: Throwable
+            ) {
+                Log.e("AuthorProfileActivity", "채팅방 생성 네트워크 오류", t)
+            }
         })
     }
 }

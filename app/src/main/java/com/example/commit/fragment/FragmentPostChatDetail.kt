@@ -74,6 +74,7 @@ class FragmentPostChatDetail : Fragment() {
                     ChatRoomScreen(
                         commissionTitle = chatName,
                         authorName = authorName,
+                        chatroomId = chatroomId,
                         chatViewModel = chatViewModel,
                         onPayClick = {
                             if (isAdded && !isDetached) {

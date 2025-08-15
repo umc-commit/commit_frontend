@@ -8,7 +8,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-/*object RetrofitObject {
+object RetrofitObject {
 
     private const val BASE_URL = "https://commit.n-e.kr"
 
@@ -43,8 +43,23 @@ import java.util.concurrent.TimeUnit
 
         return retrofit.create(RetrofitAPI::class.java)
     }
-}*/
 
+    fun getCurrentUserId(context: Context): String? {
+        val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+        val token = prefs.getString("accessToken", null) ?: return null
+
+        return try {
+            val payload = token.split(".")[1]
+            val decoded = android.util.Base64.decode(payload, android.util.Base64.URL_SAFE)
+            val json = org.json.JSONObject(String(decoded))
+            json.optString("userId", null)
+        } catch (e: Exception) {
+            null
+        }
+    }
+}
+
+/*
 object RetrofitObject {
 
     private const val BASE_URL = "https://commit.n-e.kr"
@@ -77,6 +92,7 @@ object RetrofitObject {
         return retrofit.create(RetrofitAPI::class.java)
     }
 }
+*/
 
 
 

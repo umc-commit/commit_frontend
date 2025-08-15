@@ -1,11 +1,11 @@
 package com.example.commit.ui.post
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -13,20 +13,16 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import android.widget.Toast
 import com.example.commit.R
 import com.example.commit.activity.MainActivity
-import com.example.commit.activity.WrittenReviewsActivity
-import com.example.commit.connection.RetrofitObject
 import com.example.commit.connection.RetrofitClient
-import com.example.commit.connection.RetrofitAPI
+import com.example.commit.connection.RetrofitObject
 import com.example.commit.connection.dto.CommissionDetailResponse
 import com.example.commit.fragment.FragmentChat
 import com.example.commit.fragment.FragmentPostChatDetail
-import com.example.commit.viewmodel.PostViewModel
-import com.example.commit.viewmodel.CommissionFormViewModel
 import com.example.commit.viewmodel.ArtistViewModel
-import com.example.commit.ui.post.components.TabType
+import com.example.commit.viewmodel.CommissionFormViewModel
+import com.example.commit.viewmodel.PostViewModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -35,6 +31,7 @@ class FragmentPostScreen : Fragment() {
 
     companion object {
         private const val ARG_COMMISSION_ID = "commission_id"
+
         fun newInstance(commissionId: Int): FragmentPostScreen {
             return FragmentPostScreen().apply {
                 arguments = Bundle().apply {
@@ -66,8 +63,8 @@ class FragmentPostScreen : Fragment() {
             )
             setContent {
                 val commission by viewModel.commissionDetail.collectAsState()
-                val artistBlock by artistViewModel.artistBlock.collectAsState()  // ▼ 추가
-                val artistError by artistViewModel.artistError.collectAsState()  // ▼ 추가
+                val artistBlock by artistViewModel.artistBlock.collectAsState()
+                val artistError by artistViewModel.artistError.collectAsState()
 
                 LaunchedEffect(commission) {
                     Log.d("FragmentPostScreen", "commission 데이터 변경됨: $commission")
@@ -80,25 +77,20 @@ class FragmentPostScreen : Fragment() {
                         minPrice = detail.minPrice,
                         summary = detail.summary,
                         content = detail.content,
-                        images = detail.images.map { img -> img.imageUrl },
+                        images = detail.images.map { it.imageUrl },
                         isBookmarked = detail.isBookmarked,
                         imageCount = detail.images.size,
                         currentIndex = 0,
                         commissionId = detail.id,
-                        onReviewListClick = { /* 리뷰 화면 이동 처리 */ },
+                        onReviewListClick = { /* TODO: 리뷰 화면 이동 */ },
                         onChatClick = {
-                            val intent = Intent(requireContext(), MainActivity::class.java).apply {
-                                putExtra("openFragment", "chat")
-                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                            }
-                            requireContext().startActivity(intent)
+                            // 신청서 제출 여부 확인 후 → 기존 방 이동 or 생성
+                            checkApplicationStatus(detail.id, detail.title)
                         },
                         onBookmarkToggle = { newState ->
                             viewModel.toggleBookmark(requireContext(), detail.id, newState)
                         }
                     )
-
-
                 }
             }
         }
@@ -106,237 +98,209 @@ class FragmentPostScreen : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         val hideBottomBar = arguments?.getBoolean("hideBottomBar") ?: false
-        if (hideBottomBar) {
-            (requireActivity() as? MainActivity)?.showBottomNav(false)
-        }
+        if (hideBottomBar) (requireActivity() as? MainActivity)?.showBottomNav(false)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         (requireActivity() as? MainActivity)?.showBottomNav(true)
     }
-    
+
+    /** 신청서 제출 여부 확인 → 기존 방 있으면 이동, 없으면 생성 */
     private fun checkApplicationStatus(commissionId: Int, commissionTitle: String) {
-        // CommissionFormViewModel을 통해 신청서 제출 상태 확인
         commissionFormViewModel.checkApplicationStatus(
             commissionId = commissionId.toString(),
             context = requireContext()
         ) { hasSubmitted ->
-            if (hasSubmitted) {
-                // 신청서가 제출된 경우: 채팅방으로 이동 (CommissionRequestBubble 표시)
-                navigateToChatroom(commissionId, commissionTitle)
-            } else {
-                // 신청서가 제출되지 않은 경우: 채팅방 생성
+            openOrCreateChatroom(commissionId, commissionTitle, hasSubmitted)
+        }
+    }
+
+    /** 목록 조회로 commissionId 매칭 방 탐색 → 이동 / 생성 */
+    private fun openOrCreateChatroom(
+        commissionId: Int,
+        commissionTitle: String,
+        hasSubmitted: Boolean
+    ) {
+        val api = RetrofitObject.getRetrofitService(requireContext())
+        api.getChatroomList().enqueue(object :
+            Callback<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>,
+                response: Response<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>
+            ) {
+                if (!response.isSuccessful) {
+                    Log.w("FragmentPostScreen", "채팅방 목록 조회 실패 → 생성 fallback: ${response.code()}")
+                    createChatroom(commissionId, commissionTitle)
+                    return
+                }
+                val list = response.body()?.success.orEmpty()
+                val existing = list.firstOrNull { it.commissionId == commissionId.toString() }
+
+                if (existing != null) {
+                    val chatroomId = existing.chatroomId.toIntOrNull() ?: -1
+                    val authorName = existing.artistNickname.ifBlank { "작가" }
+                    Log.d("FragmentPostScreen", "기존 채팅방 발견 → id=$chatroomId, author=$authorName")
+
+                    navigateToChatroomWithArgs(
+                        commissionId = commissionId,
+                        commissionTitle = commissionTitle,
+                        authorName = authorName,
+                        chatroomId = chatroomId,
+                        hasSubmittedApplication = hasSubmitted
+                    )
+                } else {
+                    createChatroom(commissionId, commissionTitle)
+                }
+            }
+
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>,
+                t: Throwable
+            ) {
+                Log.w("FragmentPostScreen", "채팅방 목록 조회 네트워크 오류 → 생성 fallback", t)
                 createChatroom(commissionId, commissionTitle)
             }
-        }
+        })
     }
-    
-    private fun navigateToChatroom(commissionId: Int, commissionTitle: String) {
-        // 신청서가 제출된 커미션의 경우 CommissionRequestBubble이 표시되는 채팅방으로 이동
-        Log.d("FragmentPostScreen", "신청서 제출된 커미션 - 채팅방으로 이동")
-        
-        // 임시 값들 (실제로는 API에서 가져와야 함)
-        val artistName = "키르"
-        val tempChatroomId = 999 // 테스트용 고정값 (실제로는 기존 채팅방 ID 사용)
-        
-        // CommissionRequestBubble이 표시되는 채팅방으로 이동
-        val fragment = FragmentPostChatDetail().apply {
-            arguments = bundleOf(
-                "chatName" to commissionTitle,
-                "authorName" to artistName,
-                "chatroomId" to tempChatroomId,
-                "sourceFragment" to "FragmentPostScreen",
-                "commissionId" to commissionId,
-                "hasSubmittedApplication" to true // 신청서 제출됨 표시
-            )
-        }
-        
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.Nav_Frame, fragment)
-            .addToBackStack(null)
-            .commit()
-    }
-    
+
+    /** 채팅방 생성 → 목록 재조회로 artistNickname 확보 후 이동 */
     private fun createChatroom(commissionId: Int, commissionTitle: String) {
-        Log.d("FragmentPostScreen", "createChatroom 메서드 호출됨 - commissionId: $commissionId, title: $commissionTitle")
+        Log.d("FragmentPostScreen", "createChatroom 호출 - commissionId=$commissionId, title=$commissionTitle")
         val api = RetrofitObject.getRetrofitService(requireContext())
-        
-        // 먼저 커미션 상세 정보를 조회해서 artistId를 가져옴
+
+        // 1) 커미션 상세에서 artistId 획득
         api.getCommissionDetail(commissionId).enqueue(object : Callback<CommissionDetailResponse> {
             override fun onResponse(
                 call: Call<CommissionDetailResponse>,
                 response: Response<CommissionDetailResponse>
             ) {
-                Log.d("FragmentPostScreen", "커미션 상세 조회 응답: code=${response.code()}, isSuccessful=${response.isSuccessful}")
-                
-                if (response.isSuccessful) {
-                    val commissionData = response.body()?.success
-                    Log.d("FragmentPostScreen", "커미션 응답 전체: ${response.body()}")
-                    Log.d("FragmentPostScreen", "커미션 success 데이터: $commissionData")
-                    
-                    if (commissionData != null) {
-                        val artistId = commissionData.artistId
-                        Log.d("FragmentPostScreen", "커미션에서 가져온 artistId: $artistId")
-                        Log.d("FragmentPostScreen", "커미션 전체 데이터: $commissionData")
-                        
-                        // artistId가 0이면 다른 방법으로 시도
-                        if (artistId == 0) {
-                            Log.w("FragmentPostScreen", "artistId가 0입니다. 다른 방법으로 시도합니다.")
-                            // 임시로 commissionId를 artistId로 사용 (테스트용)
-                            val tempArtistId = if (commissionId % 2 == 0) 2 else 1
-                            Log.d("FragmentPostScreen", "임시 artistId 사용: $tempArtistId")
-                            getUserProfileAndCreateChatroom(api, tempArtistId, commissionId, commissionTitle)
-                        } else {
-                            // 정상적인 artistId 사용
-                            getUserProfileAndCreateChatroom(api, artistId, commissionId, commissionTitle)
-                        }
-                    } else {
-                        Log.e("FragmentPostScreen", "커미션 데이터가 없음")
-                        Toast.makeText(requireContext(), "커미션 정보를 가져올 수 없습니다", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Log.e("FragmentPostScreen", "커미션 상세 조회 실패: ${response.code()}")
-                    Log.e("FragmentPostScreen", "커미션 에러 응답: ${response.errorBody()?.string()}")
+                if (!response.isSuccessful) {
+                    Log.e("FragmentPostScreen", "커미션 상세 실패: ${response.errorBody()?.string()}")
                     Toast.makeText(requireContext(), "커미션 정보 조회에 실패했습니다", Toast.LENGTH_SHORT).show()
+                    return
                 }
+                val commission = response.body()?.success ?: run {
+                    Toast.makeText(requireContext(), "커미션 정보를 가져올 수 없습니다", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                val artistId = commission.artistId.takeIf { it != 0 } ?: run {
+                    val temp = if (commissionId % 2 == 0) 2 else 1
+                    Log.w("FragmentPostScreen", "artistId=0 → 임시 사용: $temp")
+                    temp
+                }
+
+                // 2) 채팅방 생성 (JWT에서 userId 추출 → 바디는 artistId/commissionId만)
+                val req = RetrofitClient.CreateChatroomRequest(
+                    artistId = artistId,
+                    commissionId = commissionId
+                )
+                api.createChatroom(req).enqueue(object :
+                    Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
+                    override fun onResponse(
+                        call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
+                        resp: Response<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
+                    ) {
+                        if (!resp.isSuccessful) {
+                            Log.e("FragmentPostScreen", "채팅방 생성 실패: ${resp.errorBody()?.string()}")
+                            Toast.makeText(requireContext(), "채팅방 생성에 실패했습니다", Toast.LENGTH_SHORT).show()
+                            return
+                        }
+                        val created = resp.body()?.success ?: run {
+                            Toast.makeText(requireContext(), "채팅방 생성에 실패했습니다", Toast.LENGTH_SHORT).show()
+                            return
+                        }
+                        val createdId = created.id.toIntOrNull() ?: -1
+                        Log.d("FragmentPostScreen", "채팅방 생성 성공: id=${created.id}(int=$createdId)")
+
+                        // 3) 목록 재조회로 artistNickname 확보 후 이동
+                        api.getChatroomList().enqueue(object :
+                            Callback<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>> {
+                            override fun onResponse(
+                                call: Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>,
+                                listResp: Response<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>
+                            ) {
+                                val list = listResp.body()?.success.orEmpty()
+                                val item = list.firstOrNull {
+                                    it.chatroomId == created.id || it.commissionId == commissionId.toString()
+                                }
+                                val authorName = item?.artistNickname?.ifBlank { "작가" } ?: "작가"
+
+                                navigateToChatroomWithArgs(
+                                    commissionId = commissionId,
+                                    commissionTitle = commissionTitle,
+                                    authorName = authorName,
+                                    chatroomId = createdId,
+                                    hasSubmittedApplication = false
+                                )
+
+                                // (옵션) 채팅 목록 새로고침
+                                try {
+                                    val main = requireActivity() as MainActivity
+                                    val chatFrag = main.supportFragmentManager.fragments
+                                        .find { it is FragmentChat } as? FragmentChat
+                                    chatFrag?.refreshChatroomList()
+                                } catch (_: Exception) { /* ignore */ }
+
+                                Toast.makeText(requireContext(), "채팅방이 생성되었습니다", Toast.LENGTH_SHORT).show()
+                            }
+
+                            override fun onFailure(
+                                call: Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>,
+                                t: Throwable
+                            ) {
+                                Log.w("FragmentPostScreen", "목록 재조회 실패 → 닉네임 기본값으로 이동", t)
+                                navigateToChatroomWithArgs(
+                                    commissionId = commissionId,
+                                    commissionTitle = commissionTitle,
+                                    authorName = "작가",
+                                    chatroomId = createdId,
+                                    hasSubmittedApplication = false
+                                )
+                            }
+                        })
+                    }
+
+                    override fun onFailure(
+                        call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
+                        t: Throwable
+                    ) {
+                        Log.e("FragmentPostScreen", "채팅 생성 네트워크 오류", t)
+                        Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
             }
 
-            override fun onFailure(
-                call: Call<CommissionDetailResponse>,
-                t: Throwable
-            ) {
-                Log.e("FragmentPostScreen", "커미션 상세 조회 네트워크 오류", t)
+            override fun onFailure(call: Call<CommissionDetailResponse>, t: Throwable) {
+                Log.e("FragmentPostScreen", "커미션 상세 네트워크 오류", t)
                 Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    private fun getUserProfileAndCreateChatroom(
-        api: RetrofitAPI,
-        artistId: Int,
+    /** 실제 이동: 작가 닉네임/신청서 제출 여부까지 전달 */
+    private fun navigateToChatroomWithArgs(
         commissionId: Int,
-        commissionTitle: String
+        commissionTitle: String,
+        authorName: String,
+        chatroomId: Int,
+        hasSubmittedApplication: Boolean
     ) {
-        // 사용자 프로필을 조회해서 실제 userId 사용
-        api.getMyProfile().enqueue(object : Callback<RetrofitClient.ApiResponse<RetrofitClient.ProfileResponseData>> {
-            override fun onResponse(
-                call: Call<RetrofitClient.ApiResponse<RetrofitClient.ProfileResponseData>>,
-                response: Response<RetrofitClient.ApiResponse<RetrofitClient.ProfileResponseData>>
-            ) {
-                Log.d("FragmentPostScreen", "프로필 조회 응답: code=${response.code()}, isSuccessful=${response.isSuccessful}")
-                
-                if (response.isSuccessful) {
-                    val profileData = response.body()?.success
-                    if (profileData != null) {
-                        val currentUserId = profileData.user.userId?.toIntOrNull() ?: 1
-                        Log.d("FragmentPostScreen", "현재 사용자 ID: $currentUserId")
-                        
-                        // 실제 사용자 ID와 아티스트 ID로 채팅방 생성
-                        createChatroomWithCorrectData(api, currentUserId, artistId, commissionId, commissionTitle)
-                    } else {
-                        Log.e("FragmentPostScreen", "프로필 데이터가 없음")
-                        Toast.makeText(requireContext(), "사용자 정보를 가져올 수 없습니다", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Log.e("FragmentPostScreen", "프로필 조회 실패: ${response.code()}")
-                    Toast.makeText(requireContext(), "사용자 정보 조회에 실패했습니다", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(
-                call: Call<RetrofitClient.ApiResponse<RetrofitClient.ProfileResponseData>>,
-                t: Throwable
-            ) {
-                Log.e("FragmentPostScreen", "프로필 조회 네트워크 오류", t)
-                Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun createChatroomWithCorrectData(
-        api: RetrofitAPI,
-        consumerId: Int,
-        artistId: Int,
-        commissionId: Int,
-        commissionTitle: String
-    ) {
-        // commissionId를 requestId로 사용 (또는 별도로 생성)
-        val requestId = commissionId
-        
-        Log.d("FragmentPostScreen", "올바른 데이터로 채팅방 생성 시도")
-        Log.d("FragmentPostScreen", "consumerId: $consumerId, artistId: $artistId, requestId: $requestId")
-        
-        val request = RetrofitClient.CreateChatroomRequest(
-            consumerId = consumerId,
-            artistId = artistId,
-            requestId = requestId
-        )
-        Log.d("FragmentPostScreen", "API 호출 시작 - request: $request")
-        
-        api.createChatroom(request).enqueue(object : Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
-            override fun onResponse(
-                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
-                response: Response<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
-            ) {
-                Log.d("FragmentPostScreen", "API 응답 받음: code=${response.code()}, isSuccessful=${response.isSuccessful}")
-                
-                if (response.isSuccessful) {
-                    val data = response.body()?.success
-                    if (data != null) {
-                        Log.d("FragmentPostScreen", "채팅방 생성 성공: ${data.id}")
-                        
-                        // 생성된 채팅방으로 이동
-                        val fragment = FragmentPostChatDetail().apply {
-                            arguments = bundleOf(
-                                "chatName" to commissionTitle,
-                                "authorName" to "작가", // 실제 아티스트 이름을 사용할 수 있음
-                                "chatroomId" to data.id,
-                                "sourceFragment" to "FragmentPostScreen",
-                                "commissionId" to commissionId
-                            )
-                        }
-                        
-                        parentFragmentManager.beginTransaction()
-                            .replace(R.id.Nav_Frame, fragment)
-                            .addToBackStack(null)
-                            .commit()
-                        
-                        // 채팅방 목록 새로고침
-                        try {
-                            val mainActivity = requireActivity() as MainActivity
-                            val fragmentChat = mainActivity.supportFragmentManager.fragments
-                                .find { it is FragmentChat } as? FragmentChat
-                            fragmentChat?.refreshChatroomList()
-                        } catch (e: Exception) {
-                            Log.w("FragmentPostScreen", "채팅방 목록 새로고침 실패", e)
-                        }
-                        
-                        Toast.makeText(
-                            requireContext(),
-                            "채팅방이 생성되었습니다",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else {
-                        Log.e("FragmentPostScreen", "채팅방 생성 실패: success 데이터가 없음")
-                        Toast.makeText(requireContext(), "채팅방 생성에 실패했습니다", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Log.e("FragmentPostScreen", "채팅방 생성 실패: ${response.code()}")
-                    Log.e("FragmentPostScreen", "에러 응답: ${response.errorBody()?.string()}")
-                    Toast.makeText(requireContext(), "채팅방 생성에 실패했습니다", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(
-                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
-                t: Throwable
-            ) {
-                Log.e("FragmentPostScreen", "채팅방 생성 네트워크 오류: ${t.message}", t)
-                Toast.makeText(requireContext(), "네트워크 오류가 발생했습니다: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+        val fragment = FragmentPostChatDetail().apply {
+            arguments = bundleOf(
+                "chatName" to commissionTitle,
+                "authorName" to authorName,
+                "chatroomId" to chatroomId,
+                "sourceFragment" to "FragmentPostScreen",
+                "commissionId" to commissionId,
+                "hasSubmittedApplication" to hasSubmittedApplication
+            )
+        }
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.Nav_Frame, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 }

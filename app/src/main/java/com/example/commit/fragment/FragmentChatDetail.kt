@@ -44,6 +44,8 @@ class FragmentChatDetail : Fragment() {
         val chatName = arguments?.getString("chatName") ?: "채팅방"
         val authorName = arguments?.getString("authorName") ?: "익명"
         val chatroomId = arguments?.getInt("chatroomId", 1) ?: 1 // 기본값 1
+        val artistId = arguments?.getInt("artistId", -1) ?: -1
+
 
         return ComposeView(requireContext()).apply {
             setContent {
@@ -95,6 +97,7 @@ class FragmentChatDetail : Fragment() {
                     ChatRoomScreen(
                         commissionTitle = chatName,
                         authorName = authorName,
+                        chatroomId = chatroomId,
                         chatViewModel = chatViewModel, // ChatViewModel 전달
                         onPayClick = {
                             if (isAdded && !isDetached) {
@@ -116,8 +119,8 @@ class FragmentChatDetail : Fragment() {
                             showBottomSheet.value = true
                         },
                         onProfileClick = {
-                            // AuthorProfileActivity로 이동
                             val intent = Intent(requireContext(), AuthorProfileActivity::class.java)
+                            intent.putExtra("artistId", artistId)   // 같이 넘김
                             startActivity(intent)
                         }
                     )
