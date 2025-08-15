@@ -78,6 +78,7 @@
         <activity android:name=".activity.ReviewEditActivity" android:exported="false"/>
         <activity android:name=".activity.author.AuthorProfileActivity" android:exported="false"/>
         <activity android:name=".activity.CommissionFormActivity" android:exported="false"/>
+        <activity android:name=".ui.FormCheck.FormCheckActivity" android:exported="false" />
 
     </application>
 

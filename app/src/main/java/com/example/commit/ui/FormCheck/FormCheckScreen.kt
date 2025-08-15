@@ -30,7 +30,7 @@ fun FormCheckScreen(
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -57,7 +57,7 @@ fun FormCheckScreen(
                 onBackClick = onBackClick
             )
         }
-        
+
         // 하단 고정 취소 버튼 (ChatDeleteScreen과 동일한 스타일)
         Button(
             onClick = {
@@ -97,7 +97,7 @@ fun PreviewFormCheckScreen() {
             isNew = false,
             title = "낙서 타임 커미션"
         )
-        
+
         val dummyRequestItem = RequestItem(
             requestId = 1,
             status = "진행중",
@@ -114,7 +114,7 @@ fun PreviewFormCheckScreen() {
                 id = 1
             )
         )
-        
+
         val dummyFormSchema = listOf(
             FormItem(
                 id = 1,
@@ -138,12 +138,12 @@ fun PreviewFormCheckScreen() {
                 )
             )
         )
-        
+
         val dummyFormAnswer = mapOf(
             "신청 내용" to "귀여운 고양이 그림 부탁드립니다",
             "당일마감" to "O"
         )
-        
+
         FormCheckScreen(
             chatItem = dummyChatItem,
             requestItem = dummyRequestItem,

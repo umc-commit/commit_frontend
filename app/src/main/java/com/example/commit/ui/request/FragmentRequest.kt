@@ -75,7 +75,7 @@ requests: List<RequestItem>,
 
     val filteredRequests = when (selectedStatus) {
         "진행 중" -> requests.filter { it.status == "IN_PROGRESS" ||it.status == "APPROVED" }
-        "작업 완료" -> requests.filter { it.status == "COMPLETED" }
+        "작업 완료" -> requests.filter { it.status == "COMPLETED" ||it.status == "SUBMITTED"}
         else -> requests
     }
 
