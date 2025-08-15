@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -16,9 +15,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.commit.data.model.entities.ChatItem
+import com.example.commit.R
+import com.example.commit.data.model.Artist
+import com.example.commit.data.model.Commission
 import com.example.commit.data.model.FormItem
+import com.example.commit.data.model.OptionItem
 import com.example.commit.data.model.RequestItem
+import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.ui.Theme.CommitTheme
 
 @Composable
@@ -31,11 +34,40 @@ fun FormCheckScreen(
 ) {
     val context = LocalContext.current
 
+    // API 미도착 시 기본 폼 스키마
+    val defaultFormSchema = listOf(
+        FormItem(
+            id = 1,
+            label = "당일마감",
+            type = "radio",
+            options = listOf(OptionItem("O (+10000P)"), OptionItem("X"))
+        ),
+        FormItem(
+            id = 2,
+            label = "신청 캐릭터",
+            type = "radio",
+            options = listOf(OptionItem("고양이"), OptionItem("햄스터"), OptionItem("캐리커쳐"), OptionItem("랜덤"))
+        ),
+        FormItem(
+            id = 3,
+            label = "저희 팀 코밋 예쁘게 봐주세요!",
+            type = "check",
+            options = listOf(OptionItem("확인했습니다."))
+        ),
+        FormItem(
+            id = 4,
+            label = "신청 내용",
+            type = "textarea"
+        )
+    )
+
+    val usedFormSchema = if (formSchema.isEmpty()) defaultFormSchema else formSchema
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .systemBarsPadding() // 시스템 바에 대한 패딩 추가
+            .systemBarsPadding()
     ) {
         // 상단 고정 TopBar
         FormCheckTopBar(
@@ -52,13 +84,13 @@ fun FormCheckScreen(
         ) {
             FormCheckSection(
                 item = chatItem,
-                formSchema = formSchema,
+                formSchema = usedFormSchema,
                 formAnswer = formAnswer,
                 onBackClick = onBackClick
             )
         }
 
-        // 하단 고정 취소 버튼 (ChatDeleteScreen과 동일한 스타일)
+        // 하단 고정 취소 버튼
         Button(
             onClick = {
                 Toast.makeText(context, "취소되었습니다", Toast.LENGTH_SHORT).show()
@@ -88,9 +120,8 @@ fun FormCheckScreen(
 @Composable
 fun PreviewFormCheckScreen() {
     CommitTheme {
-        // 더미 데이터 생성
         val dummyChatItem = ChatItem(
-            profileImageRes = com.example.commit.R.drawable.ic_profile,
+            profileImageRes = R.drawable.ic_profile,
             name = "키르",
             message = "최근 메시지",
             time = "2시간 전",
@@ -106,40 +137,12 @@ fun PreviewFormCheckScreen() {
             thumbnailImageUrl = "",
             progressPercent = 50,
             createdAt = "2023-12-01",
-            artist = com.example.commit.data.model.Artist(
-                id = 1,
-                nickname = "키르"
-            ),
-            commission = com.example.commit.data.model.Commission(
-                id = 1
-            )
+            artist = Artist(id = 1, nickname = "키르"),
+            commission = Commission(id = 1)
         )
 
-        val dummyFormSchema = listOf(
-            FormItem(
-                id = 1,
-                type = "textarea",
-                label = "신청 내용",
-                options = emptyList()
-            ),
-            FormItem(
-                id = 2,
-                type = "file",
-                label = "참고 이미지",
-                options = emptyList()
-            ),
-            FormItem(
-                id = 3,
-                type = "radio",
-                label = "당일마감",
-                options = listOf(
-                    com.example.commit.data.model.OptionItem("O"),
-                    com.example.commit.data.model.OptionItem("X")
-                )
-            )
-        )
-
-        val dummyFormAnswer = mapOf(
+        val dummyFormSchema = emptyList<FormItem>()
+        val dummyFormAnswer = mapOf<String, Any>(
             "신청 내용" to "귀여운 고양이 그림 부탁드립니다",
             "당일마감" to "O"
         )
