@@ -7,7 +7,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +50,12 @@ fun FormCheckScreen(
             id = 2,
             label = "신청 캐릭터",
             type = "radio",
-            options = listOf(OptionItem("고양이"), OptionItem("햄스터"), OptionItem("캐리커쳐"), OptionItem("랜덤"))
+            options = listOf(
+                OptionItem("고양이"),
+                OptionItem("햄스터"),
+                OptionItem("캐리커쳐"),
+                OptionItem("랜덤")
+            )
         ),
         FormItem(
             id = 3,
@@ -61,7 +70,17 @@ fun FormCheckScreen(
         )
     )
 
+    // API 미도착 시 기본 답변
+    val defaultFormAnswer = mapOf(
+        "당일마감" to "O (+10000P)",
+        "신청 캐릭터" to "고양이",
+        "저희 팀 코밋 예쁘게 봐주세요!" to "확인했습니다.",
+        "신청 내용" to "귀여운 고양이 그림 부탁드립니다"
+    )
+
+    // 폼/답변 최종 사용값 결정
     val usedFormSchema = if (formSchema.isEmpty()) defaultFormSchema else formSchema
+    val usedFormAnswer = if (formAnswer.isEmpty()) defaultFormAnswer else formAnswer
 
     Column(
         modifier = Modifier
@@ -85,7 +104,7 @@ fun FormCheckScreen(
             FormCheckSection(
                 item = chatItem,
                 formSchema = usedFormSchema,
-                formAnswer = formAnswer,
+                formAnswer = usedFormAnswer, // ✅ 여기서 변경
                 onBackClick = onBackClick
             )
         }

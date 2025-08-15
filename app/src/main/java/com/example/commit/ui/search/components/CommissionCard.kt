@@ -80,7 +80,7 @@ fun CommissionCard(
                 Text(text = commission.title, style = CommitTypography.bodyMedium, color = Color(0xFF2B2B2B),
                     maxLines = 1, modifier = Modifier.weight(1f))
 
-                val bookmarkResId = if (bookmarked) R.drawable.ic_select_bookmarket else R.drawable.ic_unselect_bookmarket
+                val bookmarkResId = if (bookmarked) R.drawable.ic_home_bookmark_on  else R.drawable.ic_unselect_bookmarket
                 Icon(
                     painter = painterResource(id = bookmarkResId),
                     contentDescription = if (bookmarked) "북마크 해제" else "북마크",
