@@ -337,24 +337,28 @@ class RetrofitClient {
 
     // 채팅방 생성 요청 DTO
     data class CreateChatroomRequest(
-        @SerializedName("consumerId")
-        val consumerId: Int,
         @SerializedName("artistId")
         val artistId: Int,
-        @SerializedName("requestId")
-        val requestId: Int
+        @SerializedName("commissionId")
+        val commissionId: Int
     )
 
     // 채팅방 생성 응답 DTO
     data class CreateChatroomResponse(
         @SerializedName("id")
-        val id: Int,
-        @SerializedName("consumerId")
-        val consumerId: Int,
+        val id: String,
+        @SerializedName("commissionId")
+        val commissionId: String,
+        @SerializedName("userId")
+        val userId: String,
         @SerializedName("artistId")
-        val artistId: Int,
-        @SerializedName("requestId")
-        val requestId: Int
+        val artistId: String,
+        @SerializedName("hiddenArtist")
+        val hiddenArtist: Boolean,
+        @SerializedName("hiddenUser")
+        val hiddenUser: Boolean,
+        @SerializedName("createdAt")
+        val createdAt: String
     )
 
     // 채팅방 목록 응답 DTO - success 필드가 직접 배열임
@@ -362,7 +366,7 @@ class RetrofitClient {
         val chatrooms: List<ChatroomItem>
     )
 
-    // 채팅방 목록 DTO (새로운 API 스펙)
+    // 채팅방 목록 DTO
     data class ChatroomItem(
         @SerializedName("chatroom_id")
         val chatroomId: String,
@@ -372,10 +376,10 @@ class RetrofitClient {
         val artistNickname: String,
         @SerializedName("artist_profile_image")
         val artistProfileImage: String?,
-        @SerializedName("request_id")
-        val requestId: String,
-        @SerializedName("request_title")
-        val requestTitle: String,
+        @SerializedName("commission_id")
+        val commissionId: String,
+        @SerializedName("commission_title")
+        val commissionTitle: String,
         @SerializedName("last_message")
         val lastMessage: String?,
         @SerializedName("last_message_time")

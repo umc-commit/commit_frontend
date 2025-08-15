@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 fun ChatRoomScreen(
     commissionTitle: String,
     authorName: String,
+    chatroomId: Int,
     onPayClick: () -> Unit,
     onFormCheckClick: () -> Unit,
     onBackClick: () -> Unit,
@@ -38,14 +39,7 @@ fun ChatRoomScreen(
     val coroutineScope = rememberCoroutineScope()
 
     // 메시지 목록을 안전하게 관리
-    val messages by remember(chatViewModel.chatMessages) {
-        mutableStateOf(chatViewModel.chatMessages)
-    }
-
-    // 채팅방 ID 설정 (더미데이터 로드를 위해)
-    LaunchedEffect(Unit) {
-        chatViewModel.setChatroomId(1) // 임시 ID, 실제로는 전달받은 ID 사용
-    }
+    val messages = chatViewModel.chatMessages
 
     Column(
         modifier = Modifier
@@ -70,7 +64,7 @@ fun ChatRoomScreen(
         // 메시지 목록
         ChatMessageList(
             messages = messages,
-            currentUserId = chatViewModel.currentUserId,
+            currentUserId = "me",
             onPayClick = {
                 // 결제 완료 시스템 메시지 표시
                 chatViewModel.addNewMessage("결제가 완료되었어요. 24시간 이내로 작업을 시작해주세요.", MessageType.PAYMENT_COMPLETE)
@@ -85,6 +79,11 @@ fun ChatRoomScreen(
 
         // 입력창
         val context = LocalContext.current
+        LaunchedEffect(Unit) {
+            chatViewModel.loadCurrentUserId(context)
+            chatViewModel.setChatroomId(1)
+            chatViewModel.loadMessages(context, 1)
+        }
         ChatBottomSection(
             message = chatViewModel.message,
             onMessageChange = chatViewModel::onMessageChange,
