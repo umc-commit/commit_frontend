@@ -2,12 +2,23 @@ package com.example.commit.ui.point
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,7 +34,8 @@ import com.example.commit.ui.point.components.PointOptionList
 
 @Composable
 fun PointChargeScreen(
-    onCancelClicked: () -> Unit
+    onCancelClicked: () -> Unit,
+    onChargeSuccess: () -> Unit
 ) {
     var selectedPoint by remember { mutableStateOf<Int?>(null) }
     var selectedPayment by remember { mutableStateOf<String?>(null) }
@@ -34,7 +46,7 @@ fun PointChargeScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        // 상단 헤더 고정
+        // 상단 헤더 (기존 아이콘 그대로 사용)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -47,10 +59,8 @@ fun PointChargeScreen(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .padding(start = 16.dp)
-                    .size(24.dp)
-                    .clickable {
-                        onCancelClicked()
-                    }
+                    .height(24.dp)
+                    .clickable { onCancelClicked() }
             )
 
             Text(
@@ -67,11 +77,11 @@ fun PointChargeScreen(
                 .padding(20.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_point_rectangle),
-                contentDescription = "포인트 직사각형",
+                painter = painterResource(id = R.drawable.ic_point_banner),
+                contentDescription = "포인트 배너",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
+                    .height(120.dp)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -100,6 +110,7 @@ fun PointChargeScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // 동의 섹션 (기존 구현 그대로 사용)
             AgreementSection(
                 amount = selectedPoint ?: 0,
                 agreed = agreed,
@@ -108,7 +119,22 @@ fun PointChargeScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            ChargeButton(enabled = isChargeEnabled)
+            // 결제 버튼(위에 투명 클릭 레이어로 onClick 처리)
+            Box(modifier = Modifier.fillMaxWidth()) {
+                ChargeButton(enabled = isChargeEnabled)
+
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable(
+                            enabled = isChargeEnabled,
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            onChargeSuccess()
+                        }
+                )
+            }
         }
     }
 }

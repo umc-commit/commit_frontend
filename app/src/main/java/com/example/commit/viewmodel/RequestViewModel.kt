@@ -24,31 +24,22 @@ class RequestViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-    fun loadRequests(
-        context: Context,
-        page: Int = 2, // 기본값 page=2
-        append: Boolean = false
-    ) {
+    fun loadRequests(context: Context) {
         viewModelScope.launch {
             try {
-                Log.d(TAG, "요청 시작: page=$page, append=$append (limit 없음, 토큰은 인터셉터로 자동 추가)")
+                Log.d(TAG, "요청 시작: 전체 데이터 로드 (page=1, limit=9999)")
 
                 val service = RetrofitObject.getRetrofitService(context)
-                // limit을 null로 줌 → Retrofit이 파라미터를 안 붙임
-                val response: ApiResponse<RequestListResponse> = service.getRequestList(page, null)
-
+                val response: ApiResponse<RequestListResponse> = service.getRequestList(
+                    page = 1,
+                    limit = 9999
+                )
                 Log.d(TAG, "전체 응답 = $response")
 
                 if (response.resultType == "SUCCESS" && response.success != null) {
-                    val newItems = response.success.requests
-                    Log.d(TAG, "신청 목록 ${newItems.size}개 로드됨 (page=$page)")
-
-                    _requestList.value =
-                        if (append && page > 1) {
-                            _requestList.value + newItems
-                        } else {
-                            newItems
-                        }
+                    val allItems = response.success.requests
+                    Log.d(TAG, "신청 목록 총 ${allItems.size}개 로드됨")
+                    _requestList.value = allItems
                 } else {
                     val error = response.error?.reason ?: "알 수 없는 오류"
                     Log.e(TAG, "API 실패: $error")
