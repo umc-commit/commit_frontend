@@ -227,7 +227,8 @@ fun CommissionFormScreen(
 
                 CommissionHeader(
                     artistName = commissionInfo?.artist?.nickname ?: "키르",
-                    commissionTitle = commissionInfo?.title ?: "낙서 타입 커미션"
+                    commissionTitle = commissionInfo?.title ?: "낙서 타입 커미션",
+                    thumbnailImageUrl = commissionInfo?.thumbnailImageUrl
                 )
                 Spacer(Modifier.height(20.dp))
                 Divider(thickness = 8.dp, color = Color(0xFFD9D9D9))
