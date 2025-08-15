@@ -127,6 +127,13 @@ class AuthorCommissionAdapter(
             if (initiallyOn) R.drawable.ic_home_bookmark_on else R.drawable.ic_home_bookmark
         )
 
+        // 북마크 아이콘: 부모 인터셉트 방지 + z-order 보정
+        holder.ivBookmark.setOnTouchListener { v, _ ->
+            (v.parent as? ViewGroup)?.requestDisallowInterceptTouchEvent(true)
+            false
+        }
+        holder.ivBookmark.bringToFront() // 겹침 케이스일 때만 효과
+
         // 클릭 리스너
         holder.ivBookmark.setOnClickListener {
             val ctx = holder.itemView.context
