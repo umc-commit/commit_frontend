@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.commit.connection.RetrofitAPI
 import com.example.commit.connection.RetrofitObject
 import com.example.commit.data.model.CommissionFormResponse
-import com.example.commit.data.model.CommissionRequestResponse
 import com.example.commit.data.model.CommissionRequestSubmit
 import com.example.commit.data.model.ImageUploadResponse
 import com.google.gson.Gson
@@ -24,13 +23,16 @@ import java.io.File
 
 class CommissionFormViewModel : ViewModel() {
 
-    private val _commissionFormState = MutableStateFlow<CommissionFormState>(CommissionFormState.Loading)
+    private val _commissionFormState =
+        MutableStateFlow<CommissionFormState>(CommissionFormState.Loading)
     val commissionFormState: StateFlow<CommissionFormState> = _commissionFormState.asStateFlow()
 
-    private val _imageUploadState = MutableStateFlow<ImageUploadState>(ImageUploadState.Idle)
+    private val _imageUploadState =
+        MutableStateFlow<ImageUploadState>(ImageUploadState.Idle)
     val imageUploadState: StateFlow<ImageUploadState> = _imageUploadState.asStateFlow()
 
-    private val _submitState = MutableStateFlow<SubmitState>(SubmitState.Idle)
+    private val _submitState =
+        MutableStateFlow<SubmitState>(SubmitState.Idle)
     val submitState: StateFlow<SubmitState> = _submitState.asStateFlow()
 
     private val _uploadedImageUrls = MutableStateFlow<List<String>>(emptyList())
@@ -45,7 +47,6 @@ class CommissionFormViewModel : ViewModel() {
     /* -------------------------------------------
      * Form API
      * ------------------------------------------- */
-
     fun getCommissionForm(commissionId: String, context: Context) {
         viewModelScope.launch {
             try {
@@ -53,10 +54,14 @@ class CommissionFormViewModel : ViewModel() {
 
                 val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
                 val token = prefs.getString("accessToken", null)
-                Log.d("CommissionFormViewModel", "토큰 확인: ${if (token.isNullOrEmpty()) "없음" else "있음"}")
+                Log.d(
+                    "CommissionFormViewModel",
+                    "토큰 확인: ${if (token.isNullOrEmpty()) "없음" else "있음"}"
+                )
 
                 if (token.isNullOrEmpty()) {
-                    _commissionFormState.value = CommissionFormState.Error("인증 토큰이 없습니다. 로그인이 필요합니다.")
+                    _commissionFormState.value =
+                        CommissionFormState.Error("인증 토큰이 없습니다. 로그인이 필요합니다.")
                     return@launch
                 }
 
@@ -76,7 +81,8 @@ class CommissionFormViewModel : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                _commissionFormState.value = CommissionFormState.Error("네트워크 오류: ${e.message}")
+                _commissionFormState.value =
+                    CommissionFormState.Error("네트워크 오류: ${e.message}")
             }
         }
     }
@@ -89,7 +95,8 @@ class CommissionFormViewModel : ViewModel() {
     private fun resolveMime(context: Context, uri: Uri): String {
         val fromResolver = context.contentResolver.getType(uri)
         val ext = MimeTypeMap.getFileExtensionFromUrl(uri.toString())
-        val fromExt = ext?.let { MimeTypeMap.getSingleton().getMimeTypeFromExtension(it.lowercase()) }
+        val fromExt =
+            ext?.let { MimeTypeMap.getSingleton().getMimeTypeFromExtension(it.lowercase()) }
         val mime = (fromResolver ?: fromExt ?: "image/jpeg")
         return if (mime == "image/jpg") "image/jpeg" else mime
     }
@@ -113,7 +120,10 @@ class CommissionFormViewModel : ViewModel() {
             android.graphics.ImageDecoder.decodeBitmap(src)
         } else {
             @Suppress("DEPRECATION")
-            android.provider.MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+            android.provider.MediaStore.Images.Media.getBitmap(
+                context.contentResolver,
+                uri
+            )
         }
         val outJpg = File(context.cacheDir, "upload_${System.currentTimeMillis()}.jpg")
         java.io.FileOutputStream(outJpg).use { fos ->
@@ -143,14 +153,19 @@ class CommissionFormViewModel : ViewModel() {
                     if (imageUrl != null) {
                         _uploadedImageUrls.value = _uploadedImageUrls.value + imageUrl
                         _imageUploadState.value = ImageUploadState.Success(body)
-                        Log.d("ImageUpload", "업로드 성공: $imageUrl (mime=$mime, name=${file.name})")
+                        Log.d(
+                            "ImageUpload",
+                            "업로드 성공: $imageUrl (mime=$mime, name=${file.name})"
+                        )
                     } else {
-                        _imageUploadState.value = ImageUploadState.Error("이미지 URL이 비어 있습니다.")
+                        _imageUploadState.value =
+                            ImageUploadState.Error("이미지 URL이 비어 있습니다.")
                     }
                 } else {
                     val err = response.errorBody()?.string()
                     Log.e("ImageUpload", "실패 ${response.code()}, $err")
-                    _imageUploadState.value = ImageUploadState.Error("업로드 실패: ${response.code()}")
+                    _imageUploadState.value =
+                        ImageUploadState.Error("업로드 실패: ${response.code()}")
                 }
             } catch (e: Exception) {
                 Log.e("ImageUpload", "예외: ${e.message}", e)
@@ -195,10 +210,8 @@ class CommissionFormViewModel : ViewModel() {
 
                 fields.forEach { f ->
                     val key = f.id.toString()
-                    
-                    // 디버깅: 각 필드의 값 확인
                     Log.d("SubmitDebug", "필드 처리: id=$key, type=${f.type}, label=${f.label}")
-                    
+
                     when (f.type) {
                         "textarea", "radio", "check" -> {
                             val v = (answersByLabel[f.label] as? String)?.takeIf { it.isNotBlank() }
@@ -209,15 +222,17 @@ class CommissionFormViewModel : ViewModel() {
                                 Log.d("SubmitDebug", "텍스트 필드 건너뛰기: $key (빈 값)")
                             }
                         }
+
                         "file", "image" -> {
                             val urls = uploadedImageUrls.value
                             if (urls.isNotEmpty()) {
-                                formAnswer[key] = urls  // 반드시 배열
+                                formAnswer[key] = urls // 배열이어야 함
                                 Log.d("SubmitDebug", "이미지 필드 추가: $key = $urls")
                             } else {
                                 Log.d("SubmitDebug", "이미지 필드 건너뛰기: $key (빈 배열)")
                             }
                         }
+
                         else -> {
                             val v = (answersByLabel[f.label] as? String)?.takeIf { it.isNotBlank() }
                             if (v != null) {
@@ -229,11 +244,13 @@ class CommissionFormViewModel : ViewModel() {
                         }
                     }
                 }
-                
-                // 최종 formAnswer 검증
+
                 Log.d("SubmitDebug", "최종 formAnswer 크기: ${formAnswer.size}")
                 formAnswer.forEach { (key, value) ->
-                    Log.d("SubmitDebug", "formAnswer[$key] = $value (타입: ${value?.javaClass?.simpleName})")
+                    Log.d(
+                        "SubmitDebug",
+                        "formAnswer[$key] = $value (타입: ${value.javaClass.simpleName})"
+                    )
                 }
 
                 // 빈 formAnswer 방지
@@ -241,35 +258,47 @@ class CommissionFormViewModel : ViewModel() {
                     Log.w("SubmitDebug", "formAnswer가 비어있음 - 기본값 추가")
                     formAnswer["1"] = "신청 내용이 없습니다"
                 }
-                
-                // 디버깅 로그
-                Log.d("SubmitPayload", gson.toJson(CommissionRequestSubmit(formAnswer = formAnswer)))
 
                 // 3) 요청
                 val request = CommissionRequestSubmit(formAnswer = formAnswer)
+                Log.d("SubmitPayload", gson.toJson(request))
+
                 val response = retrofitAPI!!.submitCommissionRequest(commissionId, request)
 
                 if (response.isSuccessful) {
-                    // 신청서 제출 성공 시 상태 저장
+                    // 성공: requestId만 꺼내서 Success에 전달
                     markApplicationSubmitted(commissionId, context)
-                    _submitState.value = SubmitState.Success(response.body()!!)
+
+                    val requestId = response.body()
+                        ?.success     // 실제 success 객체명에 맞게
+                        ?.request_id  // 실제 필드명에 맞게 (예: id면 .id)
+                        ?.toString()
+
+                    _submitState.value = SubmitState.Success(requestId)
                 } else {
-                    val errorBody = response.errorBody()?.string()
+                    val errorBody = response.errorBody()?.string().orEmpty()
                     Log.e("SubmitError", "서버 응답: ${response.code()}, 에러: $errorBody")
 
                     _submitState.value = when (response.code()) {
                         400 -> {
-                            // C010 에러인지 확인 (이미 신청한 커미션)
-                            val errorBodyString = errorBody ?: ""
-                            if (errorBodyString.contains("C010") || errorBodyString.contains("이미 신청한 커미션입니다")) {
-                                // C010 에러인 경우 신청서 제출 상태 저장
+                            if (errorBody.contains("C010") || errorBody.contains("이미 신청한 커미션입니다")) {
+                                val existingId = Regex("\"existingRequestId\"\\s*:\\s*\"?(\\d+)\"?")
+                                    .find(errorBody)?.groupValues?.getOrNull(1).orEmpty()
+
                                 markApplicationSubmitted(commissionId, context)
-                                SubmitState.Error("이미 신청한 커미션입니다")
+
+                                if (existingId.isNotBlank()) {
+                                    SubmitState.AlreadySubmitted(existingId)
+                                } else {
+                                    SubmitState.Error("이미 신청한 커미션입니다")
+                                }
                             } else {
-                                // 기타 400 에러
-                                SubmitState.Error(errorBodyString.ifEmpty { "잘못된 요청입니다." })
+                                SubmitState.Error(
+                                    if (errorBody.isNotEmpty()) errorBody else "잘못된 요청입니다."
+                                )
                             }
                         }
+
                         401 -> SubmitState.Error("인증이 필요합니다.")
                         404 -> SubmitState.Error("커미션을 찾을 수 없습니다.")
                         500 -> SubmitState.Error("서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
@@ -281,40 +310,43 @@ class CommissionFormViewModel : ViewModel() {
             }
         }
     }
-    
+
     /* -------------------------------------------
      * Check Application Status
      * ------------------------------------------- */
-    
-    fun checkApplicationStatus(commissionId: String, context: Context, onResult: (Boolean) -> Unit) {
+    fun checkApplicationStatus(
+        commissionId: String,
+        context: Context,
+        onResult: (Boolean) -> Unit
+    ) {
         viewModelScope.launch {
             try {
                 val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
                 val token = prefs.getString("accessToken", null)
-                
+
                 if (token.isNullOrEmpty()) {
                     onResult(false)
                     return@launch
                 }
-                
+
                 if (retrofitAPI == null) retrofitAPI = RetrofitObject.getRetrofitService(context)
-                
-                // TODO: 실제로는 신청서 제출 상태를 확인하는 API 엔드포인트가 필요합니다
-                // 예: GET /api/commissions/{commissionId}/applications/status
-                // 현재는 SharedPreferences에 저장된 신청서 제출 기록을 확인
+
+                // TODO: 실제 상태 조회 API 생기면 교체
                 val applicationKey = "commission_${commissionId}_submitted"
                 val hasSubmitted = prefs.getBoolean(applicationKey, false)
-                
-                Log.d("CommissionFormViewModel", "신청서 상태 확인: commissionId=$commissionId, hasSubmitted=$hasSubmitted")
+
+                Log.d(
+                    "CommissionFormViewModel",
+                    "신청서 상태 확인: commissionId=$commissionId, hasSubmitted=$hasSubmitted"
+                )
                 onResult(hasSubmitted)
-                
             } catch (e: Exception) {
                 Log.e("CommissionFormViewModel", "신청서 상태 확인 실패: ${e.message}")
                 onResult(false)
             }
         }
     }
-    
+
     // 신청서 제출 완료 시 상태 저장
     fun markApplicationSubmitted(commissionId: String, context: Context) {
         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
@@ -327,7 +359,6 @@ class CommissionFormViewModel : ViewModel() {
 /* -------------------------------------------
  * States
  * ------------------------------------------- */
-
 sealed class CommissionFormState {
     object Loading : CommissionFormState()
     data class Success(val data: CommissionFormResponse) : CommissionFormState()
@@ -341,9 +372,14 @@ sealed class ImageUploadState {
     data class Error(val message: String) : ImageUploadState()
 }
 
+/**
+ * 성공 시엔 requestId(String?)만 전달하도록 맞췄습니다.
+ * 전체 응답을 넘기고 싶다면 Success를 data class Success(val response: CommissionRequestResponse)로 바꾸세요.
+ */
 sealed class SubmitState {
-    object Idle : SubmitState()
-    object Loading : SubmitState()
-    data class Success(val data: CommissionRequestResponse) : SubmitState()
+    data object Idle : SubmitState()
+    data object Loading : SubmitState()
+    data class Success(val requestId: String? = null) : SubmitState()
     data class Error(val message: String) : SubmitState()
+    data class AlreadySubmitted(val existingRequestId: String) : SubmitState()
 }

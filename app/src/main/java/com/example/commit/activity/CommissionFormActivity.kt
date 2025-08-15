@@ -21,7 +21,8 @@ class CommissionFormActivity : FragmentActivity() {
                 CommissionFormScreen(
                     commissionId = commissionId,
                     viewModel = viewModel,
-                    onNavigateToSuccess = { /* 성공 시 처리 */ }
+                    onNavigateToSuccess = { /* 성공 시 처리 */ },
+                    onNavigateToFormCheck = { /* no-op for preview */ }
                 )
             }
         }
