@@ -13,7 +13,7 @@ import de.hdodenhof.circleimageview.CircleImageView
 
 class ProfileFollowingAdapter(
     private var users: List<RetrofitClient.FollowedArtist>,
-    private val onProfileClick: (artistId: String) -> Unit
+    private val onProfileClick: (artistId: Int) -> Unit
 ) : RecyclerView.Adapter<ProfileFollowingAdapter.FollowingUserViewHolder>() {
 
     class FollowingUserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -50,7 +50,8 @@ class ProfileFollowingAdapter(
 
         // 프로필 버튼 클릭 → 작가 프로필 화면 이동
         holder.btnProfile.setOnClickListener {
-            onProfileClick(user.id)
+            val id = user.id.toIntOrNull() ?: return@setOnClickListener
+            onProfileClick(id)
         }
     }
 

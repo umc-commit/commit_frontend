@@ -52,7 +52,15 @@ class AuthorProfileActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Intent로부터 artistId 받기
-        artistIdFromIntent = intent.getIntExtra("artistId", -1)
+        artistIdFromIntent = intent.extras?.get("artistId")?.let { any ->
+            when (any) {
+                is Int -> any
+                is Long -> any.toInt()
+                is String -> any.toIntOrNull() ?: -1
+                else -> -1
+            }
+        } ?: -1
+
         if (artistIdFromIntent == -1) {
             Log.d("AuthorProfileActivity", "artistId 없음")
             finish()
