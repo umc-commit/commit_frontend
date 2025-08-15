@@ -25,7 +25,7 @@ import com.example.commit.activity.ReviewWriteActivity
 import com.example.commit.connection.dto.CommissionItem
 import com.example.commit.connection.dto.RequestItem
 import com.example.commit.ui.Theme.CommitTypography
-import com.example.commit.ui.FormCheck.FormCheckActivity
+import com.example.commit.activity.FormCheckActivity
 
 @Composable
 fun RequestDetailItem(
