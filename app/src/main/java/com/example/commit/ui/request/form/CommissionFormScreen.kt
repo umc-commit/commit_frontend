@@ -90,46 +90,31 @@ fun CommissionFormScreen(
     )
 
     // API 스키마 or 기본 스키마
-    val formSchema = when (commissionFormState) {
+    // API 스키마 or 기본 스키마
+    val formSchema = when (val state = commissionFormState) {
         is CommissionFormState.Success -> {
-            val response = (commissionFormState as CommissionFormState.Success).data
-            val formSchemaData = response?.success?.formSchema
-            Log.d("FormDebug", "API 응답 받음 - formSchema: $formSchemaData")
-
-            if (formSchemaData?.fields != null) {
-                runCatching {
-                    // API 응답 + 기본 라디오/체크박스 옵션 병합
-                    val apiFields = formSchemaData.fields.map { f ->
-                        FormItem(
-                            id = f.id.toIntOrNull(),
-                            type = f.type,
-                            label = f.label,
-                            options = f.options?.map { OptionItem(it.label) } ?: emptyList()
-                        )
-                    }
-                    
-                    val merged = mutableListOf<FormItem>()
-                    // 기본 라디오/체크박스 먼저 추가
-                    merged += defaultFormSchema.filter { it.type in listOf("radio", "check") }
-                    // API 응답 필드 추가 (중복 라벨 제외)
-                    apiFields.forEach { apiItem ->
-                        if (merged.none { it.label == apiItem.label }) {
-                            merged += apiItem
-                        }
-                    }
-                    merged
-                }.getOrElse {
-                    Log.e("FormSchema", "formSchema 파싱 오류: ${it.message}")
-                    defaultFormSchema
+            val fieldsFromApi = state.data?.success?.formSchema?.fields
+            if (!fieldsFromApi.isNullOrEmpty()) {
+                // ✅ API가 뭔가라도 주면, 기본 옵션은 전혀 섞지 않고 API 그대로 사용
+                fieldsFromApi.map { f ->
+                    FormItem(
+                        id = f.id.toIntOrNull(),
+                        type = f.type,
+                        label = f.label,
+                        options = f.options?.map { OptionItem(it.label) } ?: emptyList()
+                    )
                 }
-            } else defaultFormSchema
+            } else {
+                // ✅ API가 비어있을 때만 기본 스키마 사용
+                defaultFormSchema
+            }
         }
         is CommissionFormState.Error -> {
-            Log.w("CommissionFormScreen", "API 오류 발생, 기본 폼 사용: ${(commissionFormState as CommissionFormState.Error).message}")
+            // 오류 시엔 기본 스키마
             defaultFormSchema
         }
         is CommissionFormState.Loading -> {
-            Log.d("CommissionFormScreen", "API 로딩 중, 기본 폼 사용")
+            // 로딩 중 임시로 기본 스키마
             defaultFormSchema
         }
         else -> defaultFormSchema
