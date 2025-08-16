@@ -103,6 +103,7 @@ fun ChatListScreenPreview() {
     val sampleChats = listOf(
         ChatItem(
             profileImageRes = R.drawable.ic_pf_charac2,
+            profileImageUrl = null,
             name = "키르",
             message = "[결제 요청] 낙서 타임 커미션",
             time = "방금 전",
@@ -111,6 +112,7 @@ fun ChatListScreenPreview() {
         ),
         ChatItem(
             profileImageRes = R.drawable.ic_pf_charac1,
+            profileImageUrl = null,
             name = "브로콜리",
             message = "[커미션 완료] 일러스트 타입",
             time = "2일 전",
