@@ -114,6 +114,7 @@ fun FormCheckTopBarPreview() {
     CommitTheme {
         val dummyChatItem = ChatItem(
             profileImageRes = com.example.commit.R.drawable.ic_profile,
+
             name = "키르",
             message = "최근 메시지",
             time = "2시간 전",

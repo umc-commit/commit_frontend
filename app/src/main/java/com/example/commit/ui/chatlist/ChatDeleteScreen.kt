@@ -160,8 +160,8 @@ fun RoundedCheckbox(
 @Composable
 fun ChatDeleteScreenPreview() {
     val sampleChats = listOf(
-        ChatItem(R.drawable.ic_profile, "키르", "[결제 요청] 낙서 타임 커미션", "방금 전", true, "낙서 타입 커미션"),
-        ChatItem(R.drawable.ic_profile, "브로콜리", "[커미션 완료] 일러스트 타입", "2일 전", false, "일러스트 타입 커미션")
+        ChatItem(R.drawable.ic_profile, profileImageUrl = null, "키르", "[결제 요청] 낙서 타임 커미션", "방금 전", true, "낙서 타입 커미션"),
+        ChatItem(R.drawable.ic_profile, profileImageUrl = null, "브로콜리", "[커미션 완료] 일러스트 타입", "2일 전", false, "일러스트 타입 커미션")
     )
     val selected = remember { mutableStateListOf<ChatItem>() }
 

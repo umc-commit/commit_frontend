@@ -54,6 +54,7 @@ class FormCheckDialogFragment : DialogFragment() {
                     val artistName = arguments?.getString("artistName") ?: ""
                     val formSchemaJson = arguments?.getString("formSchema") ?: "{}"
                     val formAnswerJson = arguments?.getString("formAnswer") ?: "{}"
+                    val artistProfileImage = arguments?.getString("artistProfileImage")?: ""
 
                     // JSON을 파싱하여 필요한 데이터 구조로 변환
                     val formSchema = try {
@@ -88,6 +89,7 @@ class FormCheckDialogFragment : DialogFragment() {
                     // 더미 데이터 생성 (실제로는 API에서 가져온 데이터 사용)
                     val chatItem = ChatItem(
                         profileImageRes = com.example.commit.R.drawable.ic_profile, // 기본 프로필 이미지 사용
+                        profileImageUrl = artistProfileImage,
                         name = artistName,
                         message = "",
                         time = "",

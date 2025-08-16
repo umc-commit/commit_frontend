@@ -45,6 +45,7 @@ class FragmentChatDetail : Fragment() {
         val authorName = arguments?.getString("authorName") ?: "익명"
         val chatroomId = arguments?.getInt("chatroomId", 1) ?: 1 // 기본값 1
         val artistId = arguments?.getInt("artistId", -1) ?: -1
+        val artistProfileImage = arguments?.getString("artistProfileImage")
 
 
         return ComposeView(requireContext()).apply {
@@ -87,6 +88,7 @@ class FragmentChatDetail : Fragment() {
                     
                     val chatItem = ChatItem(
                         profileImageRes = R.drawable.ic_profile,
+                        profileImageUrl = artistProfileImage,
                         name = authorName,
                         message = "",
                         title = chatName,

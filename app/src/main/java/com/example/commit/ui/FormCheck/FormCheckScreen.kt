@@ -141,6 +141,7 @@ fun PreviewFormCheckScreen() {
     CommitTheme {
         val dummyChatItem = ChatItem(
             profileImageRes = R.drawable.ic_profile,
+            profileImageUrl = null,
             name = "키르",
             message = "최근 메시지",
             time = "2시간 전",

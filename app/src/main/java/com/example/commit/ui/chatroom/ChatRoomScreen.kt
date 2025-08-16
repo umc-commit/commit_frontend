@@ -33,6 +33,7 @@ fun ChatRoomScreen(
     onBackClick: () -> Unit,
     onSettingClick: () -> Unit,
     onProfileClick: () -> Unit,
+    authorProfileImageUrl: String? = null,
     chatViewModel: ChatViewModel = viewModel()
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }

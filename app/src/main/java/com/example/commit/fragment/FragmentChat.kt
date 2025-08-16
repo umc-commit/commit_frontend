@@ -64,6 +64,7 @@ class FragmentChat : Fragment() {
                             chatItemsState.value = rooms.map { room ->
                                 ChatItem(
                                     profileImageRes = R.drawable.ic_profile,
+                                    profileImageUrl = room.artistProfileImage,
                                     name = room.artistNickname,
                                     message = room.lastMessage ?: "새로운 메시지가 없습니다",
                                     time = formatTime(room.lastMessageTime),
@@ -84,6 +85,7 @@ class FragmentChat : Fragment() {
                             chatItemsState.value = rooms.map { room ->
                                 ChatItem(
                                     profileImageRes = R.drawable.ic_profile,
+                                    profileImageUrl = room.artistProfileImage,
                                     name = room.artistNickname,
                                     message = room.lastMessage ?: "새로운 메시지가 없습니다",
                                     time = formatTime(room.lastMessageTime),

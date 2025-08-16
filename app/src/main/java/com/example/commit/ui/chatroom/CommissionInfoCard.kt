@@ -33,12 +33,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 
 @Composable
 fun CommissionInfoCard(
     title: String = "낙서 타입 커미션",
     period: String = "작업기간 : 23시간",
-    onSeePostClick: () -> Unit = {}
+    onSeePostClick: () -> Unit = {},
+    thumbnailImageUrl: String? = null
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
 
@@ -49,6 +51,16 @@ fun CommissionInfoCard(
                 .padding(top = 16.dp, start = 28.dp, end = 28.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            if (!thumbnailImageUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = thumbnailImageUrl,
+                    contentDescription = "프로필 이미지",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                )
+            } else {
             // 썸네일
             Image(
                 painter = painterResource(id = R.drawable.bg_thumbnail_rounded),
@@ -59,6 +71,7 @@ fun CommissionInfoCard(
                     .background(Color.LightGray), // 썸네일 배경 (임시)
                 contentScale = ContentScale.Crop
             )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
