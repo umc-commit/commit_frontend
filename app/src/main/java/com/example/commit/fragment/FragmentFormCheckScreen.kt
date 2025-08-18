@@ -12,6 +12,8 @@ import com.example.commit.data.model.RequestItem
 import com.example.commit.ui.FormCheck.FormCheckScreen
 import com.example.commit.ui.Theme.CommitTheme
 import com.google.gson.Gson
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.commit.viewmodel.CommissionFormViewModel
 
 class FragmentFormCheckScreen : Fragment() {
     override fun onCreateView(
@@ -44,13 +46,15 @@ class FragmentFormCheckScreen : Fragment() {
                         time = "",
                         isNew = false
                     )
-                    
+
+                    val formVM: CommissionFormViewModel = viewModel()
                     FormCheckScreen(
                         chatItem = chatItem,
                         requestItem = requestItem,
                         formSchema = formSchema,
                         formAnswer = formAnswer,
-                        onBackClick = { requireActivity().onBackPressedDispatcher.onBackPressed() }
+                        onBackClick = { requireActivity().onBackPressedDispatcher.onBackPressed()},
+                        viewModel = formVM
                     )
                 }
             }

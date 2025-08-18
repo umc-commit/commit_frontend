@@ -1,8 +1,10 @@
 package com.example.commit.activity
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import com.example.commit.R
 import com.example.commit.data.model.Artist
 import com.example.commit.data.model.Commission
@@ -11,10 +13,13 @@ import com.example.commit.data.model.RequestItem
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.ui.FormCheck.FormCheckScreen
 import com.example.commit.ui.Theme.CommitTheme
+import com.example.commit.viewmodel.CommissionFormViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 class FormCheckActivity : ComponentActivity() {
+
+    private val formVM: CommissionFormViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +74,15 @@ class FormCheckActivity : ComponentActivity() {
             commission = Commission(id = commissionId)
         )
 
+        Log.d("FormCheckActivity", "onCreate commissionId=$commissionId, requestId=$requestId")
+
+        // ✅ 여기서 API 호출 (Call.enqueue 버전 ViewModel)
+        if (commissionId > 0) {
+            formVM.getSubmittedCommissionForm(commissionId.toString(), this)
+        } else {
+            Log.w("FormCheckActivity", "commissionId가 유효하지 않음 → API 호출 skip")
+        }
+
         setContent {
             CommitTheme {
                 FormCheckScreen(
@@ -76,13 +90,10 @@ class FormCheckActivity : ComponentActivity() {
                     requestItem = requestItem,
                     formSchema = formSchema,
                     formAnswer = formAnswer,
-                    onBackClick = { finish() }
+                    onBackClick = { finish() },
+                    viewModel = formVM
                 )
             }
-        }
-
-        if (requestId <= 0) {
-            // Toast.makeText(this, "요청 정보가 올바르지 않습니다.", Toast.LENGTH_SHORT).show() //
         }
     }
 }

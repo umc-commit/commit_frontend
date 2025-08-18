@@ -21,6 +21,12 @@ import com.example.commit.ui.FormCheck.FormCheckScreen
 import com.example.commit.ui.Theme.CommitTheme
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.commit.viewmodel.CommissionFormViewModel
+
+
+
+
 
 class FormCheckDialogFragment : DialogFragment() {
 
@@ -113,7 +119,7 @@ class FormCheckDialogFragment : DialogFragment() {
                             id = 1
                         )
                     )
-
+                    val formVM: CommissionFormViewModel = viewModel()
                     // 안전한 영역 확보를 위한 Box
                     Box(
                         modifier = Modifier
@@ -125,7 +131,8 @@ class FormCheckDialogFragment : DialogFragment() {
                             requestItem = requestItem,
                             formSchema = formSchema,
                             formAnswer = formAnswer,
-                            onBackClick = { dismiss() }
+                            onBackClick = { dismiss() },
+                            viewModel = formVM
                         )
                     }
                 }

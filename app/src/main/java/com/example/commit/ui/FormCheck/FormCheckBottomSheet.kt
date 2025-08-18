@@ -12,6 +12,8 @@ import androidx.compose.ui.unit.dp
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.data.model.FormItem
 import com.example.commit.data.model.RequestItem
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.commit.viewmodel.CommissionFormViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,16 +36,18 @@ fun FormCheckBottomSheet(
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(20.dp))
-            
+
+            val formVM: CommissionFormViewModel = viewModel()
             // FormCheckScreen 내용
             FormCheckScreen(
                 chatItem = chatItem,
                 requestItem = requestItem,
                 formSchema = formSchema,
                 formAnswer = formAnswer,
-                onBackClick = onDismiss
+                onBackClick = onDismiss,
+                viewModel = formVM
             )
-            
+
             Spacer(modifier = Modifier.height(20.dp))
         }
     }

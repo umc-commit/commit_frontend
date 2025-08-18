@@ -1,28 +1,26 @@
 package com.example.commit.ui.FormCheck
 
 import android.widget.Toast
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.commit.R
-import com.example.commit.data.model.Artist
-import com.example.commit.data.model.Commission
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.commit.data.model.FormItem
 import com.example.commit.data.model.OptionItem
 import com.example.commit.data.model.RequestItem
 import com.example.commit.data.model.entities.ChatItem
-import com.example.commit.ui.Theme.CommitTheme
+import com.example.commit.viewmodel.CommissionFormViewModel
+import com.example.commit.viewmodel.SubmittedFormState
 
 @Composable
 fun FormCheckScreen(
@@ -30,11 +28,12 @@ fun FormCheckScreen(
     requestItem: RequestItem,
     formSchema: List<FormItem>,
     formAnswer: Map<String, Any>,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    viewModel: CommissionFormViewModel
 ) {
     val context = LocalContext.current
 
-    // API 미도착 시 기본 폼 스키마
+    // ----- 기본 스키마/답변 (API 실패/미도착 시 대체) -----
     val defaultFormSchema = listOf(
         FormItem(
             id = 1,
@@ -65,8 +64,6 @@ fun FormCheckScreen(
             type = "textarea"
         )
     )
-
-    // API 미도착 시 기본 답변
     val defaultFormAnswer = mapOf(
         "당일마감" to "O (+10000P)",
         "신청 캐릭터" to "고양이",
@@ -74,8 +71,29 @@ fun FormCheckScreen(
         "신청 내용" to "귀여운 고양이 그림 부탁드립니다"
     )
 
-    // 폼/답변 최종 사용값 결정
-    val usedFormSchema = if (formSchema.isEmpty()) defaultFormSchema else formSchema
+    // ----- ViewModel 상태 구독 -----
+    val remoteSchema by viewModel.submittedFormSchemaUi.collectAsStateWithLifecycle()
+    val submittedState by viewModel.submittedFormState.collectAsStateWithLifecycle()
+
+    // 로그 확인용
+    LaunchedEffect(Unit) {
+        Log.d("FormCheckScreen", "entered; remoteSchema.size=${remoteSchema.size}")
+    }
+    LaunchedEffect(remoteSchema) {
+        Log.d("FormCheckScreen", "remoteSchema updated size=${remoteSchema.size}")
+    }
+    LaunchedEffect(submittedState) {
+        Log.d("FormCheckScreen", "submittedState=$submittedState")
+        val msg = (submittedState as? SubmittedFormState.Error)?.message
+        if (!msg.isNullOrBlank()) Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    // ----- 최종 사용 스키마/답변 (원격 > 전달 > 기본) -----
+    val usedFormSchema = when {
+        remoteSchema.isNotEmpty() -> remoteSchema
+        formSchema.isNotEmpty() -> formSchema
+        else -> defaultFormSchema
+    }
     val usedFormAnswer = if (formAnswer.isEmpty()) defaultFormAnswer else formAnswer
 
     Column(
@@ -88,24 +106,28 @@ fun FormCheckScreen(
         FormCheckTopBar(
             onBackClick = onBackClick,
             chatItem = chatItem,
-            requestItem = requestItem,
+            requestItem = requestItem
         )
 
-        // 스크롤 가능한 Section
+        // 스크롤 영역
         Column(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
         ) {
+            if (submittedState is SubmittedFormState.Loading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+
             FormCheckSection(
                 item = chatItem,
                 formSchema = usedFormSchema,
-                formAnswer = usedFormAnswer, // ✅ 여기서 변경
+                formAnswer = usedFormAnswer,
                 onBackClick = onBackClick
             )
         }
 
-        // 하단 고정 취소 버튼
+        // 하단 취소 버튼
         Button(
             onClick = {
                 Toast.makeText(context, "취소되었습니다", Toast.LENGTH_SHORT).show()
@@ -121,54 +143,7 @@ fun FormCheckScreen(
                 contentColor = Color.White
             )
         ) {
-            Text(
-                text = "취소하기",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White
-            )
+            Text(text = "취소하기", fontSize = 16.sp, color = Color.White)
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewFormCheckScreen() {
-    CommitTheme {
-        val dummyChatItem = ChatItem(
-            profileImageRes = R.drawable.ic_profile,
-            profileImageUrl = null,
-            name = "키르",
-            message = "최근 메시지",
-            time = "2시간 전",
-            isNew = false,
-            title = "낙서 타임 커미션"
-        )
-
-        val dummyRequestItem = RequestItem(
-            requestId = 1,
-            status = "진행중",
-            title = "낙서 타임 커미션",
-            price = 50000,
-            thumbnailImageUrl = "",
-            progressPercent = 50,
-            createdAt = "2023-12-01",
-            artist = Artist(id = 1, nickname = "키르"),
-            commission = Commission(id = 1)
-        )
-
-        val dummyFormSchema = emptyList<FormItem>()
-        val dummyFormAnswer = mapOf<String, Any>(
-            "신청 내용" to "귀여운 고양이 그림 부탁드립니다",
-            "당일마감" to "O"
-        )
-
-        FormCheckScreen(
-            chatItem = dummyChatItem,
-            requestItem = dummyRequestItem,
-            formSchema = dummyFormSchema,
-            formAnswer = dummyFormAnswer,
-            onBackClick = { /* Preview */ }
-        )
     }
 }
