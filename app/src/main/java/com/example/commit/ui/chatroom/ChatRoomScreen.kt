@@ -33,7 +33,8 @@ fun ChatRoomScreen(
     onBackClick: () -> Unit,
     onSettingClick: () -> Unit,
     onProfileClick: () -> Unit,
-    authorProfileImageUrl: String? = null,
+    authorProfileImageUrl: String? = null,     // ★ 추가
+    commissionThumbnailUrl: String? = null,
     chatViewModel: ChatViewModel = viewModel()
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
@@ -60,7 +61,9 @@ fun ChatRoomScreen(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        CommissionInfoCard(title = commissionTitle)
+        CommissionInfoCard(
+            title = commissionTitle,
+            thumbnailImageUrl = commissionThumbnailUrl)
 
         // 메시지 목록
         ChatMessageList(
@@ -80,10 +83,10 @@ fun ChatRoomScreen(
 
         // 입력창
         val context = LocalContext.current
-        LaunchedEffect(Unit) {
+        LaunchedEffect(chatroomId) {
             chatViewModel.loadCurrentUserId(context)
-            chatViewModel.setChatroomId(1)
-            chatViewModel.loadMessages(context, 1)
+            chatViewModel.setChatroomId(chatroomId)
+            chatViewModel.loadMessages(context, chatroomId)
         }
         ChatBottomSection(
             message = chatViewModel.message,

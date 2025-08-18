@@ -30,6 +30,7 @@ class FragmentChat : Fragment() {
 
     // 채팅방 목록 새로고침 콜백
     private var refreshCallback: (() -> Unit)? = null
+    
 
     override fun onResume() {
         super.onResume()
@@ -70,6 +71,7 @@ class FragmentChat : Fragment() {
                                     time = formatTime(room.lastMessageTime),
                                     isNew = room.hasUnread > 0,
                                     title = room.commissionTitle // 새 필드명
+
                                 )
                             }
                             isLoadingState.value = false
@@ -114,6 +116,9 @@ class FragmentChat : Fragment() {
                             val chatroomId = room.chatroomId.toIntOrNull() ?: -1
                             val commissionId = room.commissionId.toIntOrNull() ?: -1
                             val artistId = room.artistId.toIntOrNull() ?: -1
+                            val requestId    = room.requestId ?: -1
+                            val thumbnailUrl = room.thumbnailUrl ?: ""
+                            val profileUrl   = room.artistProfileImage
 
                             (activity as? MainActivity)?.showBottomNav(false)
 
@@ -125,6 +130,9 @@ class FragmentChat : Fragment() {
                                         "chatroomId" to chatroomId,
                                         "commissionId" to commissionId,
                                         "artistId" to artistId,
+                                        "requestId" to requestId,
+                                        "thumbnailUrl" to thumbnailUrl,
+                                        "artistProfileImage" to profileUrl,
                                         "hasSubmittedApplication" to false,
                                     )
                                 })

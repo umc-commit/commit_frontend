@@ -38,7 +38,6 @@ import coil.compose.AsyncImage
 @Composable
 fun CommissionInfoCard(
     title: String = "낙서 타입 커미션",
-    period: String = "작업기간 : 23시간",
     onSeePostClick: () -> Unit = {},
     thumbnailImageUrl: String? = null
 ) {
@@ -124,7 +123,6 @@ fun CommissionInfoCard(
 fun PreviewCommissionInfoCard() {
     CommissionInfoCard(
         title = "낙서 타입 커미션",
-        period = "작업기간 : 23시간",
         onSeePostClick = { println("글보기 버튼 클릭됨") }
     )
 }
