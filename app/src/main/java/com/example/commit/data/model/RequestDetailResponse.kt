@@ -29,7 +29,8 @@ data class FormItem(
 
 @Parcelize
 data class OptionItem(
-    val label: String
+    val label: String,
+    val value: String = label
 ) : Parcelable
 
 @Parcelize

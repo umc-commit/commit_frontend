@@ -34,7 +34,7 @@ class PostViewModel : ViewModel() {
 
     fun loadCommissionDetail(context: Context, id: Int) {
         val service = RetrofitObject.getRetrofitService(context)
-        service.getCommissionDetail(id)
+        service.getCommissionDetail(id.toString())
             .enqueue(object : retrofit2.Callback<com.example.commit.connection.dto.CommissionDetailResponse> {
                 override fun onResponse(
                     call: retrofit2.Call<com.example.commit.connection.dto.CommissionDetailResponse>,

@@ -168,6 +168,11 @@ class FragmentChat : Fragment() {
         val prefs = requireContext().getSharedPreferences("auth", Context.MODE_PRIVATE)
         val token = prefs.getString("accessToken", "토큰 없음")
         Log.d("FragmentChat", "현재 저장된 토큰 길이: ${token?.length ?: 0}")
+        try {
+            val userId = com.example.commit.connection.RetrofitObject.getCurrentUserId(requireContext())
+            Log.d("FragmentChat", "JWT userId: ${userId ?: "null"}")
+        } catch (_: Exception) {
+        }
 
         Log.d("ChatAPI", "채팅방 목록 조회 시작")
         val api = RetrofitObject.getRetrofitService(requireContext())
@@ -216,7 +221,7 @@ class FragmentChat : Fragment() {
         val api = RetrofitObject.getRetrofitService(requireContext())
         val request = RetrofitClient.CreateChatroomRequest(
             artistId = artistId,
-            commissionId = commissionId
+            commissionId = commissionId.toString()
         )
 
         api.createChatroom(request).enqueue(object :
