@@ -9,7 +9,7 @@ data class CommissionArtistResponse(
 )
 
 data class ArtistSummary(
-    val artistId: Long,
+    val artistId: Int,
     val nickname: String,
     val profileImageUrl: String?,
     val follower: Int,
