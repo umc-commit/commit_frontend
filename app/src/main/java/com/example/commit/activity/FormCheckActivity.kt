@@ -28,6 +28,7 @@ class FormCheckActivity : ComponentActivity() {
         val thumbnailUrl = intent.getStringExtra("thumbnailUrl") ?: ""
         val totalPrice = intent.getIntExtra("totalPrice", 0)
         val createdAt = intent.getStringExtra("createdAt") ?: ""
+        val artistProfileImage = intent.getStringExtra("artistProfileImage")
 
         val formSchemaJson = intent.getStringExtra("formSchemaJson")
         val formAnswerJson = intent.getStringExtra("formAnswerJson")
@@ -48,6 +49,7 @@ class FormCheckActivity : ComponentActivity() {
         // TopBar 등에 쓸 ChatItem / RequestItem 구성
         val chatItem = ChatItem(
             profileImageRes = R.drawable.ic_profile,
+            profileImageUrl = artistProfileImage,
             name = artistNickname,
             message = "",
             time = "",

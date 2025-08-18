@@ -45,6 +45,11 @@ class FragmentChatDetail : Fragment() {
         val authorName = arguments?.getString("authorName") ?: "익명"
         val chatroomId = arguments?.getInt("chatroomId", 1) ?: 1 // 기본값 1
         val artistId = arguments?.getInt("artistId", -1) ?: -1
+        val artistProfileImage = arguments?.getString("artistProfileImage")
+        val requestId = arguments?.getInt("requestId", -1) ?: -1
+        val thumbnailUrl = arguments?.getString("thumbnailUrl") ?: ""
+
+
 
 
         return ComposeView(requireContext()).apply {
@@ -87,6 +92,7 @@ class FragmentChatDetail : Fragment() {
                     
                     val chatItem = ChatItem(
                         profileImageRes = R.drawable.ic_profile,
+                        profileImageUrl = artistProfileImage,
                         name = authorName,
                         message = "",
                         title = chatName,
@@ -99,6 +105,8 @@ class FragmentChatDetail : Fragment() {
                         authorName = authorName,
                         chatroomId = chatroomId,
                         chatViewModel = chatViewModel, // ChatViewModel 전달
+                        authorProfileImageUrl = artistProfileImage, // ★
+                        commissionThumbnailUrl = thumbnailUrl,      // ★
                         onPayClick = {
                             if (isAdded && !isDetached) {
                                 parentFragmentManager.popBackStack()
@@ -133,16 +141,27 @@ class FragmentChatDetail : Fragment() {
                             )
                         }
                     }
-                    
-                    /*if (showFormCheckSheet.value) {
+
+                    /* if (showFormCheckSheet.value) {
                         FormCheckBottomSheet(
-                            chatItem = chatItem,
-                            requestItem = requestItem,
+                            chatItem = chatItem,               // profileImageUrl 포함된 chatItem 사용
+                            requestItem = RequestItem(
+                                requestId = requestId,         // ★ 전달
+                                status = "PENDING",
+                                title = chatName,
+                                price = 0,                     // 서버 값 있으면 대체
+                                thumbnailImageUrl = thumbnailUrl, // ★ 전달
+                                progressPercent = 0,
+                                createdAt = "",
+                                artist = Artist(id = artistId, nickname = authorName),
+                                commission = Commission(id = /* commissionId */ 0)
+                            ),
                             formSchema = formSchema,
                             formAnswer = formAnswer,
                             onDismiss = { showFormCheckSheet.value = false }
                         )
-                    }*/
+                    } */
+
                 }
             }
         }

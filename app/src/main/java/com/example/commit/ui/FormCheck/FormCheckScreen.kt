@@ -8,10 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -141,6 +137,7 @@ fun PreviewFormCheckScreen() {
     CommitTheme {
         val dummyChatItem = ChatItem(
             profileImageRes = R.drawable.ic_profile,
+            profileImageUrl = null,
             name = "키르",
             message = "최근 메시지",
             time = "2시간 전",
