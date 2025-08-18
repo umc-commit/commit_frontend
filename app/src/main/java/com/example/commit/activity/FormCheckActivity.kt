@@ -40,7 +40,7 @@ class FormCheckActivity : ComponentActivity() {
 
         val gson = Gson()
 
-        // formSchema, formAnswer 파싱 (없으면 빈 값으로)
+        // formSchema, formAnswer 파싱
         val formSchema: List<FormItem> = formSchemaJson?.let {
             val type = object : TypeToken<List<FormItem>>() {}.type
             runCatching { gson.fromJson<List<FormItem>>(it, type) }.getOrDefault(emptyList())
@@ -76,11 +76,17 @@ class FormCheckActivity : ComponentActivity() {
 
         Log.d("FormCheckActivity", "onCreate commissionId=$commissionId, requestId=$requestId")
 
-        // ✅ 여기서 API 호출 (Call.enqueue 버전 ViewModel)
-        if (commissionId > 0) {
+        // requestId 우선 호출, 없으면 commissionId로 폴백
+        when {
+            requestId > 0 -> {
+                formVM.getSubmittedRequestForms(requestId.toString(), this)
+            }
+         /* commissionId > 0 -> {
             formVM.getSubmittedCommissionForm(commissionId.toString(), this)
-        } else {
-            Log.w("FormCheckActivity", "commissionId가 유효하지 않음 → API 호출 skip")
+            }*/
+            else -> {
+                Log.w("FormCheckActivity", "유효한 requestId/commissionId 없음 → API 호출 skip")
+            }
         }
 
         setContent {

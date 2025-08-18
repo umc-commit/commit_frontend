@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.commit.connection.RetrofitAPI
 import com.example.commit.connection.RetrofitClient
 import com.example.commit.connection.RetrofitObject
+import com.example.commit.connection.dto.SubmittedRequestFormsResponse
 import com.example.commit.data.model.CommissionFormResponse
 import com.example.commit.data.model.CommissionRequestSubmit
 import com.example.commit.data.model.ImageUploadResponse
@@ -27,6 +28,10 @@ import java.io.File
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import com.google.gson.GsonBuilder
+import okhttp3.ResponseBody
+
+
 
 class CommissionFormViewModel : ViewModel() {
 
@@ -56,6 +61,11 @@ class CommissionFormViewModel : ViewModel() {
     private val _submittedFormSchemaUi =
         MutableStateFlow<List<FormItem>>(emptyList())
     val submittedFormSchemaUi: StateFlow<List<FormItem>> = _submittedFormSchemaUi.asStateFlow()
+
+    // 🔹 신규: 제출된 답변(라벨->값) 맵
+    private val _submittedFormAnswerUi =
+        MutableStateFlow<Map<String, Any>>(emptyMap())
+    val submittedFormAnswerUi: StateFlow<Map<String, Any>> = _submittedFormAnswerUi.asStateFlow()
 
     private var retrofitAPI: RetrofitAPI? = null
     private val gson = Gson()
@@ -296,8 +306,9 @@ class CommissionFormViewModel : ViewModel() {
         private const val TAG = "CommissionFormVM"
     }
 
+/*
     // ---------------------------------------------------------------------
-    // 제출된 신청서 보기 (Call<...> → enqueue 사용)  ── ★ 로그 추가 버전
+    // (기존) 제출된 신청서 보기 - commissionId 기반 (스키마 전용)
     // ---------------------------------------------------------------------
     fun getSubmittedCommissionForm(commissionId: String, context: Context) {
         viewModelScope.launch {
@@ -307,27 +318,15 @@ class CommissionFormViewModel : ViewModel() {
 
                 val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
                 val token = prefs.getString("accessToken", null)
-                Log.d(
-                    TAG,
-                    "tokenPresent=${!token.isNullOrEmpty()} tokenPreview=${token?.take(10)}..."
-                )
                 if (token.isNullOrEmpty()) {
-                    Log.w(TAG, "no token → abort")
                     _submittedFormState.value =
                         SubmittedFormState.Error("인증 토큰이 없습니다. 로그인이 필요합니다.")
                     return@launch
                 }
 
-                if (retrofitAPI == null) {
-                    retrofitAPI = RetrofitObject.getRetrofitService(context)
-                    Log.d(TAG, "Retrofit service initialized: ${retrofitAPI != null}")
-                }
+                if (retrofitAPI == null) retrofitAPI = RetrofitObject.getRetrofitService(context)
 
                 val call = retrofitAPI!!.getSubmittedCommissionForm(commissionId.toInt())
-                // call.request()는 OkHttp 4.x 기준 동기 생성 가능
-                runCatching { Log.d(TAG, "enqueue url=${call.request().url}") }
-                    .onFailure { Log.w(TAG, "request.url read failed: ${it.message}") }
-
                 call.enqueue(object :
                     Callback<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>> {
 
@@ -335,11 +334,6 @@ class CommissionFormViewModel : ViewModel() {
                         call: Call<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>,
                         response: Response<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>
                     ) {
-                        Log.d(
-                            TAG,
-                            "onResponse code=${response.code()} isSuccessful=${response.isSuccessful}"
-                        )
-
                         if (!response.isSuccessful) {
                             val msg = when (response.code()) {
                                 401 -> "인증이 필요합니다. 다시 로그인해주세요."
@@ -347,71 +341,163 @@ class CommissionFormViewModel : ViewModel() {
                                 404 -> "리소스를 찾을 수 없습니다."
                                 else -> "API 호출 실패: ${response.code()}"
                             }
-                            Log.w(TAG, "httpError: $msg")
                             _submittedFormState.value = SubmittedFormState.Error(msg)
                             return
                         }
 
                         val body = response.body()
-                        Log.d(
-                            TAG,
-                            "body null=${body == null} resultType=${body?.resultType} hasSuccess=${body?.success != null}"
-                        )
-
                         val ok = body?.resultType == "SUCCESS" && body.success != null
                         if (!ok) {
-                            Log.w(TAG, "logical error: resultType!=SUCCESS or success==null")
                             _submittedFormState.value =
                                 SubmittedFormState.Error("신청서 데이터를 불러오지 못했습니다.")
                             return
                         }
 
-                        val success = body!!.success!!
-                        // success 개략 로그
-                        runCatching {
-                            val sObj = gson.toJsonTree(success).asJsonObject
-                            val commissionIdLog = sObj.getAsJsonObject("commission")?.get("id")
-                            val titleLog = sObj.getAsJsonObject("commission")?.get("title")
-                            Log.d(TAG, "success.commission.id=$commissionIdLog title=$titleLog")
-                        }.onFailure {
-                            Log.w(TAG, "success quick log failed: ${it.message}")
-                        }
-
-                        _submittedFormState.value = SubmittedFormState.Success(success)
-
-                        // UI 매핑
-                        try {
-                            val successJson = gson.toJsonTree(success).asJsonObject
-                            val fieldsJson = successJson
-                                .getAsJsonObject("formSchema")
-                                ?.getAsJsonArray("fields")
-
-                            Log.d(
-                                TAG,
-                                "mapping fieldsJson size=${fieldsJson?.size() ?: 0}"
-                            )
-
-                            val mapped = mapSchemaFieldsToFormItems(fieldsJson)
-                            _submittedFormSchemaUi.value = mapped
-
-                            Log.d(TAG, "mapped FormItem count=${mapped.size}")
-                        } catch (e: Exception) {
-                            _submittedFormSchemaUi.value = emptyList()
-                            Log.e(TAG, "mapping failed: ${e.message}", e)
-                        }
+                        _submittedFormState.value = SubmittedFormState.Success(body!!.success!!)
+                        val successJson = gson.toJsonTree(body.success).asJsonObject
+                        val fieldsJson = successJson
+                            .getAsJsonObject("formSchema")
+                            ?.getAsJsonArray("fields")
+                        val mapped = mapSchemaFieldsToFormItems(fieldsJson)
+                        _submittedFormSchemaUi.value = mapped
+                        _submittedFormAnswerUi.value = emptyMap() // 이 API는 답변 없음
                     }
 
                     override fun onFailure(
                         call: Call<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>,
                         t: Throwable
                     ) {
-                        Log.e(TAG, "onFailure: ${t.message}", t)
                         _submittedFormState.value =
                             SubmittedFormState.Error("네트워크 오류: ${t.message}")
                     }
                 })
             } catch (e: Exception) {
-                Log.e(TAG, "getSubmittedCommissionForm exception: ${e.message}", e)
+                _submittedFormState.value = SubmittedFormState.Error("네트워크 오류: ${e.message}")
+            }
+        }
+    }
+*/
+
+    // ---------------------------------------------------------------------
+    // 제출된 신청서 보기 - requestId 기반 (답변 + 이미지 포함)
+    // ---------------------------------------------------------------------
+    fun getSubmittedRequestForms(requestId: String, context: Context) {
+        viewModelScope.launch {
+            val tag = "getSubmittedRequestForms"
+            try {
+                Log.d(tag, "[enter] requestId=$requestId")
+                _submittedFormState.value = SubmittedFormState.Loading
+
+                val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+                val token = prefs.getString("accessToken", null)
+                Log.d(tag, "tokenPresent=${!token.isNullOrEmpty()} tokenPreview=${token?.take(10)}...")
+
+                if (token.isNullOrEmpty()) {
+                    _submittedFormState.value =
+                        SubmittedFormState.Error("인증 토큰이 없습니다. 로그인이 필요합니다.")
+                    return@launch
+                }
+
+                if (retrofitAPI == null) retrofitAPI = RetrofitObject.getRetrofitService(context)
+
+                val call = retrofitAPI!!.getSubmittedRequestForms(requestId.toInt())
+                runCatching { Log.d(tag, "url=${call.request().url}") }
+
+                call.enqueue(object : Callback<RetrofitClient.ApiResponse<SubmittedRequestFormsResponse>> {
+
+                    override fun onResponse(
+                        call: Call<RetrofitClient.ApiResponse<SubmittedRequestFormsResponse>>,
+                        response: Response<RetrofitClient.ApiResponse<SubmittedRequestFormsResponse>>
+                    ) {
+                        Log.d(tag, "http code=${response.code()} ok=${response.isSuccessful}")
+
+                        if (!response.isSuccessful) {
+                            val errBody = runCatching { response.errorBody()?.string() }.getOrNull()
+                            Log.w(tag, "errorBody=${errBody.orEmpty()}")
+                            val msg = when (response.code()) {
+                                401 -> "인증이 필요합니다. 다시 로그인해주세요."
+                                403 -> "접근 권한이 없습니다."
+                                404 -> "신청서를 찾을 수 없습니다. (requestId=$requestId)"
+                                else -> "API 호출 실패: ${response.code()}"
+                            }
+                            _submittedFormState.value = SubmittedFormState.Error(msg)
+                            return
+                        }
+
+                        val body = response.body()
+                        val success = body?.success
+                        Log.d(tag, "resultType=${body?.resultType} hasSuccess=${success != null}")
+
+                        if (body?.resultType != "SUCCESS" || success == null) {
+                            _submittedFormState.value =
+                                SubmittedFormState.Error("신청서 데이터를 불러오지 못했습니다.")
+                            return
+                        }
+
+
+                        runCatching {
+                            val pretty = GsonBuilder().setPrettyPrinting().create()
+                            Log.d(tag, "API body(json) =\n${pretty.toJson(body)}")           // 래퍼 포함 전체
+                            Log.d(tag, "success body(json) =\n${pretty.toJson(success)}")   // 순수 success 페이로드
+                        }
+
+                        // (나머지 기존 상세 로그/매핑 그대로)
+                        Log.d(tag, "requestId=${success.requestId} status=${success.status} displayTime=${success.displayTime}")
+                        Log.d(tag, "commission: id=${success.commission.id} title=${success.commission.title}")
+                        Log.d(tag, "artist: id=${success.artist.id} nickname=${success.artist.nickname} profile=${success.artist.profileImageUrl}")
+
+                        val text = success.requestContent?.text
+                        val images = success.requestContent?.images.orEmpty().sortedBy { it.orderIndex }
+                        Log.d(tag, "requestContent.text=${text ?: "(null)"}")
+                        Log.d(tag, "requestContent.images size=${images.size}")
+                        images.forEachIndexed { i, img ->
+                            Log.v(tag, "img[$i] id=${img.id} order=${img.orderIndex} url=${img.imageUrl}")
+                        }
+
+                        val schemaItems = mutableListOf<FormItem>()
+                        val answerMap = mutableMapOf<String, Any>()
+
+                        success.formResponses.forEachIndexed { idx, r ->
+                            val label = (r.questionLabel ?: "항목 ${idx + 1}").trim()
+                            schemaItems += FormItem(
+                                id = r.questionId.toIntOrNull() ?: (idx + 1),
+                                label = label,
+                                type = "text",
+                                options = emptyList()
+                            )
+                            if (!r.answer.isNullOrBlank()) answerMap[label] = r.answer!!
+                        }
+
+                        val noteLabel = "신청 내용"
+                        val imageLabel = "참고 이미지"
+                        schemaItems += FormItem(id = 9001, label = noteLabel, type = "textarea", options = emptyList())
+                        schemaItems += FormItem(id = 9002, label = imageLabel, type = "file", options = emptyList())
+
+                        text?.takeIf { it.isNotBlank() }?.let { answerMap[noteLabel] = it }
+                        val imageUrls = images.map { it.imageUrl }.filter { it.isNotBlank() }
+                        if (imageUrls.isNotEmpty()) {
+                            answerMap[imageLabel] = imageUrls
+                            answerMap["images"] = imageUrls
+                            answerMap["imageUrls"] = imageUrls
+                        }
+
+                        Log.d(tag, "mapped schemaItems=${schemaItems.size}, answerKeys=${answerMap.keys.joinToString()}")
+
+                        _submittedFormSchemaUi.value = schemaItems
+                        _submittedFormAnswerUi.value = answerMap
+                        _submittedFormState.value = SubmittedFormState.Idle
+                    }
+
+                    override fun onFailure(
+                        call: Call<RetrofitClient.ApiResponse<SubmittedRequestFormsResponse>>,
+                        t: Throwable
+                    ) {
+                        Log.e(tag, "onFailure: ${t.message}", t)
+                        _submittedFormState.value = SubmittedFormState.Error("네트워크 오류: ${t.message}")
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e(tag, "exception: ${e.message}", e)
                 _submittedFormState.value = SubmittedFormState.Error("네트워크 오류: ${e.message}")
             }
         }
@@ -445,11 +531,6 @@ class CommissionFormViewModel : ViewModel() {
                         OptionItem(finalLabel)
                     }
                 } else emptyList()
-
-            Log.v(
-                TAG,
-                "map[$index] id=$id type=$type label=$label options=${options.size}"
-            )
 
             result += FormItem(
                 id = id,

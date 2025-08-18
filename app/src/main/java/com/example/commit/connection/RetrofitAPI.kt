@@ -210,4 +210,10 @@ interface RetrofitAPI {
     @DELETE("/api/notifications/fcm/token")
     fun deleteFcmToken(
     ): Call<RetrofitClient.ApiResponse<RetrofitClient.SimpleMessage>>
+
+    //제출된 신청폼 조회
+    @GET("/api/requests/{requestId}/forms")
+    fun getSubmittedRequestForms(
+        @Path("requestId") requestId: Int
+    ): Call<RetrofitClient.ApiResponse<SubmittedRequestFormsResponse>>
 }

@@ -19,7 +19,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 class FragmentFormAnswer : Fragment() {
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -32,12 +31,14 @@ class FragmentFormAnswer : Fragment() {
                 // 1) 스키마 복원
                 val schemaJson = arguments?.getString("formSchemaJson").orEmpty()
                 val schemaType = object : TypeToken<List<FormItem>>() {}.type
-                val formSchema: List<FormItem> = gson.fromJson(schemaJson, schemaType) ?: emptyList()
+                val formSchema: List<FormItem> =
+                    if (schemaJson.isNotBlank()) gson.fromJson(schemaJson, schemaType) else emptyList()
 
                 // 2) 답변 복원
                 val answerJson = arguments?.getString("formAnswerJson").orEmpty()
-                val answerType = object : TypeToken<Map<String, String>>() {}.type
-                val formAnswer: Map<String, String> = gson.fromJson(answerJson, answerType) ?: emptyMap()
+                val answerType = object : TypeToken<Map<String, Any>>() {}.type
+                val formAnswer: Map<String, Any> =
+                    if (answerJson.isNotBlank()) gson.fromJson(answerJson, answerType) else emptyMap()
 
                 Column(
                     modifier = Modifier
@@ -49,7 +50,8 @@ class FragmentFormAnswer : Fragment() {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     FormAnswerSection(
-                        formSchema = formSchema
+                        formSchema = formSchema,
+                        formAnswer = formAnswer
                     )
                 }
             }

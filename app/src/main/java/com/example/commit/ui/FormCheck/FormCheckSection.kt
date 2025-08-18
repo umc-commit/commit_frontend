@@ -57,7 +57,6 @@ fun FormCheckSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (!item.profileImageUrl.isNullOrBlank()) {
-                // Coil
                 coil.compose.AsyncImage(
                     model = item.profileImageUrl,
                     contentDescription = "Profile",
@@ -115,7 +114,7 @@ fun FormCheckSection(
             val answerText = when (answer) {
                 is List<*> -> answer.joinToString(", ")
                 is String -> answer
-                else -> "응답 없음"
+                else -> " "
             }
 
             Box(
