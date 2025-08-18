@@ -199,4 +199,15 @@ interface RetrofitAPI {
     @GET("/api/users/follows")
     fun getFollowedArtists(
     ): Call<RetrofitClient.ApiResponse<RetrofitClient.FollowedArtistsSuccess>>
+
+    // FCM 토큰 등록
+    @POST("/api/notifications/fcm/token")
+    fun registerFcmToken(
+        @Body body: RetrofitClient.FcmTokenRegisterRequest
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.FcmTokenRegisterSuccess>>
+
+    // FCM 토큰 삭제
+    @DELETE("/api/notifications/fcm/token")
+    fun deleteFcmToken(
+    ): Call<RetrofitClient.ApiResponse<RetrofitClient.SimpleMessage>>
 }

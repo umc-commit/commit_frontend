@@ -14,6 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.commit.R
+import com.example.commit.activity.MainActivity
 import com.example.commit.activity.WrittenReviewsActivity
 import com.example.commit.activity.login.AgreeFirstActivity
 import com.example.commit.activity.login.LoginActivity
@@ -61,8 +62,8 @@ class FragmentMypage : Fragment() {
         }
 
         binding.logoutLayout.setOnClickListener {
-            val intent = Intent(requireContext(), LoginActivity::class.java)
-            startActivity(intent)
+            // MainActivity에 정의한 performLogout() 호출
+            (activity as? MainActivity)?.performLogout()
         }
 
         // 완료된 커미션 클릭 시 MyPageCommissionActivity로 이동

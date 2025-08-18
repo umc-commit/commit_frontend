@@ -125,9 +125,10 @@ class NicknameActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val body = response.body()
                     if (body?.resultType == "SUCCESS") {
-                        // 회원가입 성공 → 닉네임 저장
+                        // 회원가입 성공 → 토큰, 닉네임 저장
                         val prefs = getSharedPreferences("auth", MODE_PRIVATE)
                         prefs.edit()
+                            .putString("accessToken", body.success?.token) // 새로운 토큰 저장
                             .putString("nickname", body.success?.user?.nickname ?: "")
                             .apply()
 
