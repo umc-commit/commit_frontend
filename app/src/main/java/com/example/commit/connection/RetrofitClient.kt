@@ -570,6 +570,25 @@ class RetrofitClient {
         @SerializedName("followerCount") val followerCount: Int
     )
 
+    // FCM 토큰 등록 - 요청/응답 DTO
+    data class FcmTokenRegisterRequest(
+        @SerializedName("fcm_token") val fcmToken: String
+    )
+
+    data class FcmTokenRegisterSuccess(
+        @SerializedName("id") val id: String,
+        @SerializedName("user_id") val userId: String,
+        @SerializedName("fcm_token") val fcmToken: String,
+        @SerializedName("is_active") val isActive: Boolean,
+        @SerializedName("created_at") val createdAt: String,
+        @SerializedName("updated_at") val updatedAt: String
+    )
+
+    // FCM 토큰 삭제 공용 메시지 응답 DTO (success: { message: "..." })
+    data class SimpleMessage(
+        @SerializedName("message") val message: String
+    )
+
 
 
 }

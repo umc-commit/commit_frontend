@@ -85,7 +85,9 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
     // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
+    // FCM
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     implementation("com.github.bumptech.glide:glide:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")

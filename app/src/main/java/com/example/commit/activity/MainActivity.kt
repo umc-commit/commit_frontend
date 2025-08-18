@@ -14,8 +14,14 @@ import com.example.commit.fragment.FragmentHome
 import com.example.commit.fragment.FragmentMypage
 import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.ui.post.FragmentPostScreen
+import com.google.firebase.messaging.FirebaseMessaging
 import android.content.Intent
-
+import com.example.commit.connection.RetrofitObject
+import com.example.commit.connection.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import com.example.commit.activity.login.LoginActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -57,19 +63,37 @@ class MainActivity : AppCompatActivity() {
 
         initBottomNavigation()
 
+        // 백스택 리스너 설정 이후 아무데나: 최초 진입 시 등록 한번
+        registerFcmTokenIfNeeded()
+
         supportFragmentManager.addOnBackStackChangedListener {
             val top = supportFragmentManager.findFragmentById(binding.NavFrame.id)
             showBottomNav(top !is FragmentPostChatDetail && top !is FragmentPostScreen)
         }
     }
 
-    // SINGLE_TOP/CLEAR_TOP로 기존 MainActivity가 재사용될 때 여기로 옴
     override fun onNewIntent(newIntent: Intent) {
         super.onNewIntent(newIntent)
-        setIntent(newIntent) // getIntent() 갱신
-        val openFragment = newIntent.getStringExtra("openFragment")
-        if (openFragment != null) {
-            handleOpenFragment(openFragment, newIntent)
+        setIntent(newIntent)
+
+        newIntent.data?.let { uri ->
+            val isKakaoCb = uri.scheme == "commit" &&
+                    uri.host == "oauth2" &&
+                    (uri.path?.startsWith("/callback/kakao") == true)
+            if (isKakaoCb) {
+                // LoginActivity에서 처리하는 게 원칙이므로 여기선 UI만 안전화
+                newIntent.data = null
+                // 홈 세팅 정도
+                supportFragmentManager.beginTransaction()
+                    .replace(binding.NavFrame.id, FragmentHome())
+                    .commit()
+                showBottomNav(true)
+                return
+            }
+        }
+
+        newIntent.getStringExtra("openFragment")?.let {
+            handleOpenFragment(it, newIntent)
         }
     }
 
@@ -197,5 +221,75 @@ class MainActivity : AppCompatActivity() {
 
         // 상세 진입 시 바텀바 숨김
         showBottomNav(false)
+    }
+
+    private fun registerFcmTokenIfNeeded() {
+        // 액세스 토큰이 있어야 Authorization 헤더가 붙음(인터셉터) :contentReference[oaicite:0]{index=0}
+        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+
+        FirebaseMessaging.getInstance().token
+            .addOnSuccessListener { token ->
+                val prev = prefs.getString("fcmToken", null)
+                if (prev == token) return@addOnSuccessListener  // 중복 전송 방지
+
+                val api = RetrofitObject.getRetrofitService(this)
+                val body = RetrofitClient.FcmTokenRegisterRequest(fcmToken = token)
+                api.registerFcmToken(body).enqueue(object : Callback<
+                        RetrofitClient.ApiResponse<RetrofitClient.FcmTokenRegisterSuccess>
+                        > {
+                    override fun onResponse(
+                        call: Call<RetrofitClient.ApiResponse<RetrofitClient.FcmTokenRegisterSuccess>>,
+                        response: Response<RetrofitClient.ApiResponse<RetrofitClient.FcmTokenRegisterSuccess>>
+                    ) {
+                        if (response.isSuccessful && response.body()?.success != null) {
+                            prefs.edit().putString("fcmToken", token).apply()
+                        }
+                    }
+                    override fun onFailure(
+                        call: Call<RetrofitClient.ApiResponse<RetrofitClient.FcmTokenRegisterSuccess>>,
+                        t: Throwable
+                    ) { /* 로깅 정도만 */ }
+                })
+            }
+            .addOnFailureListener { /* 로깅 정도만 */ }
+    }
+
+    // 1) private 제거해 공개 함수로(로그아웃 시 사용)
+    fun performLogout() {
+        val ctx = this
+        val api = RetrofitObject.getRetrofitService(ctx)
+
+        //서버에 FCM 토큰 삭제 요청
+        api.deleteFcmToken().enqueue(object : Callback<
+                RetrofitClient.ApiResponse<RetrofitClient.SimpleMessage>
+                > {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.SimpleMessage>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.SimpleMessage>>
+            ) { finalizeLocalLogout() }
+
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.SimpleMessage>>,
+                t: Throwable
+            ) { finalizeLocalLogout() }
+        })
+    }
+
+    private fun finalizeLocalLogout() {
+        // 2) 로컬 토큰/유저 캐시 정리
+        val prefs = getSharedPreferences("auth", MODE_PRIVATE)
+        prefs.edit()
+            .remove("accessToken")
+            .remove("refreshToken")
+            .remove("fcmToken") // 우리가 마지막으로 서버에 등록했던 토큰 캐시도 삭제
+            .apply()
+
+        Log.d("FCMToken", "로그아웃 후 Fcm Token=${prefs.getString("fcmToken", null)}")
+
+        // 3) 로그인 화면으로 이동
+        val i = Intent(this, LoginActivity::class.java)
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(i)
+        finish()
     }
 }

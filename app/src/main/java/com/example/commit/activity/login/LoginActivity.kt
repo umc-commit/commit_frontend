@@ -8,9 +8,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.commit.activity.MainActivity
 import com.example.commit.databinding.ActivityLoginBinding
 import androidx.browser.customtabs.CustomTabsIntent
+import com.google.firebase.messaging.FirebaseMessaging
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
+    @Volatile private var handledOnce = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,40 +46,53 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
         handleDeepLink(intent)
     }
 
-    private fun handleDeepLink(intent: Intent) {
-        Log.d("LoginActivity", "intent.action = ${intent.action}")
-        Log.d("LoginActivity", "intent.data = ${intent.data}")
-        Log.d("LoginActivity", "intent.extras = ${intent.extras}")
-
-        val data: Uri? = intent.data
-        Log.d("LoginActivity", "딥링크 수신: $data")
-
-        val token = data?.getQueryParameter("token") ?: intent.getStringExtra("token")
+    private fun handleDeepLink(i: Intent?) {
+        if (handledOnce) return
+        val data = i?.data
+        val token = data?.getQueryParameter("token") ?: i?.getStringExtra("token")
         val signupRequired = data?.getQueryParameter("signupRequired")?.toBoolean()
-            ?: intent.getBooleanExtra("signupRequired", false)
+            ?: i?.getBooleanExtra("signupRequired", false) ?: false
 
-        if (!token.isNullOrEmpty()) {
-            val prefs = getSharedPreferences("auth", MODE_PRIVATE)
-            prefs.edit().putString("accessToken", token).apply()
-            android.util.Log.d("LoginActivity", "저장된 토큰: $token")
-
-            if (signupRequired) {
-                val signUpIntent = Intent(this, AgreeFirstActivity::class.java).apply {
-                    putExtra("token", token)
-                }
-                startActivity(signUpIntent)
-            } else {
-                val mainIntent = Intent(this, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
-                startActivity(mainIntent)
-            }
-            finishAffinity()
-        } else {
-            Log.e("LoginActivity", "token이 null입니다. 딥링크 data=$data")
+        if (token.isNullOrBlank()) {
+            Log.e("LoginActivity", "token null. data=$data")
+            return
         }
+        handledOnce = true
+
+        // 1) 토큰 저장
+        getSharedPreferences("auth", MODE_PRIVATE)
+            .edit().putString("accessToken", token).apply()
+
+        // 저장된 토큰 로그 출력
+        Log.d("LoginActivity", "저장된 accessToken = $token")
+
+        FirebaseMessaging.getInstance().token
+            .addOnSuccessListener { fcm ->
+                Log.d("LoginActivity", "현재 FCM Token = $fcm")
+            }
+            .addOnFailureListener { e ->
+                Log.w("LoginActivity", "Failed to get current FCM token", e)
+            }
+
+        // 2) 라우팅
+        if (signupRequired) {
+            startActivity(Intent(this, AgreeFirstActivity::class.java).apply {
+                putExtra("token", token)
+                // 필요 시 CLEAR_TOP 정도만
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            })
+            finish() // LoginActivity만 종료
+            return
+        }
+
+        // 3) 메인으로 (같은 태스크에서 전환)
+        startActivity(Intent(this, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        })
+        finish() // 여기서 finishAffinity() 쓰지 말 것!
     }
 }
