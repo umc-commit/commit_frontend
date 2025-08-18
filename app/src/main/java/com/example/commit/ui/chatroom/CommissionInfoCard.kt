@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -42,6 +43,7 @@ fun CommissionInfoCard(
     thumbnailImageUrl: String? = null
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
+        val hasThumb = !thumbnailImageUrl.isNullOrBlank()
 
         // 커미션 박스
         Row(
@@ -50,26 +52,31 @@ fun CommissionInfoCard(
                 .padding(top = 16.dp, start = 28.dp, end = 28.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (!thumbnailImageUrl.isNullOrBlank()) {
+            if (hasThumb) {
+                // ✅ URL 썸네일 (Coil)
                 AsyncImage(
-                    model = thumbnailImageUrl,
-                    contentDescription = "프로필 이미지",
+                    model = coil.request.ImageRequest.Builder(LocalContext.current)
+                        .data(thumbnailImageUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "커미션 썸네일",
                     contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.bg_thumbnail_rounded), // 로딩 중
+                    error = painterResource(R.drawable.bg_thumbnail_rounded),       // 실패 시
                     modifier = Modifier
                         .size(46.dp)
                         .clip(RoundedCornerShape(4.dp))
                 )
             } else {
-            // 썸네일
-            Image(
-                painter = painterResource(id = R.drawable.bg_thumbnail_rounded),
-                contentDescription = "썸네일 이미지",
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color.LightGray), // 썸네일 배경 (임시)
-                contentScale = ContentScale.Crop
-            )
+                // ✅ 로컬 기본 썸네일
+                Image(
+                    painter = painterResource(id = R.drawable.bg_thumbnail_rounded),
+                    contentDescription = "기본 썸네일",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                )
             }
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -123,8 +130,10 @@ fun CommissionInfoCard(
 fun PreviewCommissionInfoCard() {
     CommissionInfoCard(
         title = "낙서 타입 커미션",
+        thumbnailImageUrl = "https://picsum.photos/seed/commit/200/200",
         onSeePostClick = { println("글보기 버튼 클릭됨") }
     )
 }
+
 
 
