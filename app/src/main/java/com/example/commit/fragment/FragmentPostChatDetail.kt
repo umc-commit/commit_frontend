@@ -146,7 +146,7 @@ class FragmentPostChatDetail : Fragment() {
         
         Log.d("FragmentPostChatDetail", "제출된 신청서 조회 시작 - commissionId: $commissionId")
         
-        api.getSubmittedCommissionForm(commissionId).enqueue(object : Callback<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>> {
+        api.getSubmittedCommissionForm(commissionId.toString()).enqueue(object : Callback<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>> {
             override fun onResponse(
                 call: Call<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>,
                 response: Response<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>

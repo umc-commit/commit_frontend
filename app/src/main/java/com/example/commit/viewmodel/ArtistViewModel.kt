@@ -57,7 +57,7 @@ class ArtistViewModel : ViewModel() {
         inFlight?.cancel()
 
         val service = RetrofitObject.getRetrofitService(context)
-        val call = service.getCommissionArtist(commissionId, page, limit)
+        val call = service.getCommissionArtist(commissionId.toString(), page, limit)
         inFlight = call
 
         call.enqueue(object : Callback<ApiResponse<CommissionArtistResponse>> {

@@ -3,6 +3,7 @@ package com.example.commit.connection
 import android.content.Context
 import android.util.Log
 import okhttp3.Interceptor
+import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -29,10 +30,15 @@ object RetrofitObject {
             chain.proceed(requestBuilder.build())
         }
 
+        val logging = HttpLoggingInterceptor { message ->
+            Log.d("OkHttp", message)
+        }.apply { level = HttpLoggingInterceptor.Level.BODY }
+
         val client = OkHttpClient.Builder()
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(authInterceptor) // 토큰 자동 추가
+            .addInterceptor(logging)
             .build()
 
         val retrofit = Retrofit.Builder()

@@ -171,7 +171,7 @@ class FragmentPostScreen : Fragment() {
         val api = RetrofitObject.getRetrofitService(requireContext())
 
         // 1) 커미션 상세에서 artistId 획득
-        api.getCommissionDetail(commissionId).enqueue(object : Callback<CommissionDetailResponse> {
+        api.getCommissionDetail(commissionId.toString()).enqueue(object : Callback<CommissionDetailResponse> {
             override fun onResponse(
                 call: Call<CommissionDetailResponse>,
                 response: Response<CommissionDetailResponse>
@@ -193,10 +193,10 @@ class FragmentPostScreen : Fragment() {
                 }
 
                 // 2) 채팅방 생성 (JWT에서 userId 추출 → 바디는 artistId/commissionId만)
-                val req = RetrofitClient.CreateChatroomRequest(
-                    artistId = artistId,
-                    commissionId = commissionId
-                )
+                        val req = RetrofitClient.CreateChatroomRequest(
+            artistId = artistId,
+            commissionId = commissionId.toString()
+        )
                 api.createChatroom(req).enqueue(object :
                     Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
                     override fun onResponse(

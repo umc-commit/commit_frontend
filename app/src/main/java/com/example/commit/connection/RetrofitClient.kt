@@ -340,7 +340,7 @@ class RetrofitClient {
         @SerializedName("artistId")
         val artistId: Int,
         @SerializedName("commissionId")
-        val commissionId: Int
+        val commissionId: String
     )
 
     // 채팅방 생성 응답 DTO
