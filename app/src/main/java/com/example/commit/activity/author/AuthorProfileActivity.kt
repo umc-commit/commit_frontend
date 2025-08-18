@@ -34,6 +34,8 @@ import com.example.commit.viewmodel.PostViewModel
 import androidx.core.os.bundleOf
 import com.example.commit.fragment.FragmentPostChatDetail
 import android.widget.Toast
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
 
 
 class AuthorProfileActivity : AppCompatActivity() {
@@ -557,7 +559,7 @@ class AuthorProfileActivity : AppCompatActivity() {
                     .addToBackStack(null)
                     .commit()
 
-                // 성공 토스트 (요청대로 이거 하나만 남김)
+                // 성공 토스트
                 Toast.makeText(this@AuthorProfileActivity, "채팅방이 생성되었습니다", Toast.LENGTH_SHORT).show()
             }
 
@@ -568,5 +570,14 @@ class AuthorProfileActivity : AppCompatActivity() {
                 Log.e("AuthorProfileActivity", "채팅방 생성 네트워크 오류", t)
             }
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (artistIdFromIntent != -1) {
+            // 서버 기준으로 최신 상태/팔로워 수 동기화
+            preloadFollowState(artistIdFromIntent)
+            loadAuthorProfile(artistIdFromIntent)
+        }
     }
 }

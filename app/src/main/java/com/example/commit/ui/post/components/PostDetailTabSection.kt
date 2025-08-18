@@ -111,14 +111,16 @@ fun PostDetailTabSection(
                     }
                     else -> {
                         ArtistInfoSection(
+                            artistId = artistBlock.artist.artistId,                 // 작가 ID 전달
+                            isFollowingInitial = artistBlock.isFollowing,    // 초기 팔로우 상태 전달
                             artistName = artistBlock.artist.nickname,
                             followerCount = artistBlock.artist.follower,
                             workCount = artistBlock.artist.completedworks,
                             rating = artistBlock.reviewStatistics.averageRate.toFloat(),
                             recommendRate = artistBlock.reviewStatistics.recommendationRate,
                             reviewCount = artistBlock.reviewStatistics.totalReviews,
-                            onFollowClick = { /* TODO: 팔로우 토글 */ },
-                            onReviewListClick = onReviewListClick
+                            onReviewListClick = onReviewListClick,
+                            profileImageUrl = artistBlock.artist.profileImageUrl
                         )
                     }
                 }

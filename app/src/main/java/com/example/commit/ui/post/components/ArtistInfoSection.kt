@@ -1,5 +1,7 @@
 package com.example.commit.ui.post.components
 
+import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,6 +24,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.example.commit.R
+import com.example.commit.connection.dto.FollowHelper
 import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
@@ -61,18 +65,25 @@ fun ExpandableItem(
 
 @Composable
 fun ArtistInfoSection(
+    artistId: Int,                 // 추가: API 호출에 필요한 작가 ID
+    isFollowingInitial: Boolean,
     artistName: String,
     followerCount: Int,
     workCount: Int,
     rating: Float,
     recommendRate: Int,
     reviewCount: Int,
-    onFollowClick: () -> Unit,
     onReviewListClick: () -> Unit,
-    profileImageUrl: String? = null
+    profileImageUrl: String? = null,
+    // 필요하면 팔로우 클릭 시 부모에 알림
+    onFollowStateChanged: (Boolean) -> Unit = {}
 ) {
+    val context = LocalContext.current
     var isExpanded by remember { mutableStateOf(false) }
-    var isFollowing by remember { mutableStateOf(false) }
+    var isFollowing by remember { mutableStateOf(isFollowingInitial) }
+    var isLoading by remember { mutableStateOf(false) }
+    // 팔로워 수를 상태로 관리
+    var followerCountState by remember { mutableStateOf(followerCount) }
 
     Column(
         modifier = Modifier
@@ -129,7 +140,7 @@ fun ArtistInfoSection(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "팔로워 $followerCount",
+                        text = "팔로워 $followerCountState",
                         style = CommitTypography.labelSmall,
                         color = Color.Gray
                     )
@@ -161,8 +172,47 @@ fun ArtistInfoSection(
                     .border(1.dp, followBorder, RoundedCornerShape(20.dp))
                     .background(followBg, RoundedCornerShape(20.dp))
                     .clickable {
-                        isFollowing = !isFollowing
-                        onFollowClick()
+                        if (isLoading) return@clickable
+                        val next = !isFollowing
+                        // 낙관적 반영
+                        isFollowing = next
+                        isLoading = true
+
+                        FollowHelper.toggleFollow(
+                            context = context,
+                            artistId = artistId,
+                            follow = next
+                        ) { success, nowFollowing, serverMessage ->
+                            isLoading = false
+                            isFollowing = nowFollowing
+
+                            // 성공 시 팔로워 수 즉시 증감(최소 0 보장)
+                            if (success) {
+                                followerCountState = if (nowFollowing) {
+                                    followerCountState + 1
+                                } else {
+                                    (followerCountState - 1).coerceAtLeast(0)
+                                }
+                            }
+                            onFollowStateChanged(nowFollowing)
+
+                            // 프로필 화면 동기화용 브로드캐스트
+                            val intent = Intent(FollowHelper.ACTION_FOLLOW_CHANGED).apply {
+                                putExtra(FollowHelper.EXTRA_ARTIST_ID, artistId)
+                                putExtra(FollowHelper.EXTRA_IS_FOLLOWING, nowFollowing)
+                                putExtra(FollowHelper.EXTRA_FOLLOWER_COUNT, followerCountState)
+                            }
+                            context.sendBroadcast(intent)
+
+                            if (success) {
+                                val msg = serverMessage ?: if (nowFollowing) "팔로우했습니다." else "팔로우를 취소했습니다."
+                                Log.d("Follow", msg)
+                            } else {
+                                // 실패 시 안내
+                                val msg = serverMessage ?: "네트워크 오류로 처리에 실패했습니다."
+                                Log.d("Follow", msg)
+                            }
+                        }
                     }
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
