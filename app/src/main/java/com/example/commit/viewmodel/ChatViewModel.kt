@@ -217,26 +217,26 @@ class ChatViewModel : ViewModel() {
     fun sendMessage(context: Context) { sendMessage() }
 
     // 더미 랜덤 응답 (옵션)
-    fun generateDummyResponse() {
-        viewModelScope.launch {
-            delay(1000L + (Math.random() * 2000).toLong())
-            val responses = listOf(
-                "네, 알겠습니다!", "좋은 아이디어네요 😊", "빠르게 작업해드릴게요!",
-                "감사합니다!", "곧 시작하겠습니다", "좋은 작품으로 보답하겠습니다",
-                "자세히 설명해주셔서 감사합니다", "꼼꼼하게 작업하겠습니다",
-                "맞습니다, 그렇게 하면 좋겠네요", "좋은 피드백 감사합니다!"
-            )
-            val dummyMessage = ChatMessage(
-                id = "dummy_${System.currentTimeMillis()}",
-                senderId = "artist",
-                content = responses.random(),
-                timestamp = System.currentTimeMillis(),
-                type = MessageType.TEXT,
-                amount = null
-            )
-            chatMessages = (chatMessages + dummyMessage).takeLast(20)
-        }
-    }
+//    fun generateDummyResponse() {
+//        viewModelScope.launch {
+//            delay(1000L + (Math.random() * 2000).toLong())
+//            val responses = listOf(
+//                "네, 알겠습니다!", "좋은 아이디어네요 😊", "빠르게 작업해드릴게요!",
+//                "감사합니다!", "곧 시작하겠습니다", "좋은 작품으로 보답하겠습니다",
+//                "자세히 설명해주셔서 감사합니다", "꼼꼼하게 작업하겠습니다",
+//                "맞습니다, 그렇게 하면 좋겠네요", "좋은 피드백 감사합니다!"
+//            )
+//            val dummyMessage = ChatMessage(
+//                id = "dummy_${System.currentTimeMillis()}",
+//                senderId = "artist",
+//                content = responses.random(),
+//                timestamp = System.currentTimeMillis(),
+//                type = MessageType.TEXT,
+//                amount = null
+//            )
+//            chatMessages = (chatMessages + dummyMessage).takeLast(20)
+//        }
+//    }
 
     fun showCommissionAcceptedMessage() {
         val m = ChatMessage(

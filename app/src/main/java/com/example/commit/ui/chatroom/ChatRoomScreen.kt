@@ -95,9 +95,9 @@ fun ChatRoomScreen(
             onSendMessage = { 
                 chatViewModel.sendMessage(context)
                 // 랜덤하게 더미 응답도 생성 (50% 확률)
-                if (Math.random() < 0.5) {
-                    chatViewModel.generateDummyResponse()
-                }
+//                if (Math.random() < 0.5) {
+//                    chatViewModel.generateDummyResponse()
+//                }
                 
                 // 신청서가 제출된 경우 커미션 수락 메시지 생성 (임시 테스트용)
                 if (chatViewModel.hasSubmittedApplication && Math.random() < 0.3) {

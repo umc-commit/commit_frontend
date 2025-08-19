@@ -45,7 +45,7 @@ fun PostBottomBar(
                     Box(
                         modifier = Modifier
                             .size(80.dp)
-                            .offset(x = 35.dp, y = 0.dp),
+                            .offset(x = 20.dp, y = 20.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
