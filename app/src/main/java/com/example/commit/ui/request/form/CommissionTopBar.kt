@@ -26,8 +26,7 @@ fun CommissionTopBar(onBackClick: () -> Unit = {}) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 28.dp, top = 50.dp, bottom = 28.dp), // Figma 기준 위치
-            verticalAlignment = Alignment.CenterVertically
+                .padding(start = 28.dp, top = 50.dp, bottom = 28.dp)
         ) {
             IconButton(
                 onClick = onBackClick,
@@ -48,7 +47,8 @@ fun CommissionTopBar(onBackClick: () -> Unit = {}) {
                 fontSize = 18.sp,
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold
-                )
+                ),
+                modifier = Modifier.offset(x=-15.dp)
             )
         }
     }
