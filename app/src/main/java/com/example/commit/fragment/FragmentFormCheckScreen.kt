@@ -27,7 +27,9 @@ class FragmentFormCheckScreen : Fragment() {
                     val requestItemJson = arguments?.getString("requestItem")
                     val formSchemaJson = arguments?.getString("formSchema")
                     val formAnswerJson = arguments?.getString("formAnswer")
-                    
+                    val artistProfileImage = arguments?.getString("artistProfileImage")
+
+
                     val requestItem = gson.fromJson(requestItemJson, RequestItem::class.java)
                     val formSchema = gson.fromJson(formSchemaJson, Array<FormItem>::class.java).toList()
                     val formAnswer = gson.fromJson(formAnswerJson, Map::class.java) as Map<String, Any>
@@ -35,6 +37,7 @@ class FragmentFormCheckScreen : Fragment() {
                     // 임시 ChatItem 생성
                     val chatItem = ChatItem(
                         profileImageRes = com.example.commit.R.drawable.ic_profile,
+                        profileImageUrl = artistProfileImage,
                         name = "키르",
                         message = "",
                         title = requestItem.title,

@@ -7,6 +7,7 @@ import java.util.*
 
 fun chatMessageToChatItem(
     lastMessage: ChatMessage,
+    profileImageUrl: String?,
     profileImageRes: Int,
     name: String,
     isNew: Boolean,
@@ -14,6 +15,7 @@ fun chatMessageToChatItem(
 ): ChatItem {
     return ChatItem(
         profileImageRes = profileImageRes,
+        profileImageUrl = profileImageUrl,
         name = name,
         message = lastMessage.content,
         time = formatRelativeTime(lastMessage.timestamp),

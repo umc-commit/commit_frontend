@@ -366,7 +366,7 @@ class FragmentHome : Fragment() {
 
         val request = RetrofitClient.CreateChatroomRequest(
             artistId = artistId,
-            commissionId = commissionId
+            commissionId = commissionId.toString()
         )
 
         api.createChatroom(request).enqueue(object :
@@ -389,7 +389,7 @@ class FragmentHome : Fragment() {
                 val chatroomIdInt = data.id.toIntOrNull()
 
                 // ① 작가 닉네임 조회
-                api.getCommissionArtist(commissionId).enqueue(object :
+                api.getCommissionArtist(commissionId.toString()).enqueue(object :
                     Callback<com.example.commit.connection.dto.ApiResponse<com.example.commit.connection.dto.CommissionArtistResponse>> {
                     override fun onResponse(
                         call: Call<com.example.commit.connection.dto.ApiResponse<com.example.commit.connection.dto.CommissionArtistResponse>>,

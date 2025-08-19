@@ -25,6 +25,11 @@ fun CommissionOptionSection(
     val primaryColor = Color(0xFF17D5C6)
     
     Log.d("FormDebug", "CommissionOptionSection 렌더링 - index: $index, title: $title, options: $options, selectedOption: $selectedOption")
+    
+    // selectedOption이 value인지 label인지 구분해서 비교하는 헬퍼 함수
+    fun isOptionSelected(selectedValue: String, optionLabel: String): Boolean {
+        return selectedValue == optionLabel
+    }
 
     CommissionSectionWrapper(
         index = index,
@@ -37,7 +42,7 @@ fun CommissionOptionSection(
                 modifier = Modifier.padding(vertical = 4.dp)
             ) {
                 RadioButton(
-                    selected = selectedOption == options[0],
+                    selected = isOptionSelected(selectedOption, options[0]),
                     onClick = { 
                         Log.d("FormDebug", "라디오 버튼 클릭됨 - $title: ${options[0]}")
                         onOptionSelected(options[0]) 
@@ -69,7 +74,7 @@ fun CommissionOptionSection(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = selectedOption == option,
+                            selected = isOptionSelected(selectedOption, option),
                             onClick = { 
                                 Log.d("FormDebug", "라디오 버튼 클릭됨 - $title: $option")
                                 onOptionSelected(option) 

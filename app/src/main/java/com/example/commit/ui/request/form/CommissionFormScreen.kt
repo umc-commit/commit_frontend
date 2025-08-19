@@ -3,25 +3,44 @@ package com.example.commit.ui.request.form
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Bitmap.CompressFormat
 import android.net.Uri
+import android.net.Uri.fromFile
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import com.example.commit.data.model.FormItem
 import com.example.commit.data.model.OptionItem
-import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.ui.Theme.CommitTheme
 import com.example.commit.viewmodel.CommissionFormState
 import com.example.commit.viewmodel.CommissionFormViewModel
@@ -29,11 +48,6 @@ import com.example.commit.viewmodel.ImageUploadState
 import com.example.commit.viewmodel.SubmitState
 import java.io.File
 import java.io.FileOutputStream
-import android.graphics.Bitmap.CompressFormat
-import android.net.Uri.fromFile
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun CommissionFormScreen(
@@ -86,25 +100,38 @@ fun CommissionFormScreen(
         FormItem(
             id = 4,
             label = "신청 내용",
-            type = "textarea" // ← 반드시 textarea
+            type = "textarea"
+        ),
+        FormItem(
+            id = 5,
+            label = "참고 이미지",
+            type = "file"
         )
     )
 
     // API 스키마 or 기본 스키마
     val formSchema = when (val state = commissionFormState) {
         is CommissionFormState.Success -> {
-            val fieldsFromApi = state.data?.success?.formSchema?.fields
+            val fieldsFromApi = if (commissionId == "1") state.data?.success?.formSchema?.fields else null
             if (!fieldsFromApi.isNullOrEmpty()) {
                 fieldsFromApi.map { f ->
                     FormItem(
-                        id = f.id.toIntOrNull(),
+                        id = f.id?.toIntOrNull(),
                         type = f.type,
                         label = f.label,
                         options = f.options
-                            // label 우선, 없으면 value 사용. 공백/널은 제외
                             ?.mapNotNull { opt ->
-                                val lbl = (opt.label ?: opt.value)?.trim()
-                                if (!lbl.isNullOrEmpty()) OptionItem(label = lbl) else null
+                                val labelStr = opt.label?.trim()
+                                val valueStr = opt.value?.trim()
+                                when {
+                                    // label & value 모두 존재
+                                    !labelStr.isNullOrEmpty() && !valueStr.isNullOrEmpty() ->
+                                        OptionItem(label = labelStr, value = valueStr)
+                                    // label만 존재 → value는 기본값(label) 사용
+                                    !labelStr.isNullOrEmpty() ->
+                                        OptionItem(label = labelStr)
+                                    else -> null
+                                }
                             }
                             ?: emptyList()
                     )
@@ -118,30 +145,23 @@ fun CommissionFormScreen(
         else -> defaultFormSchema
     }
 
-
     Log.d("FormDebug", "최종 formSchema: $formSchema")
 
     val formAnswer = remember { mutableStateMapOf<String, Any>() }
 
     val isFormComplete by remember(formSchema, formAnswer) {
         derivedStateOf {
-            // API 응답에 따라 동적으로 완성 조건 결정
             val requiredFields = formSchema.filter { it.type in listOf("radio", "check") }
             val requiredLabels = requiredFields.map { it.label }
-            
-            if (requiredLabels.isEmpty()) {
-                // 필수 필드가 없으면 항상 완성된 것으로 간주
-                true
-            } else {
-                val completed = requiredLabels.count { field ->
-                    val v = formAnswer[field]
-                    when {
-                        field.contains("확인") -> v == "확인했습니다."
-                        else -> (v as? String)?.isNotBlank() == true
-                    }
+            if (requiredLabels.isEmpty()) return@derivedStateOf true
+
+            val completed = requiredLabels.count { field ->
+                when (val v = formAnswer[field]) {
+                    is String -> v.isNotBlank()
+                    else -> false
                 }
-                completed >= requiredLabels.size
             }
+            completed >= requiredLabels.size
         }
     }
 
@@ -151,6 +171,7 @@ fun CommissionFormScreen(
                 CircularProgressIndicator()
             }
         }
+
         is CommissionFormState.Error -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -168,6 +189,7 @@ fun CommissionFormScreen(
                 }
             }
         }
+
         else -> {
             Column(
                 modifier = Modifier
@@ -176,7 +198,6 @@ fun CommissionFormScreen(
             ) {
                 CommissionTopBar(
                     onBackClick = {
-                        // 뒤로가기 버튼 클릭 시 이전 화면으로 돌아가기
                         try {
                             when (context) {
                                 is FragmentActivity -> {
@@ -186,22 +207,12 @@ fun CommissionFormScreen(
                                         context.finish()
                                     }
                                 }
-                                is androidx.activity.ComponentActivity -> {
-                                    context.finish()
-                                }
-                                else -> {
-                                    // 일반적인 경우 finish() 호출
-                                    (context as? android.app.Activity)?.finish()
-                                }
+                                is androidx.activity.ComponentActivity -> context.finish()
+                                else -> (context as? Activity)?.finish()
                             }
                         } catch (e: Exception) {
                             Log.e("CommissionFormScreen", "뒤로가기 처리 실패: ${e.message}")
-                            // 예외 발생 시 finish() 시도
-                            try {
-                                (context as? android.app.Activity)?.finish()
-                            } catch (finishException: Exception) {
-                                Log.e("CommissionFormScreen", "finish() 호출 실패: ${finishException.message}")
-                            }
+                            (context as? Activity)?.finish()
                         }
                     }
                 )
@@ -214,6 +225,7 @@ fun CommissionFormScreen(
                     commissionTitle = commissionInfo?.title ?: "낙서 타입 커미션",
                     thumbnailImageUrl = commissionInfo?.thumbnailImageUrl
                 )
+
                 Spacer(Modifier.height(20.dp))
                 Divider(thickness = 8.dp, color = Color(0xFFD9D9D9))
                 Spacer(Modifier.height(20.dp))
@@ -226,45 +238,42 @@ fun CommissionFormScreen(
                     val isUploading by viewModel.isUploading.collectAsState()
                     val uploadedImageUrls by viewModel.uploadedImageUrls.collectAsState()
 
-
-
-                    // 전체 인덱스를 연속적으로 관리
                     var currentIndex = 1
-                    
-                    // 먼저 라디오/체크박스 필드들 처리
+
+                    // 1) 라디오/체크박스
                     formSchema.filter { it.type in listOf("radio", "check") }.forEach { item ->
-                        Log.d("FormDebug", "라디오/체크박스 처리 - index: $currentIndex, item: $item")
                         Spacer(Modifier.height(12.dp))
-                        
-                        val selectedOption = formAnswer[item.label] as? String ?: ""
+                        val selectedValue = formAnswer[item.label] as? String ?: ""
+                        // selectedValue를 label로 변환하여 UI에 전달
+                        val selectedOption = item.options.find { it.value == selectedValue }?.label ?: selectedValue
                         CommissionOptionSection(
                             index = currentIndex,
                             title = item.label,
                             options = item.options.map { it.label },
                             selectedOption = selectedOption,
-                            onOptionSelected = { formAnswer[item.label] = it }
+                            onOptionSelected = { selectedLabel ->
+                                val option = item.options.find { it.label == selectedLabel }
+                                val valueToStore = option?.value ?: selectedLabel
+                                formAnswer[item.label] = valueToStore
+                            }
                         )
                         currentIndex++
                     }
 
-                    // 그 다음 이미지 필드들 처리
-                    formSchema.filter { it.type in listOf("image", "file") }.forEach { item ->
-                        Log.d("FormDebug", "이미지 필드 처리 - index: $currentIndex, item: $item")
+                    // 2) 이미지/파일
+                    formSchema.filter { it.type in listOf("image", "file") }.forEach { _ ->
                         Spacer(Modifier.height(12.dp))
-                        
-                        when (imageUploadState) {
-                            is ImageUploadState.Loading -> {
-                                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                    CircularProgressIndicator()
-                                }
+
+                        if (imageUploadState is ImageUploadState.Loading || (isUploading && images.isNotEmpty())) {
+                            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
                             }
-                            else -> {}
                         }
 
                         CommissionImageSection(
                             index = currentIndex,
                             images = images,
-                            onAddClick = { /* 필요시 부가동작 */ },
+                            onAddClick = { /* no-op */ },
                             onRemoveClick = { removeIndex -> images.removeAt(removeIndex) },
                             onImageUpload = { uri -> viewModel.uploadImage(uri, context) },
                             onImageAdded = { bitmap ->
@@ -276,11 +285,9 @@ fun CommissionFormScreen(
                         currentIndex++
                     }
 
-                    // 마지막에 텍스트박스 필드들 처리
+                    // 3) 텍스트박스
                     formSchema.filter { it.type == "textarea" }.forEach { item ->
-                        Log.d("FormDebug", "텍스트박스 처리 - index: $currentIndex, item: $item")
                         Spacer(Modifier.height(12.dp))
-                        
                         CommissionTextareaSection(
                             index = currentIndex,
                             text = formAnswer[item.label] as? String ?: "",
@@ -298,7 +305,7 @@ fun CommissionFormScreen(
                             }
                         }
 
-                        is SubmitState.Success -> {
+                        is SubmitState.Success, is SubmitState.AlreadySubmitted -> {
                             LaunchedEffect("success") {
                                 android.widget.Toast.makeText(
                                     context,
@@ -311,23 +318,7 @@ fun CommissionFormScreen(
                                 } else if (context is androidx.activity.ComponentActivity) {
                                     context.finish()
                                 }
-                            }
-                        }
-
-                        is SubmitState.AlreadySubmitted -> {
-                            // 이미 신청했어도 성공 토스트
-                            LaunchedEffect("already") {
-                                android.widget.Toast.makeText(
-                                    context,
-                                    "신청에 성공했습니다",
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                                kotlinx.coroutines.delay(1000)
-                                if (context is FragmentActivity) {
-                                    context.supportFragmentManager.popBackStack()
-                                } else if (context is androidx.activity.ComponentActivity) {
-                                    context.finish()
-                                }
+                                // onNavigateToSuccess()
                             }
                         }
 
@@ -347,13 +338,15 @@ fun CommissionFormScreen(
                                     } else if (context is androidx.activity.ComponentActivity) {
                                         context.finish()
                                     }
+                                    // onNavigateToFormCheck(existingRequestId)
                                 }
                             }
                         }
 
-                        else -> {}
+                        else -> Unit
                     }
-                        Spacer(Modifier.height(8.dp))
+
+                    Spacer(Modifier.height(8.dp))
 
                     Button(
                         onClick = {

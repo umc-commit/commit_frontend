@@ -506,7 +506,7 @@ class AuthorProfileActivity : AppCompatActivity() {
         val api = RetrofitObject.getRetrofitService(this)
         val request = RetrofitClient.CreateChatroomRequest(
             artistId = artistId,
-            commissionId = commissionId
+            commissionId = commissionId.toString()
         )
 
         api.createChatroom(request).enqueue(object :

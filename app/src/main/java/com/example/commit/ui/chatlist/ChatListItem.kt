@@ -24,13 +24,21 @@ fun ChatListItem(item: ChatItem,showNewIndicator: Boolean = true) {
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(id = item.profileImageRes),
-            contentDescription = "Profile",
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-        )
+        if (!item.profileImageUrl.isNullOrBlank()) {
+            // Coil
+            coil.compose.AsyncImage(
+                model = item.profileImageUrl,
+                contentDescription = "Profile",
+                modifier = Modifier.size(48.dp).clip(CircleShape)
+            )
+        } else {
+            // 리소스/기본 아이콘
+            Image(
+                painter = painterResource(id = item.profileImageRes),
+                contentDescription = "Profile",
+                modifier = Modifier.size(48.dp).clip(CircleShape)
+            )
+        }
 
         Spacer(modifier = Modifier.width(12.dp))
 

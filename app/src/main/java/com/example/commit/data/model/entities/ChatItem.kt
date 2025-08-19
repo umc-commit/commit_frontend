@@ -6,6 +6,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class ChatItem(
     val profileImageRes: Int,  // drawable 리소스 ID (또는 URL)
+    val profileImageUrl: String?,
     val name: String,          // 사용자 이름
     val message: String,       // 최근 메시지
     val time: String,          // 보낸 시간 ("방금 전", "2시간 전", 등)
