@@ -67,7 +67,7 @@ class FragmentHome : Fragment() {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
 
-        setBannerTransactionCount(4257)
+        setBannerTransactionCount(411)
         fetchHomeData()
 
         binding.rvFollowingPosts.layoutManager = LinearLayoutManager(requireContext())
