@@ -91,13 +91,13 @@ interface RetrofitAPI {
     // [커미션 상세보기(PostScreen)]
     @GET("/api/commissions/{commissionId}")
     fun getCommissionDetail(
-        @Path("commissionId") commissionId: Int
+        @Path("commissionId") commissionId: String
     ): Call<CommissionDetailResponse>
 
     // [제출된 신청서 보기] (동일 path이지만 다른 DTO 사용)
     @GET("/api/commissions/{commissionId}/forms")
     fun getSubmittedCommissionForm(
-        @Path("commissionId") commissionId: Int
+        @Path("commissionId") commissionId: String
     ): Call<RetrofitClient.ApiResponse<RetrofitClient.SubmittedFormData>>
 
     // [신청함 목록]
@@ -177,7 +177,7 @@ interface RetrofitAPI {
      //커미션 작가 정보 조회
     @GET("/api/commissions/{commissionId}/artist")
     fun getCommissionArtist(
-        @Path("commissionId") commissionId: Int,
+        @Path("commissionId") commissionId: String,
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 10
     ): Call<ApiResponse<CommissionArtistResponse>>

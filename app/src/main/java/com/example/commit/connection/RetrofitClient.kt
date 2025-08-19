@@ -340,7 +340,7 @@ class RetrofitClient {
         @SerializedName("artistId")
         val artistId: Int,
         @SerializedName("commissionId")
-        val commissionId: Int
+        val commissionId: String
     )
 
     // 채팅방 생성 응답 DTO
@@ -369,7 +369,7 @@ class RetrofitClient {
     // 채팅방 목록 DTO
     data class ChatroomItem(
         @SerializedName("request_id") val requestId: Int?,              // ★ 요청 id
-        @SerializedName("commission_thumbnail_url") val thumbnailUrl: String?, // ★ 썸네일
+        @SerializedName("commission_thumbnail") val thumbnailUrl: String?, // ★ 썸네일
         @SerializedName("chatroom_id")
         val chatroomId: String,
         @SerializedName("artist_id")

@@ -112,7 +112,7 @@ fun FormCheckSection(
         formSchema.forEachIndexed { index, schemaItem ->
             val answer = formAnswer[schemaItem.label]
             val answerText = when (answer) {
-                is List<*> -> answer.joinToString(", ")
+                is List<*> -> answer.mapNotNull { it?.toString() }.joinToString(", ")
                 is String -> answer
                 else -> " "
             }
