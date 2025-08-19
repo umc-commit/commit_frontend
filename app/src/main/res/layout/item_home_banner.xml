@@ -42,7 +42,7 @@
 
         <ImageView
             android:id="@+id/iv_cat_mascot"
-            android:layout_width="160dp"
+            android:layout_width="wrap_content"
             android:layout_height="215dp"
             android:src="@drawable/home_banner"
             app:layout_constraintEnd_toEndOf="parent"
