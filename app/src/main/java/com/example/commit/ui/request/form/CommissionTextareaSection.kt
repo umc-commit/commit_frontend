@@ -25,7 +25,6 @@ fun CommissionTextareaSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .background(Color.White)
     ) {
         // 텍스트 입력 + 글자수 표시를 감싸는 박스
         Box(

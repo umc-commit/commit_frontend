@@ -41,7 +41,6 @@ fun CommissionOptionSection(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = 4.dp)
-                    .background(Color.White)
             ) {
                 RadioButton(
                     selected = isOptionSelected(selectedOption, options[0]),
