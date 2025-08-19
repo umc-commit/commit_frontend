@@ -2,6 +2,7 @@ package com.example.commit.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.commit.R
@@ -104,9 +106,10 @@ class FragmentChatDetail : Fragment() {
                         commissionTitle = chatName,
                         authorName = authorName,
                         chatroomId = chatroomId,
-                        chatViewModel = chatViewModel, // ChatViewModel 전달
-                        authorProfileImageUrl = artistProfileImage, // ★
-                        commissionThumbnailUrl = thumbnailUrl,      // ★
+                        chatViewModel = chatViewModel,
+                        authorProfileImageUrl = artistProfileImage,
+                        commissionThumbnailUrl = thumbnailUrl,
+
                         onPayClick = {
                             if (isAdded && !isDetached) {
                                 parentFragmentManager.popBackStack()

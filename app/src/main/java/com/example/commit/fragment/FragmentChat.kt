@@ -124,17 +124,17 @@ class FragmentChat : Fragment() {
 
                             parentFragmentManager.beginTransaction()
                                 .replace(R.id.Nav_Frame, FragmentPostChatDetail().apply {
-                                    arguments = bundleOf(
-                                        "chatName" to room.commissionTitle,
-                                        "authorName" to room.artistNickname,
-                                        "chatroomId" to chatroomId,
-                                        "commissionId" to commissionId,
-                                        "artistId" to artistId,
-                                        "requestId" to requestId,
-                                        "thumbnailUrl" to thumbnailUrl,
-                                        "artistProfileImage" to profileUrl,
-                                        "hasSubmittedApplication" to false,
-                                    )
+                                    arguments = Bundle().apply {
+                                        putString("chatName", room.commissionTitle)
+                                        putString("authorName", room.artistNickname)
+                                        putInt("chatroomId", chatroomId)
+                                        putInt("commissionId", commissionId)
+                                        putInt("artistId", artistId)
+                                        putInt("requestId", requestId)
+                                        putString("thumbnailUrl", thumbnailUrl)
+                                        putString("artistProfileImage", profileUrl)
+                                        putBoolean("hasSubmittedApplication", false)
+                                    }
                                 })
                                 .addToBackStack("chatDetail")
                                 .commit()

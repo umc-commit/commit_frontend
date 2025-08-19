@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.commit.R
@@ -19,12 +20,10 @@ import com.example.commit.activity.author.AuthorProfileActivity
 import com.example.commit.ui.Theme.CommitTheme
 import com.example.commit.ui.chatroom.ChatOptionDialog
 import com.example.commit.ui.chatroom.ChatRoomScreen
-import com.example.commit.data.model.entities.ChatItem
-import com.example.commit.data.model.FormItem
-import com.example.commit.data.model.RequestItem
 import com.example.commit.viewmodel.ChatViewModel
 import com.example.commit.connection.RetrofitClient
 import com.example.commit.connection.RetrofitObject
+import com.example.commit.connection.dto.CommissionDetail
 import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
@@ -54,6 +53,7 @@ class FragmentPostChatDetail : Fragment() {
         val sourceFragment = arguments?.getString("sourceFragment") ?: ""
         val commissionId = arguments?.getInt("commissionId", -1) ?: -1
         val hasSubmittedApplication = arguments?.getBoolean("hasSubmittedApplication", false) ?: false
+        val thumbnailUrl = arguments?.getString("thumbnailUrl") ?: ""
         
         Log.d("FragmentPostChatDetail", "채팅방 정보 - ID: $chatroomId, 제목: $chatName, 작가: $authorName, 출처: $sourceFragment, 신청서 제출됨: $hasSubmittedApplication")
 
@@ -76,7 +76,8 @@ class FragmentPostChatDetail : Fragment() {
                         authorName = authorName,
                         chatroomId = chatroomId,
                         chatViewModel = chatViewModel,
-                        commissionThumbnailUrl = arguments?.getString("thumbnailUrl"), // ★ 추가
+                        commissionThumbnailUrl = thumbnailUrl,
+
                         onPayClick = {
                             if (isAdded && !isDetached) {
                                 parentFragmentManager.popBackStack()
@@ -102,14 +103,20 @@ class FragmentPostChatDetail : Fragment() {
                                         }
                                         parentFragmentManager.beginTransaction()
                                             .replace(R.id.Nav_Frame, fragment)
+                                            .addToBackStack(null)
                                             .commit()
+                                        // BottomNavigation 숨기기
+                                        (activity as? MainActivity)?.showBottomNav(false)
                                     }
                                     "FragmentPostScreen" -> {
                                         // FragmentPostScreen으로 돌아가기
                                         val fragment = com.example.commit.ui.post.FragmentPostScreen.newInstance(commissionId)
                                         parentFragmentManager.beginTransaction()
                                             .replace(R.id.Nav_Frame, fragment)
+                                            .addToBackStack(null)
                                             .commit()
+                                        // BottomNavigation 숨기기
+                                        (activity as? MainActivity)?.showBottomNav(false)
                                     }
                                     else -> {
                                         // 기본적으로 popBackStack 사용

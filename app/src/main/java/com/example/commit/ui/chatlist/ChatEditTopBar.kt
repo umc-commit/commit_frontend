@@ -24,7 +24,7 @@ fun ChatEditTopBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
+            .height(80.dp)
             .background(Color.White)
     ) {
         Text(
