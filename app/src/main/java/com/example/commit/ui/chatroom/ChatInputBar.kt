@@ -57,7 +57,7 @@ fun ChatInputBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 28.dp, vertical = 20.dp),
+            .padding(horizontal = 20.dp, vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
@@ -86,7 +86,7 @@ fun ChatInputBar(
                 fontWeight = FontWeight.Medium
             ),
             modifier = Modifier
-                .size(width = 258.dp, height = 36.dp), // Figma 기준 너비/높이
+                .size(width = 230.dp, height = 36.dp), // Figma 기준 너비/높이
             decorationBox = { innerTextField ->
                 Box(
                     contentAlignment = Alignment.CenterStart,
