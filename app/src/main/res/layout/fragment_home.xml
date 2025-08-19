@@ -10,7 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header_layout"
         android:layout_width="match_parent"
-        android:layout_height="125dp"
+        android:layout_height="105dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -19,7 +19,7 @@
             android:layout_height="18dp"
             android:src="@drawable/ic_commit_logo"
             android:layout_marginStart="28dp"
-            android:layout_marginTop="63dp"
+            android:layout_marginTop="43dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_search_darkgray"
             android:layout_marginEnd="13dp"
-            android:layout_marginTop="63dp"
+            android:layout_marginTop="43dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_alarm"
             android:layout_marginEnd="13dp"
-            android:layout_marginTop="63dp"
+            android:layout_marginTop="43dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
@@ -54,7 +54,7 @@
             android:layout_width="6dp"
             android:layout_height="6dp"
             android:src="@drawable/ic_red_dot"
-            android:layout_marginTop="57dp"
+            android:layout_marginTop="37dp"
             android:layout_marginEnd="10dp"
             app:layout_constraintEnd_toStartOf="@id/iv_profile"
             app:layout_constraintTop_toTopOf="parent"
@@ -68,7 +68,7 @@
             android:clickable="true"
             android:focusable="true"
             android:layout_marginEnd="28dp"
-            android:layout_marginTop="59dp"
+            android:layout_marginTop="39dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
