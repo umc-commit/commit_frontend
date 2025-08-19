@@ -34,6 +34,7 @@ import android.net.Uri.fromFile
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import com.google.gson.Gson
 
 @Composable
 fun CommissionFormScreen(
@@ -43,6 +44,9 @@ fun CommissionFormScreen(
     onNavigateToFormCheck: (existingRequestId: String) -> Unit
 ) {
     val context = LocalContext.current
+
+    val gson = remember { Gson() }
+    val commissionIdInt = remember(commissionId) { commissionId.toIntOrNull() ?: -1 }
 
     // 미리보기 이미지 리스트
     val images = remember { mutableStateListOf<Bitmap>() }
@@ -299,35 +303,52 @@ fun CommissionFormScreen(
                         }
 
                         is SubmitState.Success -> {
+                            val requestIdStr = (submitState as SubmitState.Success).requestId
+                            val requestIdInt = requestIdStr?.toIntOrNull() ?: -1
+
                             LaunchedEffect("success") {
                                 android.widget.Toast.makeText(
                                     context,
                                     "신청에 성공했습니다",
                                     android.widget.Toast.LENGTH_SHORT
                                 ).show()
-                                kotlinx.coroutines.delay(1000)
-                                if (context is FragmentActivity) {
-                                    context.supportFragmentManager.popBackStack()
-                                } else if (context is androidx.activity.ComponentActivity) {
-                                    context.finish()
+
+                                // 다음 화면으로 이동 (FormCheckActivity)
+                                val intent = android.content.Intent(
+                                    context,
+                                    com.example.commit.activity.FormCheckActivity::class.java
+                                ).apply {
+                                    putExtra("requestId", requestIdInt)
+                                    putExtra("commissionId", commissionIdInt)
+                                    putExtra("formSchemaJson", gson.toJson(formSchema))
+                                    putExtra("formAnswerJson", gson.toJson(formAnswer.toMap()))
                                 }
+                                (context as Activity).startActivity(intent)
                             }
                         }
 
                         is SubmitState.AlreadySubmitted -> {
-                            // 이미 신청했어도 성공 토스트
-                            LaunchedEffect("already") {
+                            val existingIdStr = (submitState as SubmitState.AlreadySubmitted).existingRequestId
+                            val existingIdInt = existingIdStr.toIntOrNull() ?: -1
+
+                            LaunchedEffect("already-submitted") {
                                 android.widget.Toast.makeText(
                                     context,
-                                    "신청에 성공했습니다",
+                                    "이미 신청한 커미션입니다. 기존 신청서로 이동합니다.",
                                     android.widget.Toast.LENGTH_SHORT
                                 ).show()
-                                kotlinx.coroutines.delay(1000)
-                                if (context is FragmentActivity) {
-                                    context.supportFragmentManager.popBackStack()
-                                } else if (context is androidx.activity.ComponentActivity) {
-                                    context.finish()
+
+                                // 기존 신청 상세로 이동 (FormCheckActivity)
+                                val intent = android.content.Intent(
+                                    context,
+                                    com.example.commit.activity.FormCheckActivity::class.java
+                                ).apply {
+                                    putExtra("requestId", existingIdInt)
+                                    putExtra("commissionId", commissionIdInt)
+                                    putExtra("formSchemaJson", gson.toJson(formSchema))
+                                    putExtra("formAnswerJson", gson.toJson(formAnswer.toMap()))
                                 }
+                                (context as Activity).startActivity(intent)
                             }
                         }
 
@@ -335,25 +356,32 @@ fun CommissionFormScreen(
                             val msg = (submitState as SubmitState.Error).message
                             val isAlready = msg.contains("이미 신청한 커미션")
                             if (isAlready) {
+                                // 서버가 Error로 내려줘도 '이미 제출'이면 기존 신청서로 보냄
                                 LaunchedEffect("error-already") {
                                     android.widget.Toast.makeText(
                                         context,
-                                        "신청에 성공했습니다",
+                                        "이미 신청한 커미션입니다. 기존 신청서로 이동합니다.",
                                         android.widget.Toast.LENGTH_SHORT
                                     ).show()
-                                    kotlinx.coroutines.delay(1000)
-                                    if (context is FragmentActivity) {
-                                        context.supportFragmentManager.popBackStack()
-                                    } else if (context is androidx.activity.ComponentActivity) {
-                                        context.finish()
+
+                                    val intent = android.content.Intent(
+                                        context,
+                                        com.example.commit.activity.FormCheckActivity::class.java
+                                    ).apply {
+                                        putExtra("requestId", -1) // 서버에서 existingId 못 받았을 때 대비
+                                        putExtra("commissionId", commissionIdInt)
+                                        putExtra("formSchemaJson", gson.toJson(formSchema))
+                                        putExtra("formAnswerJson", gson.toJson(formAnswer.toMap()))
                                     }
+                                    (context as Activity).startActivity(intent)
                                 }
                             }
                         }
 
                         else -> {}
                     }
-                        Spacer(Modifier.height(8.dp))
+
+                    Spacer(Modifier.height(8.dp))
 
                     Button(
                         onClick = {
