@@ -87,17 +87,19 @@ requests: List<RequestItem>,
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp)
+                .height(85.dp)
                 .background(Color.White)
         ) {
             Text(
                 text = "신청함",
                 style = CommitTypography.headlineSmall.copy(fontSize = 18.sp),
                 color = Color.Black,
-                modifier = Modifier.align(Alignment.Center)
-            )
+                modifier = Modifier
+                    .align(Alignment.Center)
 
+            )
         }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 

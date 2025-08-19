@@ -21,7 +21,7 @@ data class CommissionDetail(
     @SerializedName("images")
     val images: List<CommissionImage>,
     @SerializedName("thumbnailImageUrl")
-    val thumbnailImageUrl: String,
+    val thumbnailImageUrl: String?,
     @SerializedName("remainingSlots")
     val remainingSlots: Int,
     @SerializedName("isBookmarked")

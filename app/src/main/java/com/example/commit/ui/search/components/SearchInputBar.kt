@@ -49,13 +49,12 @@ fun SearchInputBar(
 
         TextField(
             value = query,
-            // ❗ 절대 trim/filter 등 가공하지 말 것 — 한글 조합 깨짐
             onValueChange = { text -> onQueryChange(text) },
             placeholder = {
                 Text(
                     text = "작가 이름은 @작가로 검색이 가능해요.",
                     style = CommitTypography.bodyMedium.copy(
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Normal
                     ),
                     color = Color.Gray

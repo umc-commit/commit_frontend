@@ -52,7 +52,7 @@ fun SearchBarWithBack(
                 Text(
                     text = "원하는 커미션을 입력해보세요.",
                     style = CommitTypography.bodyMedium.copy(
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Normal
                     ),
                     color = Color.Gray
