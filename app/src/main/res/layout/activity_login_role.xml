@@ -9,7 +9,7 @@
         android:id="@+id/login_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="60dp"
         android:fontFamily="@font/notosanskr_semibold"
         android:text="역할 선택"
         android:textColor="@color/black1"

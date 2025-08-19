@@ -10,7 +10,7 @@
         android:id="@+id/login_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="60dp"
         android:fontFamily="@font/notosanskr_semibold"
         android:includeFontPadding="false"
         android:text="관심있는 주제를 알려주세요."
