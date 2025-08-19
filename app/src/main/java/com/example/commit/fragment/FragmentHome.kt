@@ -77,6 +77,8 @@ class FragmentHome : Fragment() {
         val showPostDetail = arguments?.getBoolean("show_post_detail", false) ?: false
         if (showPostDetail && commissionId != -1) {
             showPostScreen(commissionId)
+            // BottomNavigation 숨기기
+            (activity as? MainActivity)?.showBottomNav(false)
         }
 
         binding.ivProfile.setOnClickListener {
