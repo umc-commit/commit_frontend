@@ -36,7 +36,12 @@ class MainActivity : AppCompatActivity() {
 
         // Intent에서 show_signup_bottom_sheet 값 가져오기
         val showSignupBottomSheet = intent.getBooleanExtra("show_signup_bottom_sheet", false)
-        val openFragment = intent.getStringExtra("openFragment")
+        var openFragment = intent.getStringExtra("openFragment")
+
+        // openFragment가 비어 있어도 FCM data(type)로부터 추론
+        if (openFragment == null) {
+            openFragment = resolveOpenFragmentFromDataIfNeeded(intent)
+        }
 
         // 액티비티가 처음 생성될 때만 초기 프래그먼트를 로드하고 바텀 시트 인자를 전달
         if (savedInstanceState == null) {
@@ -92,7 +97,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        newIntent.getStringExtra("openFragment")?.let {
+        // 우선적으로 openFragment 키 사용
+        var openFragment = newIntent.getStringExtra("openFragment")
+
+        // ★ 없으면 FCM data(type)로부터 추론
+        if (openFragment == null) {
+            openFragment = resolveOpenFragmentFromDataIfNeeded(newIntent)
+        }
+
+        openFragment?.let {
             handleOpenFragment(it, newIntent)
         }
     }
@@ -115,6 +128,22 @@ class MainActivity : AppCompatActivity() {
         }
         // 일회성이면 제거
         srcIntent.removeExtra("openFragment")
+    }
+
+    // FCM system-tray 클릭으로 진입한 경우, data(type 등)만 있는 케이스에서 openFragment를 추론
+    private fun resolveOpenFragmentFromDataIfNeeded(srcIntent: Intent): String? {
+        val extras = srcIntent.extras ?: return null
+
+        // FCM에서 왔는지 간단히 식별 (우리가 넣는 fromPush 또는 서버 data의 timestamp)
+        val isFromPush = extras.getBoolean("fromPush", false) || extras.containsKey("timestamp")
+        if (!isFromPush) return null
+
+        // 서버에서 내려준 타입으로 라우팅 결정
+        return when (extras.getString("type").orEmpty()) {
+            "chat_message" -> "postChatDetail"
+            "chat_list"    -> "chat"
+            else           -> null // 기타는 홈 등 기본 진입
+        }
     }
 
     private fun initBottomNavigation() {

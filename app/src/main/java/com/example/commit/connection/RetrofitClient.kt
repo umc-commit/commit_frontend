@@ -292,7 +292,8 @@ class RetrofitClient {
         @SerializedName("slot") val slot: Int,
         @SerializedName("reviews") val reviews: List<AuthorReviewItem>,
         @SerializedName("commissions") val commissions: List<AuthorCommissionItem>,
-        @SerializedName("badges") val badges: List<AuthorBadgeItem>
+        @SerializedName("badges") val badges: List<AuthorBadgeItem>,
+        @SerializedName("followerCount") val followerCount: Int
     )
 
     data class AuthorReviewItem(

@@ -223,8 +223,11 @@ class AuthorProfileActivity : AppCompatActivity() {
                     binding.tvUsername.text = data.nickname
                     authorName = data.nickname  // 작가 이름 저장
 
+                    // 팔로워 수 UI 반영 + 로컬 저장
+                    setFollowerCountText(data.followerCount)
+                    saveFollowerCount(artistIdFromIntent, data.followerCount)
+
                     // 프로필
-                    binding.tvUsername.text = data.nickname
                     binding.tvIntroContent.text = data.description
                     Glide.with(this@AuthorProfileActivity)
                         .load(data.profileImage?.takeIf { it.isNotBlank() } ?: R.drawable.ic_profile)
@@ -472,10 +475,14 @@ class AuthorProfileActivity : AppCompatActivity() {
                 list.find { it.artist.id == artistId.toString() }?.let { followedArtist ->
                     // 버튼 아이콘 상태
                     setFollowVisualState(true)
-                    // 팔로워 수 반영
-                    val count = followedArtist.artist.followerCount
-                    setFollowerCountText(count)
-                    saveFollowerCount(artistId, count)
+
+                    // 이미 프로필 API에서 표시된 값이 있으면 유지, 없으면 보조로 팔로워 수 세팅
+                    val current = getCurrentFollowerCountFromUI()
+                    if (current == 0) {
+                        val count = followedArtist.artist.followerCount
+                        setFollowerCountText(count)
+                        saveFollowerCount(artistId, count)
+                    }
                 }
             }
 
