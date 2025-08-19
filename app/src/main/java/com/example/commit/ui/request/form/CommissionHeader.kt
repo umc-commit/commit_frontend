@@ -26,7 +26,8 @@ fun CommissionHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 28.dp, top = 20.dp), // Figma 여백 기준
+            .padding(start = 28.dp, top = 20.dp) // Figma 여백 기준
+            .background(Color.White),
         verticalAlignment = Alignment.CenterVertically
 
     ) {

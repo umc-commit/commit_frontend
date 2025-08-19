@@ -172,23 +172,23 @@ fun CommissionFormScreen(
             }
         }
 
-        is CommissionFormState.Error -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("오류가 발생했습니다", fontSize = 16.sp, color = Color.Red)
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = (commissionFormState as CommissionFormState.Error).message,
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    Button(onClick = { viewModel.getCommissionForm(commissionId, context) }) {
-                        Text("다시 시도")
-                    }
-                }
-            }
-        }
+//        is CommissionFormState.Error -> {
+//            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+//                    Text("오류가 발생했습니다", fontSize = 16.sp, color = Color.Red)
+//                    Spacer(Modifier.height(8.dp))
+//                    Text(
+//                        text = (commissionFormState as CommissionFormState.Error).message,
+//                        fontSize = 14.sp,
+//                        color = Color.Gray
+//                    )
+//                    Spacer(Modifier.height(16.dp))
+//                    Button(onClick = { viewModel.getCommissionForm(commissionId, context) }) {
+//                        Text("다시 시도")
+//                    }
+//                }
+//            }
+//        }
 
         else -> {
             Column(

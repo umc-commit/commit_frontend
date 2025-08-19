@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.commit.ui.Theme.CommitTheme
 import android.util.Log
+import androidx.compose.foundation.background
 
 @Composable
 fun CommissionOptionSection(
@@ -40,6 +41,7 @@ fun CommissionOptionSection(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = 4.dp)
+                    .background(Color.White)
             ) {
                 RadioButton(
                     selected = isOptionSelected(selectedOption, options[0]),

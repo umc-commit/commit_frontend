@@ -18,6 +18,7 @@ import com.example.commit.activity.MainActivity
 import com.example.commit.connection.RetrofitClient
 import com.example.commit.connection.RetrofitObject
 import com.example.commit.connection.dto.CommissionDetailResponse
+import com.example.commit.connection.dto.CommissionDetail
 import com.example.commit.fragment.FragmentChat
 import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.viewmodel.ArtistViewModel
@@ -45,6 +46,9 @@ class FragmentPostScreen : Fragment() {
     private val viewModel: PostViewModel by viewModels()
     private val artistViewModel: ArtistViewModel by viewModels()
     private val commissionFormViewModel: CommissionFormViewModel by viewModels()
+    
+    // 커미션 상세 정보를 저장하여 썸네일 URL 접근용
+    private var currentCommissionDetail: CommissionDetail? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -71,6 +75,7 @@ class FragmentPostScreen : Fragment() {
                 }
 
                 commission?.let { detail ->
+                    currentCommissionDetail = detail // 커미션 상세 정보 저장
                     PostScreen(
                         title = detail.title,
                         tags = listOf(detail.category) + detail.tags,
@@ -98,8 +103,9 @@ class FragmentPostScreen : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val hideBottomBar = arguments?.getBoolean("hideBottomBar") ?: false
-        if (hideBottomBar) (requireActivity() as? MainActivity)?.showBottomNav(false)
+        
+        // BottomNavigation 숨기기
+        (requireActivity() as? MainActivity)?.showBottomNav(false)
     }
 
     override fun onDestroyView() {
@@ -148,7 +154,8 @@ class FragmentPostScreen : Fragment() {
                         commissionTitle = commissionTitle,
                         authorName = authorName,
                         chatroomId = chatroomId,
-                        hasSubmittedApplication = hasSubmitted
+                        hasSubmittedApplication = hasSubmitted,
+                        thumbnailUrl = currentCommissionDetail?.images?.firstOrNull()?.imageUrl // ✅ 저장된 커미션 상세에서 썸네일 가져오기
                     )
                 } else {
                     createChatroom(commissionId, commissionTitle)
@@ -233,7 +240,8 @@ class FragmentPostScreen : Fragment() {
                                     commissionTitle = commissionTitle,
                                     authorName = authorName,
                                     chatroomId = createdId,
-                                    hasSubmittedApplication = false
+                                    hasSubmittedApplication = false,
+                                    thumbnailUrl = commission.images.firstOrNull()?.imageUrl // ✅ 첫 번째 이미지를 썸네일로 사용
                                 )
 
                                 // (옵션) 채팅 목록 새로고침
@@ -286,17 +294,19 @@ class FragmentPostScreen : Fragment() {
         commissionTitle: String,
         authorName: String,
         chatroomId: Int,
-        hasSubmittedApplication: Boolean
+        hasSubmittedApplication: Boolean,
+        thumbnailUrl: String? = null
     ) {
         val fragment = FragmentPostChatDetail().apply {
-            arguments = bundleOf(
-                "chatName" to commissionTitle,
-                "authorName" to authorName,
-                "chatroomId" to chatroomId,
-                "sourceFragment" to "FragmentPostScreen",
-                "commissionId" to commissionId,
-                "hasSubmittedApplication" to hasSubmittedApplication
-            )
+            arguments = Bundle().apply {
+                putString("chatName", commissionTitle)
+                putString("authorName", authorName)
+                putInt("chatroomId", chatroomId)
+                putString("sourceFragment", "FragmentPostScreen")
+                putInt("commissionId", commissionId)
+                putBoolean("hasSubmittedApplication", hasSubmittedApplication)
+                putString("thumbnailUrl", thumbnailUrl) // ✅ 썸네일 URL 추가
+            }
         }
         parentFragmentManager.beginTransaction()
             .replace(R.id.Nav_Frame, fragment)

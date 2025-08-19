@@ -33,7 +33,7 @@ fun ChatRoomScreen(
     onBackClick: () -> Unit,
     onSettingClick: () -> Unit,
     onProfileClick: () -> Unit,
-    authorProfileImageUrl: String? = null,     // ★ 추가
+    authorProfileImageUrl: String? = null,
     commissionThumbnailUrl: String? = null,
     chatViewModel: ChatViewModel = viewModel()
 ) {

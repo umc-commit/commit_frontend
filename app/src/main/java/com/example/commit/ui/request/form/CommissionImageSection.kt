@@ -76,6 +76,7 @@ fun CommissionImageSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp)
+            .background(Color.White)
     ) {
         // 번호와 제목 표시
         Row(verticalAlignment = Alignment.CenterVertically) {
