@@ -63,7 +63,8 @@ fun ChatRoomScreen(
 
         CommissionInfoCard(
             title = commissionTitle,
-            thumbnailImageUrl = commissionThumbnailUrl)
+            thumbnailImageUrl = commissionThumbnailUrl
+        )
 
         // 메시지 목록
         ChatMessageList(

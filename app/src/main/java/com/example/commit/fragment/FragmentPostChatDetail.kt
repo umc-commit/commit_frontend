@@ -76,6 +76,7 @@ class FragmentPostChatDetail : Fragment() {
                         authorName = authorName,
                         chatroomId = chatroomId,
                         chatViewModel = chatViewModel,
+                        commissionThumbnailUrl = arguments?.getString("thumbnailUrl"), // ★ 추가
                         onPayClick = {
                             if (isAdded && !isDetached) {
                                 parentFragmentManager.popBackStack()
