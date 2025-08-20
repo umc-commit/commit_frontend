@@ -32,7 +32,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.commit.ui.post.PostScreen
 import com.example.commit.viewmodel.PostViewModel
 import androidx.core.os.bundleOf
-import com.example.commit.fragment.FragmentPostChatDetail
+import com.example.commit.fragment.FragmentChatDetail
 import android.widget.Toast
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
@@ -550,16 +550,15 @@ class AuthorProfileActivity : AppCompatActivity() {
                 }
 
                 // 채팅 상세 프래그먼트로 전환
-                val fragment = FragmentPostChatDetail().apply {
-                    arguments = bundleOf(
-                        "chatName" to commissionTitle,
-                        "authorName" to authorName,  // 저장된 작가 이름 전달
-                        "chatroomId" to chatroomIdInt,
-                        "sourceFragment" to "AuthorProfileActivity",
-                        "commissionId" to commissionId,
-                        "artistId" to artistId       // artistId도 같이 전달하면 프로필 버튼 연동 가능
-                    )
-                }
+                val fragment = FragmentChatDetail.newInstanceFromPost(
+                    chatName = commissionTitle,
+                    authorName = authorName,
+                    chatroomId = chatroomIdInt,
+                    commissionId = commissionId,
+                    hasSubmittedApplication = false,
+                    sourceFragment = "AuthorProfileActivity",
+                    thumbnailUrl = ""
+                )
 
                 supportFragmentManager.beginTransaction()
                     .replace(composeOverlay!!.id, fragment)

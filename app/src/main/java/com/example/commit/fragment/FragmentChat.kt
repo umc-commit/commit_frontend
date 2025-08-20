@@ -20,6 +20,10 @@ import com.example.commit.connection.RetrofitObject
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.ui.Theme.CommitTheme
 import com.example.commit.ui.chatlist.ChatDeleteFragment
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.example.commit.data.model.ChatMessage
+import com.example.commit.data.model.MessageType
 import com.example.commit.ui.chatlist.ChatListScreen
 import com.example.commit.ui.chatlist.DeleteOptionBottomSheet
 import retrofit2.Call
@@ -62,13 +66,22 @@ class FragmentChat : Fragment() {
                         Log.d("FragmentChat", "fetchChatroomList 최초 호출")
                         fetchChatroomList { rooms ->
                             rawRoomsState.value = rooms
-                            chatItemsState.value = rooms.map { room ->
+                            // ✅ 최신 메시지 시간 순으로 정렬 (최신이 위로)
+                            val sortedRooms = rooms.sortedByDescending { room ->
+                                room.lastMessageTime ?: "1970-01-01T00:00:00Z" // null인 경우 가장 오래된 시간으로 처리
+                            }
+                            chatItemsState.value = sortedRooms.map { room ->
+                                val localLast = loadLocalLastMessage(requireContext(), room.chatroomId)
+                                val preview = room.lastMessage
+                                    ?: localLast?.let { formatPreview(it) }
+                                    ?: "커미션 작업 완료"
+
                                 ChatItem(
                                     profileImageRes = R.drawable.ic_profile,
                                     profileImageUrl = room.artistProfileImage,
                                     name = room.artistNickname,
-                                    message = room.lastMessage ?: "새로운 메시지가 없습니다",
-                                    time = formatTime(room.lastMessageTime),
+                                    message = preview,                                // ★ 개선된 메시지
+                                    time = pickTimeString(room.lastMessageTime, localLast), // ★ 개선된 시간
                                     isNew = room.hasUnread > 0,
                                     title = room.commissionTitle // 새 필드명
 
@@ -84,13 +97,22 @@ class FragmentChat : Fragment() {
                         isLoadingState.value = true
                         fetchChatroomList { rooms ->
                             rawRoomsState.value = rooms
-                            chatItemsState.value = rooms.map { room ->
+                            // ✅ 최신 메시지 시간 순으로 정렬 (최신이 위로)
+                            val sortedRooms = rooms.sortedByDescending { room ->
+                                room.lastMessageTime ?: "1970-01-01T00:00:00Z" // null인 경우 가장 오래된 시간으로 처리
+                            }
+                            chatItemsState.value = sortedRooms.map { room ->
+                                val localLast = loadLocalLastMessage(requireContext(), room.chatroomId)
+                                val preview = room.lastMessage
+                                    ?: localLast?.let { formatPreview(it) }
+                                    ?: "커미션 작업 완료"
+
                                 ChatItem(
                                     profileImageRes = R.drawable.ic_profile,
                                     profileImageUrl = room.artistProfileImage,
                                     name = room.artistNickname,
-                                    message = room.lastMessage ?: "새로운 메시지가 없습니다",
-                                    time = formatTime(room.lastMessageTime),
+                                    message = preview,                                // ★ 개선된 메시지
+                                    time = pickTimeString(room.lastMessageTime, localLast), // ★ 개선된 시간
                                     isNew = room.hasUnread > 0,
                                     title = room.commissionTitle
                                 )
@@ -123,19 +145,16 @@ class FragmentChat : Fragment() {
                             (activity as? MainActivity)?.showBottomNav(false)
 
                             parentFragmentManager.beginTransaction()
-                                .replace(R.id.Nav_Frame, FragmentPostChatDetail().apply {
-                                    arguments = Bundle().apply {
-                                        putString("chatName", room.commissionTitle)
-                                        putString("authorName", room.artistNickname)
-                                        putInt("chatroomId", chatroomId)
-                                        putInt("commissionId", commissionId)
-                                        putInt("artistId", artistId)
-                                        putInt("requestId", requestId)
-                                        putString("thumbnailUrl", thumbnailUrl)
-                                        putString("artistProfileImage", profileUrl)
-                                        putBoolean("hasSubmittedApplication", false)
-                                    }
-                                })
+                                .replace(R.id.Nav_Frame, FragmentChatDetail.newInstanceFromPost(
+                                    chatName = room.commissionTitle,
+                                    authorName = room.artistNickname,
+                                    chatroomId = chatroomId,
+                                    commissionId = commissionId,
+                                    hasSubmittedApplication = false,
+                                    sourceFragment = "FragmentChat",
+                                    thumbnailUrl = thumbnailUrl,
+                                    artistId = artistId  // ✅ artistId 추가
+                                ))
                                 .addToBackStack("chatDetail")
                                 .commit()
                         },
@@ -207,6 +226,40 @@ class FragmentChat : Fragment() {
         if (timeString.isNullOrEmpty()) return "방금 전"
         // TODO: ISO 8601 → 상대시간 등으로 변환
         return "방금 전"
+    }
+    
+    // 로컬에서 마지막 메시지 로드
+    private fun loadLocalLastMessage(ctx: Context, chatroomId: String?): ChatMessage? {
+        val id = chatroomId?.toIntOrNull() ?: return null
+        val prefs = ctx.getSharedPreferences("chat_store", Context.MODE_PRIVATE)
+        val key = "chat_messages_$id"
+        val json = prefs.getString(key, null) ?: return null
+        return try {
+            val type = object : TypeToken<List<ChatMessage>>() {}.type
+            val list: List<ChatMessage> = Gson().fromJson(json, type) ?: emptyList()
+            list.lastOrNull()
+        } catch (_: Throwable) { null }
+    }
+    
+    // 메시지 타입별 미리보기 텍스트 생성
+    private fun formatPreview(msg: ChatMessage): String {
+        return when (msg.type) {
+            MessageType.TEXT -> msg.content.ifBlank { "메시지" }
+            MessageType.COMMISSION_REQUEST -> "신청서 전송"
+            MessageType.COMMISSION_ACCEPTED -> "커미션 수락"
+            MessageType.PAYMENT -> "결제 요청 ${msg.amount ?: ""}"
+            MessageType.PAYMENT_COMPLETE -> "결제 완료"
+            MessageType.COMMISSION_START -> "작업 시작"
+            MessageType.COMMISSION_COMPLETE -> "작업 완료"
+            else -> "메시지"
+        }
+    }
+    
+    // 시간 우선순위 결정 (서버 → 로컬)
+    private fun pickTimeString(roomTime: String?, local: ChatMessage?): String {
+        return roomTime ?: run {
+            if (local != null) "방금 전" else "방금 전"
+        }
     }
 
     /**

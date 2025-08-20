@@ -44,7 +44,7 @@ import com.example.commit.connection.RetrofitClient
 import com.example.commit.connection.RetrofitObject
 import com.example.commit.databinding.BottomSheetHomeBinding
 import com.example.commit.databinding.FragmentHomeBinding
-import com.example.commit.fragment.FragmentPostChatDetail
+import com.example.commit.fragment.FragmentChatDetail
 import com.example.commit.ui.post.PostScreen
 import com.example.commit.ui.search.FragmentSearch
 import com.example.commit.viewmodel.PostViewModel
@@ -231,7 +231,8 @@ class FragmentHome : Fragment() {
                                 createChatroomFromHome(
                                     commissionId = data.id,
                                     commissionTitle = data.title,
-                                    artistId = artistIdInt
+                                    artistId = artistIdInt,
+                                    thumbnailUrl = data.images.firstOrNull()?.imageUrl ?: ""
                                 )
                             },
                             onBookmarkToggle = { newState ->
@@ -361,7 +362,8 @@ class FragmentHome : Fragment() {
     private fun createChatroomFromHome(
         commissionId: Int,
         commissionTitle: String,
-        artistId: Int
+        artistId: Int,
+        thumbnailUrl: String = ""
     ) {
         Log.d("FragmentHome", "createChatroomFromHome 호출 - commissionId: $commissionId, artistId: $artistId, title: $commissionTitle")
         val api = RetrofitObject.getRetrofitService(requireContext())
@@ -400,16 +402,16 @@ class FragmentHome : Fragment() {
                         val nickname = resp.body()?.success?.artist?.nickname ?: ""
 
                         // ② 닉네임을 authorName으로 넘겨서 채팅 화면 진입
-                        val fragment = FragmentPostChatDetail().apply {
-                            arguments = bundleOf(
-                                "chatName" to commissionTitle,
-                                "authorName" to nickname,                 // ← 핵심 수정
-                                "chatroomId" to (chatroomIdInt ?: -1),
-                                "sourceFragment" to "FragmentHome",
-                                "commissionId" to commissionId,
-                                "artistId" to artistId
-                            )
-                        }
+                        val fragment = FragmentChatDetail.newInstanceFromPost(
+                            chatName = commissionTitle,
+                            authorName = nickname,
+                            chatroomId = chatroomIdInt ?: -1,
+                            commissionId = commissionId,
+                            hasSubmittedApplication = false,
+                            sourceFragment = "FragmentHome",
+                            thumbnailUrl = thumbnailUrl,
+                            artistId = artistId  // ✅ artistId 추가
+                        )
                         parentFragmentManager.beginTransaction()
                             .replace(R.id.Nav_Frame, fragment)
                             .addToBackStack(null)
@@ -425,16 +427,16 @@ class FragmentHome : Fragment() {
                         Log.e("FragmentHome", "작가 조회 실패: ${t.message}")
 
                         // 실패해도 화면은 진입하되, authorName은 빈 값(또는 기본값)
-                        val fragment = FragmentPostChatDetail().apply {
-                            arguments = bundleOf(
-                                "chatName" to commissionTitle,
-                                "authorName" to "",                       // fallback
-                                "chatroomId" to (chatroomIdInt ?: -1),
-                                "sourceFragment" to "FragmentHome",
-                                "commissionId" to commissionId,
-                                "artistId" to artistId
-                            )
-                        }
+                        val fragment = FragmentChatDetail.newInstanceFromPost(
+                            chatName = commissionTitle,
+                            authorName = "",
+                            chatroomId = chatroomIdInt ?: -1,
+                            commissionId = commissionId,
+                            hasSubmittedApplication = false,
+                            sourceFragment = "FragmentHome",
+                            thumbnailUrl = thumbnailUrl,
+                            artistId = artistId  // ✅ artistId 추가
+                        )
                         parentFragmentManager.beginTransaction()
                             .replace(R.id.Nav_Frame, fragment)
                             .addToBackStack(null)
