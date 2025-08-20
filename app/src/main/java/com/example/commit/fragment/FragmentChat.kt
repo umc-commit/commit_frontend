@@ -62,7 +62,11 @@ class FragmentChat : Fragment() {
                         Log.d("FragmentChat", "fetchChatroomList 최초 호출")
                         fetchChatroomList { rooms ->
                             rawRoomsState.value = rooms
-                            chatItemsState.value = rooms.map { room ->
+                            // ✅ 최신 메시지 시간 순으로 정렬 (최신이 위로)
+                            val sortedRooms = rooms.sortedByDescending { room ->
+                                room.lastMessageTime ?: "1970-01-01T00:00:00Z" // null인 경우 가장 오래된 시간으로 처리
+                            }
+                            chatItemsState.value = sortedRooms.map { room ->
                                 ChatItem(
                                     profileImageRes = R.drawable.ic_profile,
                                     profileImageUrl = room.artistProfileImage,
@@ -84,7 +88,11 @@ class FragmentChat : Fragment() {
                         isLoadingState.value = true
                         fetchChatroomList { rooms ->
                             rawRoomsState.value = rooms
-                            chatItemsState.value = rooms.map { room ->
+                            // ✅ 최신 메시지 시간 순으로 정렬 (최신이 위로)
+                            val sortedRooms = rooms.sortedByDescending { room ->
+                                room.lastMessageTime ?: "1970-01-01T00:00:00Z" // null인 경우 가장 오래된 시간으로 처리
+                            }
+                            chatItemsState.value = sortedRooms.map { room ->
                                 ChatItem(
                                     profileImageRes = R.drawable.ic_profile,
                                     profileImageUrl = room.artistProfileImage,
