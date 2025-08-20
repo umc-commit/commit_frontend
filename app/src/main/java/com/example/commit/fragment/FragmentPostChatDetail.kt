@@ -39,8 +39,8 @@ class FragmentPostChatDetail : Fragment() {
     
     override fun onDestroyView() {
         super.onDestroyView()
-        // Fragment가 제거될 때 BottomNavigation 다시 보이기
-        (activity as? MainActivity)?.showBottomNav(true)
+        // Fragment가 제거될 때도 BottomNavigation 숨김 상태 유지
+        // (뒤로가기 시 바텀바가 보이는 것을 방지)
         _binding = null
     }
 
@@ -119,8 +119,10 @@ class FragmentPostChatDetail : Fragment() {
                                         (activity as? MainActivity)?.showBottomNav(false)
                                     }
                                     else -> {
-                                        // 기본적으로 popBackStack 사용
+                                        // 기본적으로 popBackStack 사용하되, 바텀바는 숨김 상태 유지
                                         parentFragmentManager.popBackStack()
+                                        // popBackStack 후에도 바텀바 숨김 상태 유지
+                                        (activity as? MainActivity)?.showBottomNav(false)
                                     }
                                 }
                             }

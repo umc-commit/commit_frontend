@@ -73,7 +73,13 @@ class MainActivity : AppCompatActivity() {
 
         supportFragmentManager.addOnBackStackChangedListener {
             val top = supportFragmentManager.findFragmentById(binding.NavFrame.id)
-            showBottomNav(top !is FragmentPostChatDetail && top !is FragmentPostScreen)
+            
+            // PostScreen이 표시 중인 FragmentHome도 바텀바 숨김 대상에 포함
+            val shouldHideBottomNav = top is FragmentPostChatDetail || 
+                                    top is FragmentPostScreen || 
+                                    (top is FragmentHome && isPostScreenShowing(top))
+            
+            showBottomNav(!shouldHideBottomNav)
         }
     }
 
@@ -207,6 +213,16 @@ class MainActivity : AppCompatActivity() {
     // 바텀바 숨기기/보이기 메서드
     fun showBottomNav(isVisible: Boolean) {
         binding.BottomNavi.visibility = if (isVisible) View.VISIBLE else View.GONE
+    }
+    
+    // FragmentHome에서 PostScreen이 표시 중인지 확인
+    private fun isPostScreenShowing(fragmentHome: FragmentHome): Boolean {
+        return try {
+            val binding = fragmentHome.view?.findViewById<View>(R.id.frameComposeContainer)
+            binding?.visibility == View.VISIBLE
+        } catch (e: Exception) {
+            false
+        }
     }
 
     private fun openPostChatDetailFromIntent(srcIntent: android.content.Intent) {

@@ -272,7 +272,7 @@ class FragmentPostScreen : Fragment() {
                             ) {
                                 Log.w("FragmentPostScreen", "목록 재조회 실패 → 닉네임 기본값으로 이동", t)
 
-                                // ✅ 실패 시에도 썸네일 계산 후 함께 전달
+                                // 실패 시에도 썸네일 계산 후 함께 전달
                                 val thumb = commission.images.firstOrNull()?.imageUrl
                                     ?: fallbackThumbnailUrl
                                     ?: ""
