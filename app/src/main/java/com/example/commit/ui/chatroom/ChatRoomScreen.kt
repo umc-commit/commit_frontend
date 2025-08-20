@@ -7,8 +7,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.commit.data.model.ChatMessage
 import com.example.commit.data.model.MessageType
@@ -33,12 +38,38 @@ fun ChatRoomScreen(
     onBackClick: () -> Unit,
     onSettingClick: () -> Unit,
     onProfileClick: () -> Unit,
+    onSeePostClick: () -> Unit = {},  // 글보기 클릭 콜백 추가
     authorProfileImageUrl: String? = null,
     commissionThumbnailUrl: String? = null,
     chatViewModel: ChatViewModel = viewModel()
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+
+    // 화면 크기에 따른 동적 간격 계산
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+    
+    // NavigationBar 높이를 고려한 적응형 간격
+    val navigationBarHeight = WindowInsets.navigationBars.getBottom(density)
+    val navigationBarHeightDp = with(density) { navigationBarHeight.toDp() }
+    
+    // 화면 높이와 NavigationBar를 고려한 적응형 간격
+    val bottomSpacing = remember(configuration.screenHeightDp, navigationBarHeightDp) {
+        val baseSpacing = when {
+            configuration.screenHeightDp <= 640 -> 40.dp  // 작은 화면 (예: iPhone SE)
+            configuration.screenHeightDp <= 800 -> 55.dp  // 중간 화면 (예: iPhone 12/13)  
+            configuration.screenHeightDp <= 900 -> 69.dp  // 큰 화면 (예: iPhone 14 Pro Max)
+            else -> 80.dp  // 매우 큰 화면 (예: 태블릿)
+        }
+        
+        // NavigationBar가 있으면 간격을 줄이고, 없으면 기본 간격 사용
+        if (navigationBarHeightDp > 0.dp) {
+            (baseSpacing.value * 0.7f).dp  // NavigationBar가 있으면 30% 줄임
+        } else {
+            baseSpacing  // NavigationBar가 없으면 기본 간격
+        }
+    }
 
     // 메시지 목록을 안전하게 관리
     val messages = chatViewModel.chatMessages
@@ -47,7 +78,6 @@ fun ChatRoomScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .imePadding()
     ) {
         Spacer(modifier = Modifier.height(22.dp))
 
@@ -63,7 +93,8 @@ fun ChatRoomScreen(
 
         CommissionInfoCard(
             title = commissionTitle,
-            thumbnailImageUrl = commissionThumbnailUrl
+            thumbnailImageUrl = commissionThumbnailUrl,
+            onSeePostClick = onSeePostClick
         )
 
         // 메시지 목록
@@ -89,30 +120,42 @@ fun ChatRoomScreen(
             chatViewModel.setChatroomId(chatroomId)
             chatViewModel.loadMessages(context, chatroomId)
         }
-        ChatBottomSection(
-            message = chatViewModel.message,
-            onMessageChange = chatViewModel::onMessageChange,
-            onSendMessage = { 
-                chatViewModel.sendMessage(context)
-                // 랜덤하게 더미 응답도 생성 (50% 확률)
-//                if (Math.random() < 0.5) {
-//                    chatViewModel.generateDummyResponse()
-//                }
+        
+        // 입력창과 하단 간격을 키보드 위에 고정
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding() // 키보드 위에 고정
+        ) {
+            Column {
+                ChatBottomSection(
+                    message = chatViewModel.message,
+                    onMessageChange = chatViewModel::onMessageChange,
+                    onSendMessage = { 
+                        chatViewModel.sendMessage(context)
+                        // 랜덤하게 더미 응답도 생성 (50% 확률)
+//                        if (Math.random() < 0.5) {
+//                            chatViewModel.generateDummyResponse()
+//                        }
+                        
+                        // 신청서가 제출된 경우 커미션 수락 메시지 생성 (임시 테스트용)
+                        if (chatViewModel.hasSubmittedApplication && Math.random() < 0.3) {
+                            coroutineScope.launch {
+                                delay(3000L) // 3초 후
+                                chatViewModel.showCommissionAcceptedMessage()
+                                delay(2000L) // 2초 후
+                                chatViewModel.showPaymentRequestMessage(50000)
+                            }
+                        }
+                    },
+                    isMenuOpen = isMenuOpen,
+                    onToggleMenu = { isMenuOpen = !isMenuOpen }
+                )
                 
-                // 신청서가 제출된 경우 커미션 수락 메시지 생성 (임시 테스트용)
-                if (chatViewModel.hasSubmittedApplication && Math.random() < 0.3) {
-                    coroutineScope.launch {
-                        delay(3000L) // 3초 후
-                        chatViewModel.showCommissionAcceptedMessage()
-                        delay(2000L) // 2초 후
-                        chatViewModel.showPaymentRequestMessage(50000)
-                    }
-                }
-            },
-            isMenuOpen = isMenuOpen,
-            onToggleMenu = { isMenuOpen = !isMenuOpen }
-        )
-        Spacer(modifier = Modifier.height(69.dp))
+                                 // 키보드 위에 고정된 하단 간격 (화면 크기 적응형)
+                 Spacer(modifier = Modifier.height(bottomSpacing))
+            }
+        }
     }
 }
 
@@ -151,7 +194,10 @@ fun PreviewChatRoomScreen() {
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            CommissionInfoCard(title = "낙서 타임 커미션")
+            CommissionInfoCard(
+                title = "낙서 타임 커미션",
+                onSeePostClick = {}
+            )
 
             ChatMessageList(
                 messages = dummyMessages,

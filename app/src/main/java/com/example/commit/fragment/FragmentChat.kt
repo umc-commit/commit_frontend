@@ -123,19 +123,15 @@ class FragmentChat : Fragment() {
                             (activity as? MainActivity)?.showBottomNav(false)
 
                             parentFragmentManager.beginTransaction()
-                                .replace(R.id.Nav_Frame, FragmentPostChatDetail().apply {
-                                    arguments = Bundle().apply {
-                                        putString("chatName", room.commissionTitle)
-                                        putString("authorName", room.artistNickname)
-                                        putInt("chatroomId", chatroomId)
-                                        putInt("commissionId", commissionId)
-                                        putInt("artistId", artistId)
-                                        putInt("requestId", requestId)
-                                        putString("thumbnailUrl", thumbnailUrl)
-                                        putString("artistProfileImage", profileUrl)
-                                        putBoolean("hasSubmittedApplication", false)
-                                    }
-                                })
+                                .replace(R.id.Nav_Frame, FragmentChatDetail.newInstanceFromPost(
+                                    chatName = room.commissionTitle,
+                                    authorName = room.artistNickname,
+                                    chatroomId = chatroomId,
+                                    commissionId = commissionId,
+                                    hasSubmittedApplication = false,
+                                    sourceFragment = "FragmentChat",
+                                    thumbnailUrl = thumbnailUrl
+                                ))
                                 .addToBackStack("chatDetail")
                                 .commit()
                         },

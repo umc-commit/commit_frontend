@@ -21,7 +21,6 @@ import com.example.commit.connection.dto.CommissionDetailResponse
 import com.example.commit.connection.dto.CommissionDetail
 import com.example.commit.fragment.FragmentChat
 import com.example.commit.fragment.FragmentChatDetail
-import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.viewmodel.ArtistViewModel
 import com.example.commit.viewmodel.CommissionFormViewModel
 import com.example.commit.viewmodel.PostViewModel
@@ -316,16 +315,15 @@ class FragmentPostScreen : Fragment() {
         hasSubmittedApplication: Boolean,
         thumbnailUrl: String? = null
     ) {
-        val fragment = FragmentChatDetail().apply {
-            arguments = Bundle().apply {
-                putString("chatName", commissionTitle)
-                putString("authorName", authorName)
-                putInt("chatroomId", chatroomId)
-                putString("thumbnailUrl", thumbnailUrl ?: "")
-                putInt("artistId", currentCommissionDetail?.artistId ?: -1)
-                putInt("requestId", -1)
-            }
-        }
+        val fragment = FragmentChatDetail.newInstanceFromPost(
+            chatName = commissionTitle,
+            authorName = authorName,
+            chatroomId = chatroomId,
+            commissionId = commissionId,
+            hasSubmittedApplication = hasSubmittedApplication,
+            sourceFragment = "FragmentPostScreen",
+            thumbnailUrl = thumbnailUrl ?: ""
+        )
         parentFragmentManager.beginTransaction()
             .replace(R.id.Nav_Frame, fragment)
             .addToBackStack(null)

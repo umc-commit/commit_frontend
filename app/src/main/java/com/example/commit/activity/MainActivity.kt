@@ -12,7 +12,7 @@ import com.example.commit.fragment.FragmentBookmark
 import com.example.commit.fragment.FragmentChat
 import com.example.commit.fragment.FragmentHome
 import com.example.commit.fragment.FragmentMypage
-import com.example.commit.fragment.FragmentPostChatDetail
+import com.example.commit.fragment.FragmentChatDetail
 import com.example.commit.ui.post.FragmentPostScreen
 import com.google.firebase.messaging.FirebaseMessaging
 import android.content.Intent
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
             val top = supportFragmentManager.findFragmentById(binding.NavFrame.id)
             
             // PostScreen이 표시 중인 FragmentHome도 바텀바 숨김 대상에 포함
-            val shouldHideBottomNav = top is FragmentPostChatDetail || 
+            val shouldHideBottomNav = top is FragmentChatDetail || 
                                     top is FragmentPostScreen || 
                                     (top is FragmentHome && isPostScreenShowing(top))
             
@@ -248,15 +248,15 @@ class MainActivity : AppCompatActivity() {
         val commissionId = srcIntent.getIntExtra("commissionId", -1)
         val source = srcIntent.getStringExtra("sourceFragment") ?: "MainActivity"
 
-        val frag = FragmentPostChatDetail().apply {
-            arguments = Bundle().apply {
-                putString("chatName", chatName)
-                putString("authorName", authorName)
-                putInt("chatroomId", chatroomId)
-                putInt("commissionId", commissionId)
-                putString("sourceFragment", source)
-            }
-        }
+        val frag = FragmentChatDetail.newInstanceFromPost(
+            chatName = chatName,
+            authorName = authorName,
+            chatroomId = chatroomId,
+            commissionId = commissionId,
+            hasSubmittedApplication = false,
+            sourceFragment = source,
+            thumbnailUrl = ""
+        )
 
         // 채팅 상세는 백스택에 올리기
         supportFragmentManager.beginTransaction()

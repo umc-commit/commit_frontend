@@ -7,7 +7,7 @@ import androidx.fragment.app.FragmentManager
 import com.example.commit.R
 import com.example.commit.connection.RetrofitClient
 import com.example.commit.connection.RetrofitObject
-import com.example.commit.fragment.FragmentPostChatDetail
+import com.example.commit.fragment.FragmentChatDetail
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -136,16 +136,15 @@ object ChatroomUtils {
         commissionId: Int,
         artistId: Int
     ) {
-        val fragment = FragmentPostChatDetail().apply {
-            arguments = android.os.Bundle().apply {
-                putString("chatName", chatName)
-                putString("authorName", authorName)
-                putInt("chatroomId", chatroomId)
-                putString("sourceFragment", sourceFragment)
-                putInt("commissionId", commissionId)
-                putInt("artistId", artistId)
-            }
-        }
+        val fragment = FragmentChatDetail.newInstanceFromPost(
+            chatName = chatName,
+            authorName = authorName,
+            chatroomId = chatroomId,
+            commissionId = commissionId,
+            hasSubmittedApplication = false,
+            sourceFragment = sourceFragment,
+            thumbnailUrl = ""
+        )
         
         fragmentManager.beginTransaction()
             .replace(R.id.Nav_Frame, fragment)
