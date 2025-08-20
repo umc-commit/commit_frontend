@@ -20,6 +20,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,9 +61,14 @@ fun SearchBarWithBack(
             textStyle = CommitTypography.bodyMedium.copy(
                 color = Color.Black,
                 fontSize = 13.sp,
-                fontWeight = FontWeight.Normal
+                fontWeight = FontWeight.Normal,
+                textDecoration = TextDecoration.None
             ),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search,
+                keyboardType = KeyboardType.Text,
+                autoCorrect = false
+            ),
             keyboardActions = KeyboardActions(
                 onSearch = {
                     onSearchClick()
@@ -106,7 +113,7 @@ fun SearchBarWithBack(
                     // 검색 아이콘
                     Spacer(Modifier.width(8.dp))
                     Icon(
-                        imageVector = Icons.Default.Search,
+                        imageVector = Icons.Filled.Search,
                         contentDescription = "검색",
                         modifier = Modifier
                             .size(20.dp)
