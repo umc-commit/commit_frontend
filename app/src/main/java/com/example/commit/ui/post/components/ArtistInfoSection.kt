@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
@@ -328,15 +329,45 @@ fun ArtistInfoSection(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        ExpandableItem(
+       /* ExpandableItem(
             title = "전체 후기 보기",
             expanded = isExpanded,
             onToggle = {
                 if (!isExpanded) onReviewListClick()
                 isExpanded = !isExpanded
             }
+        )*/
+
+        ExpandableItem(
+            title = "전체 후기 보기",
+            expanded = isExpanded,
+            onToggle = { isExpanded = !isExpanded }
         ) {
 
+                ReviewItem(
+                    rating = 5.0f,
+                    title = "낚서 타임 커미션",
+                    duration = "12시간",
+                    content = "친절하게 응대해주셨습니다. 감사해요!",
+                    writer = "위시",
+                    date = "2일 전"
+                )
+                ReviewItem(
+                    rating = 4.0f,
+                    title = "2인 커플 커미션",
+                    duration = "3일",
+                    content = "복잡한 의상이었는데도 디테일을 살려서 그려주셨어요:)",
+                    writer = "헤더",
+                    date = "4일 전"
+                )
+                ReviewItem(
+                    rating = 5.0f,
+                    title = "띠부띠부 커미션",
+                    duration = "20시간",
+                    content = "답장도 빠르시고 잘 대해주셨어요. 감사합니당!",
+                    writer = "마루",
+                    date = "5일 전"
+                )
+            }
         }
     }
-}
