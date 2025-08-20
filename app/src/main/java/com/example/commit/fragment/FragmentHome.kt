@@ -231,7 +231,8 @@ class FragmentHome : Fragment() {
                                 createChatroomFromHome(
                                     commissionId = data.id,
                                     commissionTitle = data.title,
-                                    artistId = artistIdInt
+                                    artistId = artistIdInt,
+                                    thumbnailUrl = data.images.firstOrNull()?.imageUrl ?: ""
                                 )
                             },
                             onBookmarkToggle = { newState ->
@@ -361,7 +362,8 @@ class FragmentHome : Fragment() {
     private fun createChatroomFromHome(
         commissionId: Int,
         commissionTitle: String,
-        artistId: Int
+        artistId: Int,
+        thumbnailUrl: String = ""
     ) {
         Log.d("FragmentHome", "createChatroomFromHome 호출 - commissionId: $commissionId, artistId: $artistId, title: $commissionTitle")
         val api = RetrofitObject.getRetrofitService(requireContext())
@@ -407,7 +409,8 @@ class FragmentHome : Fragment() {
                                 "chatroomId" to (chatroomIdInt ?: -1),
                                 "sourceFragment" to "FragmentHome",
                                 "commissionId" to commissionId,
-                                "artistId" to artistId
+                                "artistId" to artistId,
+                                "thumbnailUrl" to thumbnailUrl
                             )
                         }
                         parentFragmentManager.beginTransaction()
@@ -432,7 +435,8 @@ class FragmentHome : Fragment() {
                                 "chatroomId" to (chatroomIdInt ?: -1),
                                 "sourceFragment" to "FragmentHome",
                                 "commissionId" to commissionId,
-                                "artistId" to artistId
+                                "artistId" to artistId,
+                                "thumbnailUrl" to thumbnailUrl
                             )
                         }
                         parentFragmentManager.beginTransaction()

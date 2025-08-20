@@ -20,6 +20,7 @@ import com.example.commit.connection.RetrofitObject
 import com.example.commit.connection.dto.CommissionDetailResponse
 import com.example.commit.connection.dto.CommissionDetail
 import com.example.commit.fragment.FragmentChat
+import com.example.commit.fragment.FragmentChatDetail
 import com.example.commit.fragment.FragmentPostChatDetail
 import com.example.commit.viewmodel.ArtistViewModel
 import com.example.commit.viewmodel.CommissionFormViewModel
@@ -76,6 +77,7 @@ class FragmentPostScreen : Fragment() {
 
                 commission?.let { detail ->
                     currentCommissionDetail = detail // 커미션 상세 정보 저장
+                    val fallbackThumb = detail.images.firstOrNull()?.imageUrl
                     PostScreen(
                         title = detail.title,
                         tags = listOf(detail.category) + detail.tags,
@@ -90,7 +92,7 @@ class FragmentPostScreen : Fragment() {
                         onReviewListClick = { /* TODO: 리뷰 화면 이동 */ },
                         onChatClick = {
                             // 신청서 제출 여부 확인 후 → 기존 방 이동 or 생성
-                            checkApplicationStatus(detail.id, detail.title)
+                            checkApplicationStatus(detail.id, detail.title, fallbackThumb)
                         },
                         onBookmarkToggle = { newState ->
                             viewModel.toggleBookmark(requireContext(), detail.id, newState)
@@ -114,12 +116,12 @@ class FragmentPostScreen : Fragment() {
     }
 
     /** 신청서 제출 여부 확인 → 기존 방 있으면 이동, 없으면 생성 */
-    private fun checkApplicationStatus(commissionId: Int, commissionTitle: String) {
+    private fun checkApplicationStatus(commissionId: Int, commissionTitle: String,fallbackThumbnailUrl: String?) {
         commissionFormViewModel.checkApplicationStatus(
             commissionId = commissionId.toString(),
             context = requireContext()
         ) { hasSubmitted ->
-            openOrCreateChatroom(commissionId, commissionTitle, hasSubmitted)
+            openOrCreateChatroom(commissionId, commissionTitle, hasSubmitted, fallbackThumbnailUrl)
         }
     }
 
@@ -127,7 +129,8 @@ class FragmentPostScreen : Fragment() {
     private fun openOrCreateChatroom(
         commissionId: Int,
         commissionTitle: String,
-        hasSubmitted: Boolean
+        hasSubmitted: Boolean,
+        fallbackThumbnailUrl: String?
     ) {
         val api = RetrofitObject.getRetrofitService(requireContext())
         api.getChatroomList().enqueue(object :
@@ -138,7 +141,7 @@ class FragmentPostScreen : Fragment() {
             ) {
                 if (!response.isSuccessful) {
                     Log.w("FragmentPostScreen", "채팅방 목록 조회 실패 → 생성 fallback: ${response.code()}")
-                    createChatroom(commissionId, commissionTitle)
+                    createChatroom(commissionId, commissionTitle, fallbackThumbnailUrl)
                     return
                 }
                 val list = response.body()?.success.orEmpty()
@@ -148,6 +151,9 @@ class FragmentPostScreen : Fragment() {
                     val chatroomId = existing.chatroomId.toIntOrNull() ?: -1
                     val authorName = existing.artistNickname.ifBlank { "작가" }
                     Log.d("FragmentPostScreen", "기존 채팅방 발견 → id=$chatroomId, author=$authorName")
+                    val thumb = currentCommissionDetail?.images?.firstOrNull()?.imageUrl
+                        ?: fallbackThumbnailUrl
+                        ?: ""
 
                     navigateToChatroomWithArgs(
                         commissionId = commissionId,
@@ -155,10 +161,10 @@ class FragmentPostScreen : Fragment() {
                         authorName = authorName,
                         chatroomId = chatroomId,
                         hasSubmittedApplication = hasSubmitted,
-                        thumbnailUrl = currentCommissionDetail?.images?.firstOrNull()?.imageUrl // ✅ 저장된 커미션 상세에서 썸네일 가져오기
+                        thumbnailUrl = thumb // ✅ 저장된 커미션 상세에서 썸네일 가져오기
                     )
                 } else {
-                    createChatroom(commissionId, commissionTitle)
+                    createChatroom(commissionId, commissionTitle, fallbackThumbnailUrl)
                 }
             }
 
@@ -167,13 +173,13 @@ class FragmentPostScreen : Fragment() {
                 t: Throwable
             ) {
                 Log.w("FragmentPostScreen", "채팅방 목록 조회 네트워크 오류 → 생성 fallback", t)
-                createChatroom(commissionId, commissionTitle)
+                createChatroom(commissionId, commissionTitle, fallbackThumbnailUrl)
             }
         })
     }
 
     /** 채팅방 생성 → 목록 재조회로 artistNickname 확보 후 이동 */
-    private fun createChatroom(commissionId: Int, commissionTitle: String) {
+    private fun createChatroom(commissionId: Int, commissionTitle: String, fallbackThumbnailUrl: String?) {
         Log.d("FragmentPostScreen", "createChatroom 호출 - commissionId=$commissionId, title=$commissionTitle")
         val api = RetrofitObject.getRetrofitService(requireContext())
 
@@ -235,13 +241,17 @@ class FragmentPostScreen : Fragment() {
                                 }
                                 val authorName = item?.artistNickname?.ifBlank { "작가" } ?: "작가"
 
+                                val thumb = commission.images.firstOrNull()?.imageUrl
+                                    ?: fallbackThumbnailUrl
+                                    ?: ""
+
                                 navigateToChatroomWithArgs(
                                     commissionId = commissionId,
                                     commissionTitle = commissionTitle,
                                     authorName = authorName,
                                     chatroomId = createdId,
                                     hasSubmittedApplication = false,
-                                    thumbnailUrl = commission.images.firstOrNull()?.imageUrl // ✅ 첫 번째 이미지를 썸네일로 사용
+                                    thumbnailUrl = thumb // ✅ 첫 번째 이미지를 썸네일로 사용
                                 )
 
                                 // (옵션) 채팅 목록 새로고침
@@ -255,19 +265,28 @@ class FragmentPostScreen : Fragment() {
                                 Toast.makeText(requireContext(), "채팅방이 생성되었습니다", Toast.LENGTH_SHORT).show()
                             }
 
+                            // (createChatroom 내부) 목록 재조회 실패 → 닉네임 기본값으로 이동 분기
                             override fun onFailure(
                                 call: Call<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>>,
                                 t: Throwable
                             ) {
                                 Log.w("FragmentPostScreen", "목록 재조회 실패 → 닉네임 기본값으로 이동", t)
+
+                                // ✅ 실패 시에도 썸네일 계산 후 함께 전달
+                                val thumb = commission.images.firstOrNull()?.imageUrl
+                                    ?: fallbackThumbnailUrl
+                                    ?: ""
+
                                 navigateToChatroomWithArgs(
                                     commissionId = commissionId,
                                     commissionTitle = commissionTitle,
                                     authorName = "작가",
                                     chatroomId = createdId,
-                                    hasSubmittedApplication = false
+                                    hasSubmittedApplication = false,
+                                    thumbnailUrl = thumb          // ★ 추가
                                 )
                             }
+
                         })
                     }
 
@@ -297,15 +316,14 @@ class FragmentPostScreen : Fragment() {
         hasSubmittedApplication: Boolean,
         thumbnailUrl: String? = null
     ) {
-        val fragment = FragmentPostChatDetail().apply {
+        val fragment = FragmentChatDetail().apply {
             arguments = Bundle().apply {
                 putString("chatName", commissionTitle)
                 putString("authorName", authorName)
                 putInt("chatroomId", chatroomId)
-                putString("sourceFragment", "FragmentPostScreen")
-                putInt("commissionId", commissionId)
-                putBoolean("hasSubmittedApplication", hasSubmittedApplication)
-                putString("thumbnailUrl", thumbnailUrl) // ✅ 썸네일 URL 추가
+                putString("thumbnailUrl", thumbnailUrl ?: "")
+                putInt("artistId", currentCommissionDetail?.artistId ?: -1)
+                putInt("requestId", -1)
             }
         }
         parentFragmentManager.beginTransaction()
