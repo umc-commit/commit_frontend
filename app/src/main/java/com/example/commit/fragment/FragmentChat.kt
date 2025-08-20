@@ -152,7 +152,8 @@ class FragmentChat : Fragment() {
                                     commissionId = commissionId,
                                     hasSubmittedApplication = false,
                                     sourceFragment = "FragmentChat",
-                                    thumbnailUrl = thumbnailUrl
+                                    thumbnailUrl = thumbnailUrl,
+                                    artistId = artistId  // ✅ artistId 추가
                                 ))
                                 .addToBackStack("chatDetail")
                                 .commit()

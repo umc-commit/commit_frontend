@@ -19,15 +19,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTheme
+import android.content.Intent
+import android.content.Context
+import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun ChatroomTopBar(
     Name: String = "사과",
     averageResponseTime: String = "평균 30분 이내 응답",
+    artistId: Int = -1,  // 작가 ID 추가
     onProfileClick: () -> Unit,
     onBackClick: () -> Unit,
     onSettingClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current  // Context를 여기서 가져오기
     Column {
         // 상단 TopBar 영역
         Row(
@@ -84,7 +90,18 @@ fun ChatroomTopBar(
 
                         // 작가 프로필 이동 버튼
                         IconButton(
-                            onClick = onProfileClick,
+                            onClick = {
+                                // AuthorProfileActivity로 이동
+                                val intent = Intent(context, Class.forName("com.example.commit.activity.author.AuthorProfileActivity"))
+                                if (artistId != -1) {
+                                    // 유효한 artistId가 있을 때만 전달
+                                    intent.putExtra("artistId", artistId)
+                                    Log.d("ChatroomTopBar", "작가 프로필 이동 - artistId: $artistId")
+                                } else {
+                                    Log.d("ChatroomTopBar", "작가 프로필 이동 - artistId 없음, 기본 프로필 화면으로 이동")
+                                }
+                                context.startActivity(intent)
+                            },
                             modifier = Modifier
                                 .padding(start = 4.dp)
                                 .size(24.dp)
@@ -149,6 +166,7 @@ fun ChatroomTopBarPreview() {
     CommitTheme {
         ChatroomTopBar(
             averageResponseTime = "평균 30분 이내 응답",
+            artistId = 123,  // Preview용 artistId 추가
             onBackClick = {},
             onProfileClick = {}
         )

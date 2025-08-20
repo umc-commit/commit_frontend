@@ -409,7 +409,8 @@ class FragmentHome : Fragment() {
                             commissionId = commissionId,
                             hasSubmittedApplication = false,
                             sourceFragment = "FragmentHome",
-                            thumbnailUrl = thumbnailUrl
+                            thumbnailUrl = thumbnailUrl,
+                            artistId = artistId  // ✅ artistId 추가
                         )
                         parentFragmentManager.beginTransaction()
                             .replace(R.id.Nav_Frame, fragment)
@@ -433,7 +434,8 @@ class FragmentHome : Fragment() {
                             commissionId = commissionId,
                             hasSubmittedApplication = false,
                             sourceFragment = "FragmentHome",
-                            thumbnailUrl = thumbnailUrl
+                            thumbnailUrl = thumbnailUrl,
+                            artistId = artistId  // ✅ artistId 추가
                         )
                         parentFragmentManager.beginTransaction()
                             .replace(R.id.Nav_Frame, fragment)

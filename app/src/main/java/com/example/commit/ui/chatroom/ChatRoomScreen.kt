@@ -84,6 +84,7 @@ fun ChatRoomScreen(
         ChatroomTopBar(
             Name = authorName,
             averageResponseTime = "평균 30분 이내 응답",
+            artistId = chatViewModel.currentArtistId ?: -1,  // ✅ artistId 전달
             onProfileClick = onProfileClick,
             onBackClick = onBackClick,
             onSettingClick = onSettingClick

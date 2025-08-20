@@ -57,6 +57,9 @@ class ChatViewModel : ViewModel() {
     var hasSubmittedApplication: Boolean = false
         private set
 
+    var currentArtistId: Int? = null
+        private set
+
     private var hasLoadedDummyData = false
 
     fun onMessageChange(newMessage: String) { message = newMessage }
@@ -69,6 +72,11 @@ class ChatViewModel : ViewModel() {
         chatMessages = emptyList()
         hasLoadedDummyData = false
         Log.d("ChatViewModel", "채팅방 변경: id=$id, 상태 초기화 완료")
+    }
+
+    fun setArtistId(artistId: Int) {
+        currentArtistId = artistId
+        Log.d("ChatViewModel", "작가 ID 설정: $artistId")
     }
 
     fun setApplicationStatus(hasSubmitted: Boolean) {
