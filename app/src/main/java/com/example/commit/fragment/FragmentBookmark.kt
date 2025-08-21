@@ -27,6 +27,8 @@ import retrofit2.Response
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import androidx.core.os.bundleOf
+
 
 class FragmentBookmark : Fragment() {
 
@@ -62,7 +64,15 @@ class FragmentBookmark : Fragment() {
     }
 
     private fun setupRecycler() {
-        adapter = BookmarkAdapter(serverList, isEditMode) { updateDeleteButton() }
+        adapter = BookmarkAdapter(
+            serverList,
+            isEditMode,
+            onSelectionChanged = { updateDeleteButton() },
+            // 카드 클릭 시 상세 진입
+            onItemClick = { commissionId ->
+                navigateToCommissionDetail(commissionId)
+            }
+        )
         binding.rvBookmarkList.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.rvBookmarkList.adapter = adapter
 
@@ -71,6 +81,20 @@ class FragmentBookmark : Fragment() {
         if (binding.rvBookmarkList.itemDecorationCount == 0) {
             binding.rvBookmarkList.addItemDecoration(GridSpacingItemDecoration(2, outerPaddingPx, spacingPx))
         }
+    }
+
+    private fun navigateToCommissionDetail(commissionId: Int) {
+        val fragment = FragmentHome().apply {
+            arguments = bundleOf(
+                "show_post_detail" to true,
+                "commission_id" to commissionId,
+                "return_to_bookmark" to true
+            )
+        }
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.Nav_Frame, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun setupToolbar() {
