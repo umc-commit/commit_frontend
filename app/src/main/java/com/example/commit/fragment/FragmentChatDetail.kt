@@ -88,7 +88,7 @@ class FragmentChatDetail : Fragment() {
                         if (isNewChat) {
                             chatViewModel.setApplicationStatus(hasSubmittedApplication)
                         }
-                        // ✅ 실제 API에서 가져온 artistId 설정
+                        // 실제 API에서 가져온 artistId 설정
                         if (artistId != -1) {
                             chatViewModel.setArtistId(artistId)
                         }
@@ -355,7 +355,7 @@ class FragmentChatDetail : Fragment() {
             chatroomId: Int = 1,
             sourceFragment: String = "CommissionForm",
             thumbnailUrl: String = "",
-            artistId: Int = -1  // ✅ artistId 추가
+            artistId: Int = -1
         ): FragmentChatDetail {
             return FragmentChatDetail().apply {
                 arguments = Bundle().apply {
@@ -366,7 +366,7 @@ class FragmentChatDetail : Fragment() {
                     putInt("chatroomId", chatroomId)
                     putString("sourceFragment", sourceFragment)
                     putString("thumbnailUrl", thumbnailUrl)
-                    putInt("artistId", artistId)  // ✅ artistId 전달
+                    putInt("artistId", artistId)
                     putBoolean("isNewChat", true)
                 }
             }

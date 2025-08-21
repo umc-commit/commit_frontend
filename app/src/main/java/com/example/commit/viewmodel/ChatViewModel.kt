@@ -286,17 +286,17 @@ class ChatViewModel : ViewModel() {
     // 채팅방 삭제 (백엔드에서 역할 기반 필터링)
     // ───────────────────────────────────────────────────────────
     
-    // ✅ 삭제된 채팅방 ID들을 로컬에서 관리
+    // 삭제된 채팅방 ID들을 로컬에서 관리
     private val _deletedChatroomIds = mutableStateListOf<Int>()
     val deletedChatroomIds: List<Int> = _deletedChatroomIds
     
-    // ✅ 초기화 시 삭제된 ID들을 로드
+    // 초기화 시 삭제된 ID들을 로드
     init {
         // 초기화 시에는 context가 없으므로 lazy 로딩으로 처리
         Log.d("ChatViewModel", "ChatViewModel 초기화")
     }
     
-    // ✅ 삭제된 채팅방 ID 로드 (FragmentChat에서 호출)
+    // 삭제된 채팅방 ID 로드 (FragmentChat에서 호출)
     fun loadDeletedChatrooms(context: Context) {
         val prefs = context.getSharedPreferences("chat_prefs", Context.MODE_PRIVATE)
         val deletedIds = prefs.getStringSet("deleted_chatroom_ids", emptySet()) ?: emptySet()
@@ -335,7 +335,7 @@ class ChatViewModel : ViewModel() {
                 
                 if (response.isSuccessful && response.code() == 204) {
                     deleteError = null
-                    // ✅ 삭제 성공 시 로컬에 삭제된 ID 추가
+                    // 삭제 성공 시 로컬에 삭제된 ID 추가
                     _deletedChatroomIds.addAll(chatroomIds)
                     persistDeletedIds(context)
                     Log.d("ChatViewModel", "삭제 성공 (204), 로컬에 추가: $chatroomIds")
@@ -367,22 +367,22 @@ class ChatViewModel : ViewModel() {
 
     // 채팅방 목록 설정 (백엔드에서 이미 필터링된 목록)
     fun setChatroomList(list: List<ChatItem>) {
-        // ✅ 삭제된 ID들을 제외한 필터링된 목록 설정
+        // 삭제된 ID들을 제외한 필터링된 목록 설정
         val filteredList = list.filterNot { it.id in _deletedChatroomIds }
         _chatroomList.value = filteredList
         Log.d("ChatViewModel", "목록 필터링: 원본 ${list.size}개 → 삭제된 ID ${_deletedChatroomIds.size}개 제외 → ${filteredList.size}개")
     }
     
-    // ✅ 채팅방 숨김 해제 (createChatroom 성공 시 사용)
+    // 채팅방 숨김 해제 (createChatroom 성공 시 사용)
     fun unhideChatroom(context: Context, id: Int) {
         _deletedChatroomIds.remove(id)
         persistDeletedIds(context)
-        // ✅ 현재 리스트에 즉시 반영 (필터가 set을 참조하고 있어야 함)
+        // 현재 리스트에 즉시 반영 (필터가 set을 참조하고 있어야 함)
         _chatroomList.value = _chatroomList.value
         Log.d("ChatViewModel", "채팅방 숨김 해제: $id, 남은 삭제된 ID: $_deletedChatroomIds")
     }
     
-    // ✅ 삭제된 ID 영구 저장
+    // 삭제된 ID 영구 저장
     private fun persistDeletedIds(context: Context) {
         val prefs = context.getSharedPreferences("chat_prefs", Context.MODE_PRIVATE)
         val editor = prefs.edit()
