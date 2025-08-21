@@ -13,6 +13,7 @@ import com.example.commit.fragment.FragmentChat
 import com.example.commit.fragment.FragmentHome
 import com.example.commit.fragment.FragmentMypage
 import com.example.commit.fragment.FragmentChatDetail
+import com.example.commit.fragment.FragmentChatDelete
 import com.example.commit.ui.post.FragmentPostScreen
 import com.google.firebase.messaging.FirebaseMessaging
 import android.content.Intent
@@ -39,9 +40,35 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        // ✅ ChatViewModel 초기화
+        // ChatViewModel 초기화
         chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
         chatViewModel.loadDeletedChatrooms(this)
+        
+        // BackStack 변경 리스너 추가 (Fragment 전환 감지)
+        supportFragmentManager.addOnBackStackChangedListener {
+            val allFragments = supportFragmentManager.fragments
+            val currentFragment = allFragments.lastOrNull()
+            val hasChatDelete = allFragments.any { it is FragmentChatDelete }
+            
+            Log.d("MainActivity", "BackStack 변경 감지:")
+            Log.d("MainActivity", "  - 현재 Fragment: ${currentFragment?.javaClass?.simpleName}")
+            Log.d("MainActivity", "  - 모든 Fragment: ${allFragments.map { it.javaClass.simpleName }}")
+            Log.d("MainActivity", "  - FragmentChatDelete 존재: $hasChatDelete")
+            
+            if (hasChatDelete) {
+                Log.d("MainActivity", "FragmentChatDelete 감지 - 바텀 네비 숨김")
+                showBottomNav(false)
+            } else {
+                // 기존 로직: PostScreen이 표시 중인 FragmentHome도 바텀바 숨김 대상에 포함
+                val top = supportFragmentManager.findFragmentById(binding.NavFrame.id)
+                val shouldHideBottomNav = top is FragmentChatDetail || 
+                                        top is FragmentPostScreen || 
+                                        (top is FragmentHome && isPostScreenShowing(top))
+                
+                Log.d("MainActivity", "기존 로직 적용 - 바텀 네비 ${if (shouldHideBottomNav) "숨김" else "보임"}")
+                showBottomNav(!shouldHideBottomNav)
+            }
+        }
 
         // Intent에서 show_signup_bottom_sheet 값 가져오기
         val showSignupBottomSheet = intent.getBooleanExtra("show_signup_bottom_sheet", false)
@@ -77,19 +104,8 @@ class MainActivity : AppCompatActivity() {
 
         initBottomNavigation()
 
-        // 백스택 리스너 설정 이후 아무데나: 최초 진입 시 등록 한번
+        // 백스택 리스너는 이미 위에서 등록됨
         registerFcmTokenIfNeeded()
-
-        supportFragmentManager.addOnBackStackChangedListener {
-            val top = supportFragmentManager.findFragmentById(binding.NavFrame.id)
-            
-            // PostScreen이 표시 중인 FragmentHome도 바텀바 숨김 대상에 포함
-            val shouldHideBottomNav = top is FragmentChatDetail || 
-                                    top is FragmentPostScreen || 
-                                    (top is FragmentHome && isPostScreenShowing(top))
-            
-            showBottomNav(!shouldHideBottomNav)
-        }
     }
 
     override fun onNewIntent(newIntent: Intent) {
@@ -221,7 +237,16 @@ class MainActivity : AppCompatActivity() {
 
     // 바텀바 숨기기/보이기 메서드
     fun showBottomNav(isVisible: Boolean) {
+        Log.d("MainActivity", "showBottomNav 호출: isVisible=$isVisible")
+        
+        // 호출 스택 추적
+        val stackTrace = Thread.currentThread().stackTrace
+        for (i in 0..minOf(5, stackTrace.size - 1)) {
+            Log.d("MainActivity", "  스택[$i]: ${stackTrace[i].className}.${stackTrace[i].methodName}:${stackTrace[i].lineNumber}")
+        }
+        
         binding.BottomNavi.visibility = if (isVisible) View.VISIBLE else View.GONE
+        Log.d("MainActivity", "바텀네비 visibility 변경: ${if (isVisible) "VISIBLE" else "GONE"}")
     }
     
     // FragmentHome에서 PostScreen이 표시 중인지 확인

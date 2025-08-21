@@ -1,4 +1,4 @@
-package com.example.commit.ui.chatlist
+package com.example.commit.fragment
 
 import android.content.Context
 import android.os.Bundle
@@ -21,12 +21,13 @@ import com.example.commit.ui.Theme.CommitTheme
 import com.example.commit.viewmodel.ChatViewModel
 import com.example.commit.fragment.FragmentChat
 import com.example.commit.activity.MainActivity
+import com.example.commit.ui.chatlist.ChatDeleteScreen
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 
-class ChatDeleteFragment : Fragment() {
+class FragmentChatDelete : Fragment() {
 
     private val selectedItems = mutableStateListOf<ChatItem>()
     
@@ -34,17 +35,7 @@ class ChatDeleteFragment : Fragment() {
     private val chatViewModel: ChatViewModel
         get() = (requireActivity() as MainActivity).chatViewModel
 
-    override fun onResume() {
-        super.onResume()
-        // ✅ ChatDeleteScreen에서 바텀 네비 숨기기
-        (activity as? MainActivity)?.showBottomNav(false)
-    }
-    
-    override fun onDestroyView() {
-        super.onDestroyView()
-        // ✅ ChatDeleteScreen 종료 시 바텀 네비 다시 보이기
-        (activity as? MainActivity)?.showBottomNav(true)
-    }
+    // ✅ 바텀 네비 제어는 FragmentChat에서 Fragment 전환 시점에만 처리
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -103,6 +94,9 @@ class ChatDeleteFragment : Fragment() {
                                         val parentFragment = parentFragmentManager.fragments.firstOrNull { it is FragmentChat } as? FragmentChat
                                         parentFragment?.refreshChatroomList()
                                         
+                                        // ✅ 삭제 성공 시 바텀 네비 다시 보이기
+                                        (activity as? MainActivity)?.showBottomNav(true)
+                                        
                                         // 화면 닫기
                                         parentFragmentManager.popBackStack()
                                     },
@@ -114,6 +108,8 @@ class ChatDeleteFragment : Fragment() {
                             }
                         },
                         onBackClick = {
+                            // ✅ 뒤로가기 시 바텀 네비 다시 보이기
+                            (activity as? MainActivity)?.showBottomNav(true)
                             parentFragmentManager.popBackStack()
                         },
                         isDeleting = chatViewModel.isDeleting,

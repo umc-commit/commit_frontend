@@ -18,7 +18,7 @@ import com.example.commit.R
 import com.example.commit.activity.MainActivity
 import com.example.commit.activity.author.AuthorProfileActivity
 import com.example.commit.ui.Theme.CommitTheme
-import com.example.commit.ui.chatlist.ChatDeleteFragment
+import com.example.commit.fragment.FragmentChatDelete
 import com.example.commit.ui.chatlist.DeleteOptionBottomSheet
 import com.example.commit.ui.chatroom.ChatOptionDialog
 import com.example.commit.ui.chatroom.ChatRoomScreen

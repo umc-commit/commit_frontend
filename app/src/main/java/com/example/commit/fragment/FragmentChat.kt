@@ -19,7 +19,7 @@ import com.example.commit.connection.RetrofitClient
 import com.example.commit.connection.RetrofitObject
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.ui.Theme.CommitTheme
-import com.example.commit.ui.chatlist.ChatDeleteFragment
+import com.example.commit.fragment.FragmentChatDelete
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.example.commit.data.model.ChatMessage
@@ -59,7 +59,7 @@ class FragmentChat : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        (activity as? MainActivity)?.showBottomNav(true)
+        // ✅ 바텀 네비 제어는 MainActivity의 BackStack 리스너에서 처리
         refreshCallback?.invoke()
     }
 
@@ -195,7 +195,7 @@ class FragmentChat : Fragment() {
                             onDeleteClick = {
                                 showBottomSheet.value = false
                                 activity.supportFragmentManager.beginTransaction()
-                                    .replace(R.id.Nav_Frame, ChatDeleteFragment())
+                                    .replace(R.id.Nav_Frame, FragmentChatDelete())
                                     .addToBackStack(null)
                                     .commit()
                             }
