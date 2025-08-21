@@ -5,6 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class ChatItem(
+    val id: Int = 0,           // 채팅방 ID
     val profileImageRes: Int,  // drawable 리소스 ID (또는 URL)
     val profileImageUrl: String?,
     val name: String,          // 사용자 이름

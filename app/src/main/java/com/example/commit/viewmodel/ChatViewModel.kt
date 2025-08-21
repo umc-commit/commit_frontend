@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.commit.connection.RetrofitClient
 import com.example.commit.connection.RetrofitObject
+import com.example.commit.connection.dto.ChatDeleteRequest
 import com.example.commit.data.model.ChatMessage
 import com.example.commit.data.model.MessageType
 import com.google.gson.Gson
@@ -49,6 +50,12 @@ class ChatViewModel : ViewModel() {
         private set
 
     var isLoading by mutableStateOf(false)
+        private set
+
+    var isDeleting by mutableStateOf(false)
+        private set
+
+    var deleteError by mutableStateOf<String?>(null)
         private set
 
     var currentOffset: Int = 0
@@ -271,6 +278,69 @@ class ChatViewModel : ViewModel() {
                     if (chatMessages.isEmpty()) loadDummyMessages()
                 }
             })
+    }
+
+    // ───────────────────────────────────────────────────────────
+    // 채팅방 삭제
+    // ───────────────────────────────────────────────────────────
+    fun deleteChatrooms(context: Context, chatroomIds: List<Int>, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        if (isDeleting) return
+        
+        isDeleting = true
+        deleteError = null
+        
+        val request = ChatDeleteRequest(chatroomIds)
+        val api = RetrofitObject.getRetrofitService(context)
+        
+        api.deleteChatrooms(request).enqueue(object : Callback<RetrofitClient.ApiResponse<Unit>> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<Unit>>,
+                response: Response<RetrofitClient.ApiResponse<Unit>>
+            ) {
+                isDeleting = false
+                
+                if (response.isSuccessful) {
+                    when (response.code()) {
+                        204 -> {
+                            deleteError = null
+                            onSuccess()
+                        }
+                        400 -> {
+                            val errorBody = response.body()
+                            val errorMessage = errorBody?.error?.reason ?: "잘못된 요청입니다."
+                            deleteError = errorMessage
+                            onError(errorMessage)
+                        }
+                        404 -> {
+                            val errorBody = response.body()
+                            val errorMessage = errorBody?.error?.reason ?: "채팅방을 찾을 수 없습니다."
+                            deleteError = errorMessage
+                            onError(errorMessage)
+                        }
+                        else -> {
+                            deleteError = "알 수 없는 오류가 발생했습니다."
+                            onError("알 수 없는 오류가 발생했습니다.")
+                        }
+                    }
+                } else {
+                    deleteError = "서버 오류가 발생했습니다."
+                    onError("서버 오류가 발생했습니다.")
+                }
+            }
+
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<Unit>>,
+                t: Throwable
+            ) {
+                isDeleting = false
+                deleteError = "네트워크 오류가 발생했습니다."
+                onError("네트워크 오류가 발생했습니다.")
+            }
+        })
+    }
+
+    fun clearDeleteError() {
+        deleteError = null
     }
 
     // ───────────────────────────────────────────────────────────
