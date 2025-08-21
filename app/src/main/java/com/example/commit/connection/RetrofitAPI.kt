@@ -211,7 +211,7 @@ interface RetrofitAPI {
     fun deleteFcmToken(
     ): Call<RetrofitClient.ApiResponse<RetrofitClient.SimpleMessage>>
 
-    // [채팅방 삭제]
+    // [채팅방 삭제] - 기존 방식
     @HTTP(method = "DELETE", path = "/api/chatrooms/delete", hasBody = true)
     fun deleteChatrooms(
         @Body request: ChatDeleteRequest

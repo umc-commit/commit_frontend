@@ -18,8 +18,9 @@ import com.example.commit.connection.RetrofitClient
 import com.example.commit.connection.RetrofitObject
 import com.example.commit.data.model.entities.ChatItem
 import com.example.commit.ui.Theme.CommitTheme
-import com.example.commit.activity.MainActivity
 import com.example.commit.viewmodel.ChatViewModel
+import com.example.commit.fragment.FragmentChat
+import com.example.commit.activity.MainActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,12 +28,11 @@ import retrofit2.Response
 
 class ChatDeleteFragment : Fragment() {
 
-    private lateinit var chatViewModel: ChatViewModel
     private val selectedItems = mutableStateListOf<ChatItem>()
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
-    }
+    
+    // ✅ ChatViewModel은 MainActivity에서 공유
+    private val chatViewModel: ChatViewModel
+        get() = (requireActivity() as MainActivity).chatViewModel
 
     override fun onResume() {
         super.onResume()
@@ -87,7 +87,16 @@ class ChatDeleteFragment : Fragment() {
                                     context = requireContext(),
                                     chatroomIds = chatroomIds,
                                     onSuccess = {
-                                        // 삭제 성공 시 화면 닫기
+                                        Log.d("ChatDelete", "삭제 성공")
+                                        
+                                        // ✅ 삭제는 ChatViewModel에서 이미 처리됨 (deleteChatrooms 메서드에서)
+                                        Log.d("ChatDelete", "삭제된 ID는 ChatViewModel에서 자동 처리됨: $chatroomIds")
+                                        
+                                        // ✅ 부모 Fragment 새로고침
+                                        val parentFragment = parentFragmentManager.fragments.firstOrNull { it is FragmentChat } as? FragmentChat
+                                        parentFragment?.refreshChatroomList()
+                                        
+                                        // 화면 닫기
                                         parentFragmentManager.popBackStack()
                                     },
                                     onError = { errorMessage ->
