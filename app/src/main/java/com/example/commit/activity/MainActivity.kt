@@ -22,17 +22,26 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import com.example.commit.activity.login.LoginActivity
+import com.example.commit.viewmodel.ChatViewModel
+import androidx.lifecycle.ViewModelProvider
 
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
     private lateinit var bottomNavigationView: BottomNavigationView
+    
+    // ✅ ChatViewModel을 Activity 레벨에서 관리 (Fragment들이 공유)
+    lateinit var chatViewModel: ChatViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        
+        // ✅ ChatViewModel 초기화
+        chatViewModel = ViewModelProvider(this)[ChatViewModel::class.java]
+        chatViewModel.loadDeletedChatrooms(this)
 
         // Intent에서 show_signup_bottom_sheet 값 가져오기
         val showSignupBottomSheet = intent.getBooleanExtra("show_signup_bottom_sheet", false)

@@ -25,7 +25,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun ChatDeleteScreen(
@@ -33,8 +36,10 @@ fun ChatDeleteScreen(
     selectedItems: List<ChatItem>,
     onItemToggle: (ChatItem) -> Unit,
     onDeleteClick: () -> Unit,
-    onBackClick: () -> Unit
-
+    onBackClick: () -> Unit,
+    isDeleting: Boolean = false,
+    deleteError: String? = null,
+    onClearError: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -71,6 +76,8 @@ fun ChatDeleteScreen(
             }
         }
 
+
+
         // 채팅 리스트
         LazyColumn(
             modifier = Modifier
@@ -104,24 +111,40 @@ fun ChatDeleteScreen(
 
         Button(
             onClick = onDeleteClick,
-            enabled = isEnabled,
+            enabled = isEnabled && !isDeleting,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
                 .height(52.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (isEnabled) Color(0xFF4D4D4D) else Color(0xFFEDEDED),
+                containerColor = if (isEnabled && !isDeleting) Color(0xFF4D4D4D) else Color(0xFFEDEDED),
                 contentColor = Color.Unspecified
             )
         ) {
-            Text(
-                text = "삭제하기",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = if (isEnabled) Color.White else Color(0xFFB0B0B0)
-            )
+            if (isDeleting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = "삭제하기",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isEnabled) Color.White else Color(0xFFB0B0B0)
+                )
+            }
         }
+    }
+
+    // 에러 다이얼로그
+    deleteError?.let { error ->
+        ErrorDialog(
+            message = error,
+            onDismiss = onClearError
+        )
     }
 }
 
@@ -156,12 +179,83 @@ fun RoundedCheckbox(
 
 
 
+
+
+
+
+@Composable
+fun ErrorDialog(
+    message: String,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = "에러",
+                    tint = Color(0xFFFF6B6B),
+                    modifier = Modifier.size(48.dp)
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    text = "삭제 실패",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = notoSansKR,
+                    color = Color.Black
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = message,
+                    fontSize = 16.sp,
+                    fontFamily = notoSansKR,
+                    color = Color(0xFF666666),
+                    textAlign = TextAlign.Center
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4D4D4D)
+                    )
+                ) {
+                    Text(
+                        text = "확인",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = notoSansKR,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun ChatDeleteScreenPreview() {
     val sampleChats = listOf(
-        ChatItem(R.drawable.ic_profile, profileImageUrl = null, "키르", "[결제 요청] 낙서 타임 커미션", "방금 전", true, "낙서 타입 커미션"),
-        ChatItem(R.drawable.ic_profile, profileImageUrl = null, "브로콜리", "[커미션 완료] 일러스트 타입", "2일 전", false, "일러스트 타입 커미션")
+        ChatItem(1, R.drawable.ic_profile, profileImageUrl = null, "키르", "[결제 요청] 낙서 타임 커미션", "방금 전", true, "낙서 타입 커미션"),
+        ChatItem(2, R.drawable.ic_profile, profileImageUrl = null, "브로콜리", "[커미션 완료] 일러스트 타입", "2일 전", false, "일러스트 타입 커미션")
     )
     val selected = remember { mutableStateListOf<ChatItem>() }
 
@@ -173,7 +267,10 @@ fun ChatDeleteScreenPreview() {
                 if (selected.contains(it)) selected.remove(it) else selected.add(it)
             },
             onDeleteClick = {},
-            onBackClick = {}
+            onBackClick = {},
+            isDeleting = false,
+            deleteError = null,
+            onClearError = {}
         )
     }
 }

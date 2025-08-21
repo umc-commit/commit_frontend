@@ -26,15 +26,36 @@ import com.example.commit.data.model.ChatMessage
 import com.example.commit.data.model.MessageType
 import com.example.commit.ui.chatlist.ChatListScreen
 import com.example.commit.ui.chatlist.DeleteOptionBottomSheet
+import com.example.commit.viewmodel.ChatViewModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import androidx.lifecycle.ViewModelProvider
 
 class FragmentChat : Fragment() {
 
+    // ChatViewModel은 MainActivity에서 공유
+    private val chatViewModel: ChatViewModel
+        get() = (requireActivity() as MainActivity).chatViewModel
+    
     // 채팅방 목록 새로고침 콜백
     private var refreshCallback: (() -> Unit)? = null
     
+    // 중복 호출 방지 플래그
+    private var hasInitialLoad = false
+    
+    // 삭제된 채팅방 ID들은 ChatViewModel에서 관리 (로컬 변수 제거)
+    
+    // 삭제된 ID 추가 (ChatViewModel에 전달)
+    fun addDeletedChatroomIds(ids: List<Int>) {
+        // ChatViewModel에서 이미 처리되므로 여기서는 로그만
+        Log.d("FragmentChat", "삭제된 채팅방 ID 추가됨: $ids")
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // ChatViewModel은 MainActivity에서 공유하므로 여기서 초기화 불필요
+    }
 
     override fun onResume() {
         super.onResume()
@@ -56,38 +77,42 @@ class FragmentChat : Fragment() {
             setContent {
                 CommitTheme {
                     val showBottomSheet = remember { mutableStateOf(false) }
-                    val chatItemsState = remember { mutableStateOf<List<ChatItem>>(emptyList()) }
                     // 원본 API 데이터 저장 (id 매칭용)
                     val rawRoomsState = remember { mutableStateOf<List<RetrofitClient.ChatroomItem>>(emptyList()) }
                     val isLoadingState = remember { mutableStateOf(true) }
 
                     // 최초 로드
                     LaunchedEffect(Unit) {
-                        Log.d("FragmentChat", "fetchChatroomList 최초 호출")
-                        fetchChatroomList { rooms ->
-                            rawRoomsState.value = rooms
-                            // ✅ 최신 메시지 시간 순으로 정렬 (최신이 위로)
-                            val sortedRooms = rooms.sortedByDescending { room ->
-                                room.lastMessageTime ?: "1970-01-01T00:00:00Z" // null인 경우 가장 오래된 시간으로 처리
-                            }
-                            chatItemsState.value = sortedRooms.map { room ->
-                                val localLast = loadLocalLastMessage(requireContext(), room.chatroomId)
-                                val preview = room.lastMessage
-                                    ?: localLast?.let { formatPreview(it) }
-                                    ?: "커미션 작업 완료"
+                        if (!hasInitialLoad) {
+                            Log.d("FragmentChat", "fetchChatroomList 최초 호출")
+                            hasInitialLoad = true
+                            fetchChatroomList { rooms ->
+                                rawRoomsState.value = rooms
+                                // 최신 메시지 시간 순으로 정렬 (최신이 위로)
+                                val sortedRooms = rooms.sortedByDescending { room ->
+                                    room.lastMessageTime ?: "1970-01-01T00:00:00Z" // null인 경우 가장 오래된 시간으로 처리
+                                }
+                                val chatItems = sortedRooms.map { room ->
+                                    val localLast = loadLocalLastMessage(requireContext(), room.chatroomId)
+                                    val preview = room.lastMessage
+                                        ?: localLast?.let { formatPreview(it) }
+                                        ?: "커미션 작업 완료"
 
-                                ChatItem(
-                                    profileImageRes = R.drawable.ic_profile,
-                                    profileImageUrl = room.artistProfileImage,
-                                    name = room.artistNickname,
-                                    message = preview,                                // ★ 개선된 메시지
-                                    time = pickTimeString(room.lastMessageTime, localLast), // ★ 개선된 시간
-                                    isNew = room.hasUnread > 0,
-                                    title = room.commissionTitle // 새 필드명
-
-                                )
+                                    ChatItem(
+                                        id = room.chatroomId.toIntOrNull() ?: 0, // id 필드 추가!
+                                        profileImageRes = R.drawable.ic_profile,
+                                        profileImageUrl = room.artistProfileImage,
+                                        name = room.artistNickname,
+                                        message = preview,                                // ★ 개선된 메시지
+                                        time = pickTimeString(room.lastMessageTime, localLast), // ★ 개선된 시간
+                                        isNew = room.hasUnread > 0,
+                                        title = room.commissionTitle // 새 필드명
+                                    )
+                                }
+                                // ChatViewModel을 통해 필터링된 목록 설정
+                                chatViewModel.setChatroomList(chatItems)
+                                isLoadingState.value = false
                             }
-                            isLoadingState.value = false
                         }
                     }
 
@@ -97,41 +122,43 @@ class FragmentChat : Fragment() {
                         isLoadingState.value = true
                         fetchChatroomList { rooms ->
                             rawRoomsState.value = rooms
-                            // ✅ 최신 메시지 시간 순으로 정렬 (최신이 위로)
+                            // 최신 메시지 시간 순으로 정렬 (최신이 위로)
                             val sortedRooms = rooms.sortedByDescending { room ->
                                 room.lastMessageTime ?: "1970-01-01T00:00:00Z" // null인 경우 가장 오래된 시간으로 처리
                             }
-                            chatItemsState.value = sortedRooms.map { room ->
+                            val chatItems = sortedRooms.map { room ->
                                 val localLast = loadLocalLastMessage(requireContext(), room.chatroomId)
                                 val preview = room.lastMessage
                                     ?: localLast?.let { formatPreview(it) }
                                     ?: "커미션 작업 완료"
 
                                 ChatItem(
+                                    id = room.chatroomId.toIntOrNull() ?: 0,
                                     profileImageRes = R.drawable.ic_profile,
                                     profileImageUrl = room.artistProfileImage,
                                     name = room.artistNickname,
                                     message = preview,                                // ★ 개선된 메시지
                                     time = pickTimeString(room.lastMessageTime, localLast), // ★ 개선된 시간
                                     isNew = room.hasUnread > 0,
-                                    title = room.commissionTitle
+                                    title = room.commissionTitle // 새 필드명
                                 )
                             }
+                            // ChatViewModel을 통해 필터링된 목록 설정
+                            chatViewModel.setChatroomList(chatItems)
                             isLoadingState.value = false
                         }
                     }
 
                     ChatListScreen(
-                        chatItems = chatItemsState.value,
+                        chatItems = chatViewModel.chatroomList, //ChatViewModel의 필터링된 목록 직접 사용
                         isLoading = isLoadingState.value,
                         onItemClick = { clickedItem ->
-                            // 화면 아이템과 원본 룸 매칭(제목+닉네임 기준)
+                            // id 기준으로 매칭 (제목+닉네임 대신)
                             val room = rawRoomsState.value.firstOrNull {
-                                it.commissionTitle == clickedItem.title &&
-                                        it.artistNickname == clickedItem.name
+                                it.chatroomId.toIntOrNull() == clickedItem.id
                             }
                             if (room == null) {
-                                Log.e("FragmentChat", "클릭 매칭 실패: ${clickedItem.title} / ${clickedItem.name}")
+                                Log.e("FragmentChat", "클릭 매칭 실패: chatroomId=${clickedItem.id}")
                                 return@ChatListScreen
                             }
 
@@ -222,11 +249,11 @@ class FragmentChat : Fragment() {
         })
     }
 
-    private fun formatTime(timeString: String?): String {
-        if (timeString.isNullOrEmpty()) return "방금 전"
-        // TODO: ISO 8601 → 상대시간 등으로 변환
-        return "방금 전"
-    }
+//    private fun formatTime(timeString: String?): String {
+//        if (timeString.isNullOrEmpty()) return "방금 전"
+//        // TODO: ISO 8601 → 상대시간 등으로 변환
+//        return "방금 전"
+//    }
     
     // 로컬에서 마지막 메시지 로드
     private fun loadLocalLastMessage(ctx: Context, chatroomId: String?): ChatMessage? {
@@ -265,53 +292,55 @@ class FragmentChat : Fragment() {
     /**
      * 새 스펙에 맞춘 채팅방 생성: userId는 JWT에서 추출(백엔드 처리)
      */
-    fun createChatroom(
-        artistId: Int,
-        commissionId: Int,
-        onSuccess: (Int) -> Unit,
-        onError: (String) -> Unit
-    ) {
-        val api = RetrofitObject.getRetrofitService(requireContext())
-        val request = RetrofitClient.CreateChatroomRequest(
-            artistId = artistId,
-            commissionId = commissionId.toString()
-        )
-
-        api.createChatroom(request).enqueue(object :
-            Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
-            override fun onResponse(
-                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
-                response: Response<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
-            ) {
-                if (!response.isSuccessful) {
-                    Log.e("ChatAPI", "채팅방 생성 실패: ${response.code()}")
-                    onError("채팅방 생성에 실패했습니다")
-                    return
-                }
-                val data = response.body()?.success
-                if (data == null) {
-                    Log.e("ChatAPI", "채팅방 생성 실패: success 데이터 없음")
-                    onError("채팅방 생성에 실패했습니다")
-                    return
-                }
-                val idInt = data.id.toIntOrNull()
-                if (idInt == null) {
-                    Log.e("ChatAPI", "채팅방 id 파싱 실패: ${data.id}")
-                    onError("채팅방 생성에 실패했습니다")
-                    return
-                }
-                Log.d("ChatAPI", "채팅방 생성 성공: ${data.id}")
-                refreshChatroomList()
-                onSuccess(idInt)
-            }
-
-            override fun onFailure(
-                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
-                t: Throwable
-            ) {
-                Log.e("ChatAPI", "채팅방 생성 네트워크 오류", t)
-                onError("네트워크 오류가 발생했습니다")
-            }
-        })
-    }
+//    fun createChatroom(
+//        artistId: Int,
+//        commissionId: Int,
+//        onSuccess: (Int) -> Unit,
+//        onError: (String) -> Unit
+//    ) {
+//        val api = RetrofitObject.getRetrofitService(requireContext())
+//        val request = RetrofitClient.CreateChatroomRequest(
+//            artistId = artistId,
+//            commissionId = commissionId.toString()
+//        )
+//
+//        api.createChatroom(request).enqueue(object :
+//            Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
+//            override fun onResponse(
+//                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
+//                response: Response<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
+//            ) {
+//                if (!response.isSuccessful) {
+//                    Log.e("ChatAPI", "채팅방 생성 실패: ${response.code()}")
+//                    onError("채팅방 생성에 실패했습니다")
+//                    return
+//                }
+//                val data = response.body()?.success
+//                if (data == null) {
+//                    Log.e("ChatAPI", "채팅방 생성 실패: success 데이터 없음")
+//                    onError("채팅방 생성에 실패했습니다")
+//                    return
+//                }
+//                Log.d("ChatAPI", "채팅방 생성 성공: ${data.id}")
+//                // createChatroom 성공 시 로컬 숨김 해제
+//                val idInt = data.id.toIntOrNull()
+//                if (idInt == null) {
+//                    Log.e("ChatAPI", "채팅방 id 파싱 실패: ${data.id}")
+//                    onError("채팅방 생성에 실패했습니다")
+//                    return
+//                }
+//                chatViewModel.unhideChatroom(requireContext(), idInt)
+//                refreshChatroomList()
+//                onSuccess(idInt)
+//            }
+//
+//            override fun onFailure(
+//                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
+//                t: Throwable
+//            ) {
+//                Log.e("ChatAPI", "채팅방 생성 네트워크 오류", t)
+//                onError("네트워크 오류가 발생했습니다")
+//            }
+//        })
+//    }
 }
