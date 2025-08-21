@@ -55,6 +55,7 @@ class FragmentPostScreen : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d("FragmentPostScreen", "========== FragmentPostScreen onCreateView 시작 ==========")
         val commissionId = arguments?.getInt(ARG_COMMISSION_ID) ?: -1
         Log.d("FragmentPostScreen", "넘겨받은 commissionId: $commissionId")
 
@@ -71,6 +72,7 @@ class FragmentPostScreen : Fragment() {
                 val artistError by artistViewModel.artistError.collectAsState()
 
                 LaunchedEffect(commission) {
+                    Log.d("FragmentPostScreen", "========== LaunchedEffect 실행됨 ==========")
                     Log.d("FragmentPostScreen", "commission 데이터 변경됨: $commission")
                 }
 
@@ -91,6 +93,7 @@ class FragmentPostScreen : Fragment() {
                         onReviewListClick = { /* TODO: 리뷰 화면 이동 */ },
                         onChatClick = {
                             // 신청서 제출 여부 확인 후 → 기존 방 이동 or 생성
+                            Log.d("FragmentPostScreen", "채팅하기 버튼 클릭: commissionId=${detail.id}")
                             checkApplicationStatus(detail.id, detail.title, fallbackThumb)
                         },
                         onBookmarkToggle = { newState ->
@@ -116,11 +119,23 @@ class FragmentPostScreen : Fragment() {
 
     /** 신청서 제출 여부 확인 → 기존 방 있으면 이동, 없으면 생성 */
     private fun checkApplicationStatus(commissionId: Int, commissionTitle: String,fallbackThumbnailUrl: String?) {
-        commissionFormViewModel.checkApplicationStatus(
-            commissionId = commissionId.toString(),
-            context = requireContext()
-        ) { hasSubmitted ->
-            openOrCreateChatroom(commissionId, commissionTitle, hasSubmitted, fallbackThumbnailUrl)
+        Log.d("FragmentPostScreen", "=== checkApplicationStatus 시작 ===")
+        Log.d("FragmentPostScreen", "commissionId: $commissionId")
+        Log.d("FragmentPostScreen", "commissionTitle: $commissionTitle")
+        Log.d("FragmentPostScreen", "fallbackThumbnailUrl: $fallbackThumbnailUrl")
+        
+        try {
+            Log.d("FragmentPostScreen", "commissionFormViewModel.checkApplicationStatus 호출 시작")
+            commissionFormViewModel.checkApplicationStatus(
+                commissionId = commissionId.toString(),
+                context = requireContext()
+            ) { hasSubmitted ->
+                Log.d("FragmentPostScreen", "신청서 제출 여부 콜백 실행: $hasSubmitted")
+                openOrCreateChatroom(commissionId, commissionTitle, hasSubmitted, fallbackThumbnailUrl)
+            }
+            Log.d("FragmentPostScreen", "commissionFormViewModel.checkApplicationStatus 호출 완료")
+        } catch (e: Exception) {
+            Log.e("FragmentPostScreen", "checkApplicationStatus 오류 발생", e)
         }
     }
 
@@ -131,6 +146,7 @@ class FragmentPostScreen : Fragment() {
         hasSubmitted: Boolean,
         fallbackThumbnailUrl: String?
     ) {
+        Log.d("FragmentPostScreen", "openOrCreateChatroom 시작: commissionId=$commissionId")
         val api = RetrofitObject.getRetrofitService(requireContext())
         api.getChatroomList().enqueue(object :
             Callback<RetrofitClient.ApiResponse<List<RetrofitClient.ChatroomItem>>> {
@@ -150,6 +166,14 @@ class FragmentPostScreen : Fragment() {
                     val chatroomId = existing.chatroomId.toIntOrNull() ?: -1
                     val authorName = existing.artistNickname.ifBlank { "작가" }
                     Log.d("FragmentPostScreen", "기존 채팅방 발견 → id=$chatroomId, author=$authorName")
+                    
+                    // ✅ 기존 채팅방도 삭제된 ID 목록에서 제거
+                    try {
+                        val main = requireActivity() as MainActivity
+                        main.chatViewModel.unhideChatroom(requireContext(), chatroomId)
+                        Log.d("FragmentPostScreen", "기존 채팅방 숨김 해제: $chatroomId")
+                    } catch (_: Exception) { /* ignore */ }
+                    
                     val thumb = currentCommissionDetail?.images?.firstOrNull()?.imageUrl
                         ?: fallbackThumbnailUrl
                         ?: ""
@@ -253,9 +277,13 @@ class FragmentPostScreen : Fragment() {
                                     thumbnailUrl = thumb // ✅ 첫 번째 이미지를 썸네일로 사용
                                 )
 
-                                // (옵션) 채팅 목록 새로고침
+                                // ✅ 생성된 채팅방 ID를 삭제된 ID 목록에서 제거
                                 try {
                                     val main = requireActivity() as MainActivity
+                                    main.chatViewModel.unhideChatroom(requireContext(), createdId)
+                                    Log.d("FragmentPostScreen", "채팅방 숨김 해제: $createdId")
+                                    
+                                    // 채팅 목록 새로고침
                                     val chatFrag = main.supportFragmentManager.fragments
                                         .find { it is FragmentChat } as? FragmentChat
                                     chatFrag?.refreshChatroomList()

@@ -249,11 +249,11 @@ class FragmentChat : Fragment() {
         })
     }
 
-//    private fun formatTime(timeString: String?): String {
-//        if (timeString.isNullOrEmpty()) return "방금 전"
-//        // TODO: ISO 8601 → 상대시간 등으로 변환
-//        return "방금 전"
-//    }
+    private fun formatTime(timeString: String?): String {
+        if (timeString.isNullOrEmpty()) return "방금 전"
+        // TODO: ISO 8601 → 상대시간 등으로 변환
+        return "방금 전"
+    }
     
     // 로컬에서 마지막 메시지 로드
     private fun loadLocalLastMessage(ctx: Context, chatroomId: String?): ChatMessage? {
@@ -292,55 +292,55 @@ class FragmentChat : Fragment() {
     /**
      * 새 스펙에 맞춘 채팅방 생성: userId는 JWT에서 추출(백엔드 처리)
      */
-//    fun createChatroom(
-//        artistId: Int,
-//        commissionId: Int,
-//        onSuccess: (Int) -> Unit,
-//        onError: (String) -> Unit
-//    ) {
-//        val api = RetrofitObject.getRetrofitService(requireContext())
-//        val request = RetrofitClient.CreateChatroomRequest(
-//            artistId = artistId,
-//            commissionId = commissionId.toString()
-//        )
-//
-//        api.createChatroom(request).enqueue(object :
-//            Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
-//            override fun onResponse(
-//                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
-//                response: Response<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
-//            ) {
-//                if (!response.isSuccessful) {
-//                    Log.e("ChatAPI", "채팅방 생성 실패: ${response.code()}")
-//                    onError("채팅방 생성에 실패했습니다")
-//                    return
-//                }
-//                val data = response.body()?.success
-//                if (data == null) {
-//                    Log.e("ChatAPI", "채팅방 생성 실패: success 데이터 없음")
-//                    onError("채팅방 생성에 실패했습니다")
-//                    return
-//                }
-//                Log.d("ChatAPI", "채팅방 생성 성공: ${data.id}")
-//                // createChatroom 성공 시 로컬 숨김 해제
-//                val idInt = data.id.toIntOrNull()
-//                if (idInt == null) {
-//                    Log.e("ChatAPI", "채팅방 id 파싱 실패: ${data.id}")
-//                    onError("채팅방 생성에 실패했습니다")
-//                    return
-//                }
-//                chatViewModel.unhideChatroom(requireContext(), idInt)
-//                refreshChatroomList()
-//                onSuccess(idInt)
-//            }
-//
-//            override fun onFailure(
-//                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
-//                t: Throwable
-//            ) {
-//                Log.e("ChatAPI", "채팅방 생성 네트워크 오류", t)
-//                onError("네트워크 오류가 발생했습니다")
-//            }
-//        })
-//    }
+    fun createChatroom(
+        artistId: Int,
+        commissionId: Int,
+        onSuccess: (Int) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val api = RetrofitObject.getRetrofitService(requireContext())
+        val request = RetrofitClient.CreateChatroomRequest(
+            artistId = artistId,
+            commissionId = commissionId.toString()
+        )
+
+        api.createChatroom(request).enqueue(object :
+            Callback<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>> {
+            override fun onResponse(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
+                response: Response<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>
+            ) {
+                if (!response.isSuccessful) {
+                    Log.e("ChatAPI", "채팅방 생성 실패: ${response.code()}")
+                    onError("채팅방 생성에 실패했습니다")
+                    return
+                }
+                val data = response.body()?.success
+                if (data == null) {
+                    Log.e("ChatAPI", "채팅방 생성 실패: success 데이터 없음")
+                    onError("채팅방 생성에 실패했습니다")
+                    return
+                }
+                Log.d("ChatAPI", "채팅방 생성 성공: ${data.id}")
+                //  createChatroom 성공 시 로컬 숨김 해제
+                val idInt = data.id.toIntOrNull()
+                if (idInt == null) {
+                    Log.e("ChatAPI", "채팅방 id 파싱 실패: ${data.id}")
+                    onError("채팅방 생성에 실패했습니다")
+                    return
+                }
+                chatViewModel.unhideChatroom(requireContext(), idInt)
+                refreshChatroomList()
+                onSuccess(idInt)
+            }
+
+            override fun onFailure(
+                call: Call<RetrofitClient.ApiResponse<RetrofitClient.CreateChatroomResponse>>,
+                t: Throwable
+            ) {
+                Log.e("ChatAPI", "채팅방 생성 네트워크 오류", t)
+                onError("네트워크 오류가 발생했습니다")
+            }
+        })
+    }
 }

@@ -400,6 +400,15 @@ class FragmentHome : Fragment() {
                 }
 
                 val chatroomIdInt = data.id.toIntOrNull()
+                
+                // ✅ 생성된 채팅방 ID를 삭제된 ID 목록에서 제거
+                try {
+                    val main = requireActivity() as MainActivity
+                    main.chatViewModel.unhideChatroom(requireContext(), chatroomIdInt ?: -1)
+                    Log.d("FragmentHome", "채팅방 숨김 해제: $chatroomIdInt")
+                } catch (e: Exception) {
+                    Log.e("FragmentHome", "unhideChatroom 호출 실패", e)
+                }
 
                 // ① 작가 닉네임 조회
                 api.getCommissionArtist(commissionId.toString()).enqueue(object :

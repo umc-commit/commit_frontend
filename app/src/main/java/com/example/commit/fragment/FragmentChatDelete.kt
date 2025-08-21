@@ -36,7 +36,14 @@ class ChatDeleteFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        // ✅ ChatDeleteScreen에서 바텀 네비 숨기기
         (activity as? MainActivity)?.showBottomNav(false)
+    }
+    
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // ✅ ChatDeleteScreen 종료 시 바텀 네비 다시 보이기
+        (activity as? MainActivity)?.showBottomNav(true)
     }
 
     override fun onCreateView(
