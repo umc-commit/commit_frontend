@@ -46,11 +46,13 @@ fun PostScreen(
     commissionId: Int = -1,
     onReviewListClick: () -> Unit,
     onChatClick: () -> Unit = {},
-    // ✅ 상세 화면에서도 ViewModel로 위임할 북마크 토글 콜백
+    // 상세 화면에서도 ViewModel로 위임할 북마크 토글 콜백
     onBookmarkToggle: (newState: Boolean) -> Unit
 ) {
     val context = LocalContext.current
-    var selectedImageIndex by remember { mutableStateOf(currentIndex) }
+    var selectedImageIndex by remember {
+        mutableStateOf(currentIndex.coerceAtMost(images.lastIndex))
+    }
 
     // 아티스트 탭 로딩용 (기존 로직 유지)
     val artistViewModel: ArtistViewModel = viewModel(key = "artist-$commissionId")
@@ -104,7 +106,7 @@ fun PostScreen(
                     .fillMaxWidth()
                     .height(233.dp)
             ) {
-                if (images.isNotEmpty()) {
+                if (images.isNotEmpty() && selectedImageIndex <= images.lastIndex) {
                     AsyncImage(
                         model = images[selectedImageIndex],
                         contentDescription = "썸네일 이미지",

@@ -19,7 +19,8 @@ import com.google.android.flexbox.FlexboxLayout
 class BookmarkAdapter(
     private val items: MutableList<BookmarkCommissionItem>,
     private var isEditMode: Boolean,
-    private val onSelectionChanged: () -> Unit
+    private val onSelectionChanged: () -> Unit,
+    private val onItemClick: (Int) -> Unit
 ) : RecyclerView.Adapter<BookmarkAdapter.VH>() {
 
     private val selected = hashSetOf<Int>() // pos
@@ -29,7 +30,6 @@ class BookmarkAdapter(
             b.tvNickname.text = item.artist.nickname
             b.tvCourseTitle.text = item.title
 
-            // --- 태그: HomeCardAdapter와 동일한 룰 ---
             val tagList = mutableListOf<String>().apply {
                 val categoryName = item.category.name.orEmpty()
                 if (categoryName.isNotBlank()) add(categoryName)
@@ -42,14 +42,21 @@ class BookmarkAdapter(
                     text = if (index == 0) tag else "#$tag"
                     if (index == 0) {
                         setTextColor(ContextCompat.getColor(context, R.color.mint1))
-                        background = ContextCompat.getDrawable(context, R.drawable.tag_background_cyan)
+                        background =
+                            ContextCompat.getDrawable(context, R.drawable.tag_background_cyan)
                     } else {
                         setTextColor(ContextCompat.getColor(context, R.color.gray2))
-                        background = ContextCompat.getDrawable(context, R.drawable.tag_background_gray)
+                        background =
+                            ContextCompat.getDrawable(context, R.drawable.tag_background_gray)
                     }
                     includeFontPadding = false
                     textSize = 8f
-                    setPadding(dpToPx(context, 6), dpToPx(context, 2), dpToPx(context, 6), dpToPx(context, 2))
+                    setPadding(
+                        dpToPx(context, 6),
+                        dpToPx(context, 2),
+                        dpToPx(context, 6),
+                        dpToPx(context, 2)
+                    )
                     gravity = Gravity.CENTER
                     typeface = ResourcesCompat.getFont(context, R.font.notosanskr_medium)
                     // 동일한 최소/최대 값으로 UI 정렬 (HomeCardAdapter 기준)
@@ -63,7 +70,6 @@ class BookmarkAdapter(
                 tv.layoutParams = lp
                 b.tagsLayout.addView(tv)
             }
-            // --------------------------------------
 
             Glide.with(b.root.context)
                 .load(item.artist.profileImageUrl)
@@ -86,11 +92,17 @@ class BookmarkAdapter(
                 if (selected.contains(position)) R.drawable.ic_bookmark_checked else R.drawable.ic_bookmark_unchecked
             )
 
+            // 클릭 동작: 편집모드면 선택 토글, 아니면 상세로 이동
             b.root.setOnClickListener {
-                if (!isEditMode) return@setOnClickListener
-                if (selected.contains(position)) selected.remove(position) else selected.add(position)
-                notifyItemChanged(position)
-                onSelectionChanged()
+                if (isEditMode) {
+                    if (selected.contains(position)) selected.remove(position) else selected.add(
+                        position
+                    )
+                    notifyItemChanged(position)
+                    onSelectionChanged()
+                } else {
+                    onItemClick(item.id) // ← commissionId 전달
+                }
             }
         }
     }

@@ -100,10 +100,19 @@ class FragmentHome : Fragment() {
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
+                    val returnToBookmark = arguments?.getBoolean("return_to_bookmark", false) == true
+
                     if (binding.frameComposeContainer.visibility == View.VISIBLE) {
-                        binding.frameComposeContainer.removeAllViews()
-                        binding.frameComposeContainer.visibility = View.GONE
-                        (activity as? MainActivity)?.showBottomNav(true)
+                        if (returnToBookmark) {
+                            // 상세에서 바로 북마크로 복귀
+                            (activity as? MainActivity)?.showBottomNav(true)
+                            parentFragmentManager.popBackStack()
+                        } else {
+                            // 기존 동작: 상세 닫고 홈 노출
+                            binding.frameComposeContainer.removeAllViews()
+                            binding.frameComposeContainer.visibility = View.GONE
+                            (activity as? MainActivity)?.showBottomNav(true)
+                        }
                         return
                     } else {
                         isEnabled = false
