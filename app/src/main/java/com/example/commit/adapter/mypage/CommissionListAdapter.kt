@@ -38,7 +38,7 @@ class CommissionListAdapter(private var commissionItems: List<CommissionListItem
         holder.tvStatus.text = item.status
 
         holder.itemView.setOnClickListener {
-            Toast.makeText(holder.itemView.context, "${item.title} 커미션 클릭됨", Toast.LENGTH_SHORT).show()
+           /* Toast.makeText(holder.itemView.context, "${item.title} 커미션 클릭됨", Toast.LENGTH_SHORT).show()*/
         }
     }
 

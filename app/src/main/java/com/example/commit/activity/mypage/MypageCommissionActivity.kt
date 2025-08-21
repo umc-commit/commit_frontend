@@ -39,34 +39,34 @@ class MyPageCommissionActivity : AppCompatActivity() {
         originalCommissionList = listOf(
             CommissionListItem(
                 date = Calendar.getInstance().apply { set(2025, Calendar.JUNE, 4) }.time, // 2025년 6월 4일
-                thumbnailResId = R.drawable.commission_image,
-                title = "키르",
+                thumbnailResId = R.drawable.commission_complete_1,
+                title = "포짚",
                 description = "낙서 타입 커미션",
-                price = 40000,
+                price = 10000,
                 status = "거래완료"
             ),
             CommissionListItem(
                 date = Calendar.getInstance().apply { set(2025, Calendar.JUNE, 4) }.time, // 2025년 6월 4일
-                thumbnailResId = R.drawable.commission_image,
-                title = "감자",
-                description = "2인 캐릭터 세트",
-                price = 16000,
+                thumbnailResId = R.drawable.commission_complete_2,
+                title = "연어맛나쵸",
+                description = "2인 커플 커미션",
+                price = 15000,
                 status = "거래완료"
             ),
             CommissionListItem(
                 date = Calendar.getInstance().apply { set(2025, Calendar.JUNE, 3) }.time, // 2025년 6월 3일
-                thumbnailResId = R.drawable.commission_image,
-                title = "냥냥",
-                description = "SD 캐릭터 1인",
-                price = 20000,
+                thumbnailResId = R.drawable.commission_complete_3,
+                title = "위시",
+                description = "표지 일러스트 커미션",
+                price = 40000,
                 status = "거래완료"
             ),
             CommissionListItem(
                 date = Calendar.getInstance().apply { set(2025, Calendar.JUNE, 5) }.time, // 2025년 6월 5일
-                thumbnailResId = R.drawable.commission_image,
-                title = "새로운",
-                description = "최신 커미션",
-                price = 50000,
+                thumbnailResId = R.drawable.commission_complete_4,
+                title = "주현",
+                description = "LD 풀채색 타입",
+                price = 30000,
                 status = "거래완료"
             )
         )

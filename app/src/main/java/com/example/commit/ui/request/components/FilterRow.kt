@@ -19,7 +19,11 @@ import com.example.commit.R
 import com.example.commit.ui.Theme.CommitTypography
 
 @Composable
-fun FilterRow(selected: String, onSelect: (String) -> Unit) {
+fun FilterRow(
+    selected: String,
+    onSelect: (String) -> Unit,
+    onSortClick: () -> Unit
+) {
     val filters = listOf("전체", "진행 중", "작업 완료")
 
     Row(
@@ -59,7 +63,8 @@ fun FilterRow(selected: String, onSelect: (String) -> Unit) {
         }
 
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clickable { onSortClick() }
         ) {
             Text(
                 text = "정렬",
@@ -83,5 +88,9 @@ fun FilterRow(selected: String, onSelect: (String) -> Unit) {
 fun FilterRowPreview() {
     var selected by remember { mutableStateOf("전체") }
 
-    FilterRow(selected = selected, onSelect = { selected = it })
+    FilterRow(
+        selected = selected,
+        onSelect = { selected = it },
+        onSortClick = { /* 미리보기에서는 아무 동작 없음 */ }
+    )
 }
