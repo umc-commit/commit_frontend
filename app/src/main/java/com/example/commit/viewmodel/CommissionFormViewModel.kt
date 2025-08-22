@@ -114,6 +114,7 @@ class CommissionFormViewModel : ViewModel() {
             context.contentResolver.openInputStream(uri)!!.use { input ->
                 out.outputStream().use { output -> input.copyTo(output) }
             }
+            Log.d("ImageSize", "파일 크기: ${out.length()} bytes (${out.length() / 1024} KB)")
             return out to mime
         }
 
