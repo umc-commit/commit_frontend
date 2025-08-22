@@ -41,6 +41,8 @@ class CommissionFormViewModel : ViewModel() {
     private val _isUploading = MutableStateFlow(false)
     val isUploading: StateFlow<Boolean> = _isUploading.asStateFlow()
 
+
+
     private var retrofitAPI: RetrofitAPI? = null
     private val gson = Gson()
 
@@ -136,6 +138,7 @@ class CommissionFormViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _isUploading.value = true
+                Log.d("UploadState", "업로드 시작됨")
                 _imageUploadState.value = ImageUploadState.Loading
 
                 if (retrofitAPI == null) retrofitAPI = RetrofitObject.getRetrofitService(context)
@@ -152,6 +155,7 @@ class CommissionFormViewModel : ViewModel() {
                     val imageUrl = body?.success?.image_url
                     if (imageUrl != null) {
                         _uploadedImageUrls.value = _uploadedImageUrls.value + imageUrl
+                        Log.d("UploadedImageUrls", "현재 업로드된 이미지 리스트: ${_uploadedImageUrls.value}")
                         _imageUploadState.value = ImageUploadState.Success(body)
                         Log.d(
                             "ImageUpload",
@@ -172,6 +176,7 @@ class CommissionFormViewModel : ViewModel() {
                 _imageUploadState.value = ImageUploadState.Error("예외: ${e.message}")
             } finally {
                 _isUploading.value = false
+                Log.d("UploadState", "업로드 완료됨")
             }
         }
     }
