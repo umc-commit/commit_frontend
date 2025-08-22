@@ -17,7 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Commit"
         tools:targetApi="35"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="true"
+        android:usesCleartextTraffic="true">
 
         <service
             android:name=".fcm.FcmMessagingService"

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitObject {
 
-    private const val BASE_URL = "https://commit.n-e.kr"
+    private const val BASE_URL = "https://commit.n-e.kr/"
 
     // 토큰을 SharedPreferences에서 가져오기
 
