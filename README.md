@@ -1,4 +1,5 @@
 # commit_frontend
+<img width="1424" height="797" alt="image" src="https://github.com/user-attachments/assets/e4fa5ccd-9d61-40e3-9671-92031a21b0f1" />
 
 ## 📌 프로젝트 소개  
 **커미션 중개 서비스 플랫폼 어플리케이션**  
