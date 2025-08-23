@@ -7,9 +7,12 @@
 작품 등록, 채팅, 결제, 후기, 알림, 북마크 등 커미션 거래 전 과정을 지원합니다.  
 
 ## 👥 팀원 및 담당 화면
-- **이승은** : 신청서, 후기, 채팅 
-- **전유나(팀장)** : 로그인/회원가입, 홈화면, 알림, 북마크, 마이페이지, 작가_프로필
-- **최예윤** : 게시글, 신청함, 검색창, 포인트 충전
+| 이승은 | 전유나(팀장) | 최예윤 |
+|:---:|:---:|:---:|
+| <img src="https://avatars.githubusercontent.com/sseungeun" alt="이승은" width="150"> | <img src="https://avatars.githubusercontent.com/Erna23" alt="전유나" width="150"> | <img src="https://avatars.githubusercontent.com/yeyun0423" alt="최예윤" width="150"> |
+| 담당 역할 | 담당 역할 | 담당 역할 |
+| [GitHub](https://github.com/sseungeun) | [GitHub](https://github.com/Erna23) | [GitHub](https://github.com/yeyun0423) |
+| <li>신청서 화면</li><li>후기 화면</li><li>채팅 화면</li> | <li>로그인/회원가입 화면</li><li>홈화면</li><li>알림 화면</li><li>북마크 화면</li><li>마이페이지 화면</li><li>작가_프로필 화면</li> | <li>게시글 화면</li><li>신청함 화면</li><li>검색창 화면</li><li>포인트 충전 화면</li> |
 
 ## 🛠 기술 스택
 ![Kotlin](https://img.shields.io/badge/Kotlin-0095D5?style=for-the-badge&logo=kotlin&logoColor=white)
