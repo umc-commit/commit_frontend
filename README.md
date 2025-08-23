@@ -6,7 +6,7 @@
 사용자(의뢰인)와 작가(아티스트)를 연결하여 커미션을 의뢰·진행할 수 있는 플랫폼 앱입니다.  
 작품 등록, 채팅, 결제, 후기, 알림, 북마크 등 커미션 거래 전 과정을 지원합니다.  
 
-## 👥 팀원 및 담당 화면
+## 👥 Team & Role
 | 이승은 | 전유나(팀장) | 최예윤 |
 |:---:|:---:|:---:|
 | <img src="https://avatars.githubusercontent.com/sseungeun" alt="이승은" width="150"> | <img src="https://avatars.githubusercontent.com/Erna23" alt="전유나" width="150"> | <img src="https://avatars.githubusercontent.com/yeyun0423" alt="최예윤" width="150"> |
