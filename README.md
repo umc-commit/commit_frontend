@@ -30,20 +30,11 @@
 ## 🧑‍💻 Git 브랜치 전략
 - 기능 단위 브랜치로 분리
 - 브랜치 네이밍 규칙: `type/#이슈번호-기능`
-  - feature	: 기능 개발
-  - fix	: 일반 버그 수정
-  - develop	: 통합 개발 브랜치
-  - main	: 최종 배포 브랜치
+- **feature**(기능 개발) | **fix**(일반 버그 수정) | **develop**(통합 개발 브랜치) | **main**(최종 배포 브랜치)
 
 ## 💬 Commit Convention
 - [타입] #이슈번호: 작업 내용 (ex: [Fix] #11: 로그인 오류 해결)
-  - Feature	: 새로운 기능
-  - Fix	: 버그 수정
-  - UI : UI 관련 작업
-  - Refactor :	리팩토링
-  - Add : 부수적 코드/파일 추가
-  - Rename :	이름 변경
-  - Merge :	브랜치 병합
+- **Feature**(기능) | **Fix**(버그) | **UI**(화면) | **Refactor**(리팩토링) | **Add**(추가) | **Rename**(이름변경) | **Merge**(병합)
 
 ## 🧾 Issue & PR 규칙
 - [Refactor / Feature/ Bug / Fix/ Style] 이슈 제목
