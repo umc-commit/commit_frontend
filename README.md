@@ -11,10 +11,11 @@
 - **최예윤** : 게시글, 신청함, 검색창, 포인트 충전
 
 ## 🛠 기술 스택
-- 언어: Kotlin
-- 서버 연결: Retrofit
-- 알림: FCM(Firebase Cloud Messaging)
-- 채팅: Socket.IO client
+![Kotlin](https://img.shields.io/badge/Kotlin-0095D5?style=for-the-badge&logo=kotlin&logoColor=white)
+![Retrofit](https://img.shields.io/badge/Retrofit-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socket.io&logoColor=white)
+
 
  ## 화면 구현방식(Compose+XML)
  - Jetpack Compose : 채팅, 결제, 신청함, 신청서, 후기, 게시글, 포인트충전, 검색화면
