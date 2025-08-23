@@ -20,6 +20,7 @@
 | [GitHub](https://github.com/sseungeun) | [GitHub](https://github.com/Erna23) | [GitHub](https://github.com/yeyun0423) |
 | <li>신청서 화면</li><li>후기 화면</li><li>채팅 화면</li> | <li>로그인/회원가입 화면</li><li>홈화면</li><li>알림 화면</li><li>북마크 화면</li><li>마이페이지 화면</li><li>작가_프로필 화면</li> | <li>게시글 화면</li><li>신청함 화면</li><li>검색창 화면</li><li>포인트 충전 화면</li> |
 
+
  ## 🖥️ 화면 구현
 | 방식 | 적용 화면 |
 |------|-----------|
